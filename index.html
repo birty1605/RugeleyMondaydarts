@@ -390,6 +390,11 @@
             border: 1px solid var(--border);
         }
 
+        /* Helper class to hide elements for non-admins */
+        .admin-only {
+            display: none !important;
+        }
+
         @media print {
             body * {
                 visibility: hidden;
@@ -433,8 +438,9 @@
     <nav id="main-nav">
         <button class="nav-btn active" onclick="showTab('fixtures', event)">Fixtures</button>
         <button class="nav-btn" onclick="showTab('leaderboards', event)">Leaderboards</button>
-        <button class="nav-btn" onclick="showTab('teams', event)">Manage Teams & Season</button>
-        <button class="nav-btn" onclick="showTab('players', event)">Manage Players</button>
+        <!-- Admin-only management tabs (hidden by default) -->
+        <button class="nav-btn admin-only" id="nav-teams-btn" onclick="showTab('teams', event)">Manage Teams & Season</button>
+        <button class="nav-btn admin-only" id="nav-players-btn" onclick="showTab('players', event)">Manage Players</button>
         <button class="nav-btn" onclick="showTab('scoresheet', event)">Print Score Sheet</button>
         <!-- Season Archives dynamically added here -->
     </nav>
@@ -464,9 +470,9 @@
                 <div id="events-list-container"></div>
 
                 <!-- Admin Add Event Form -->
-                <div style="margin-top: 1.5rem; background: #fff8f0; padding: 1rem; border-radius: 6px; border: 1px dashed var(--accent);">
+                <div class="admin-only" style="margin-top: 1.5rem; background: #fff8f0; padding: 1rem; border-radius: 6px; border: 1px dashed var(--accent);">
                     <h3 style="font-size: 1rem; color: #b45309; margin-bottom: 0.8rem;">
-                        Add End of Season Event <span class="locked-badge admin-lock-badge">Admin Locked</span>
+                        Add End of Season Event <span class="locked-badge admin-lock-badge">Unlocked</span>
                     </h3>
                     <form id="event-form">
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-bottom: 10px;">
@@ -500,7 +506,7 @@
             <div class="card" style="border: 2px solid var(--primary-light);">
                 <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 0.5rem;">
                     <h2 style="border-bottom: none; margin-bottom: 0;">🏆 Overall Team League Standings</h2>
-                    <button class="btn btn-shadow" onclick="generateTeamShadowLeague()">Split Teams into Shadow League</button>
+                    <button class="btn btn-shadow admin-only" onclick="generateTeamShadowLeague()">Split Teams into Shadow League</button>
                 </div>
                 <table>
                     <thead>
@@ -583,7 +589,7 @@
             <div class="card">
                 <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 0.5rem;">
                     <h2 style="border-bottom: none; margin-bottom: 0;">Main Singles Leaderboard</h2>
-                    <button class="btn btn-shadow" onclick="generateShadowLeague()">Split & Generate Singles Shadow League</button>
+                    <button class="btn btn-shadow admin-only" onclick="generateShadowLeague()">Split & Generate Singles Shadow League</button>
                 </div>
                 <table>
                     <thead>
@@ -669,18 +675,50 @@
             </div>
         </div>
 
-        <!-- TEAMS & SEASON MANAGEMENT TAB -->
-        <div id="teams" class="tab-content">
+        <!-- TEAMS & SEASON MANAGEMENT TAB (ADMIN ONLY) -->
+        <div id="teams" class="tab-content admin-only">
             <div class="card">
-                <h2>Generate New Season <span class="locked-badge admin-lock-badge">Admin Locked</span></h2>
+                <h2>Generate New Season <span class="locked-badge admin-lock-badge">Unlocked</span></h2>
                 <p style="margin-bottom: 1rem; color: #64748b;">
-                    Add or remove teams below, then click <strong>"Generate New Season Fixtures"</strong> to archive all existing data, create a history tab, and build a full new Home & Away fixture schedule.
+                    Add teams, configure paired venue restrictions below, then click <strong>"Generate New Season Fixtures"</strong>. The schedule generator will automatically adjust so paired teams are never scheduled to play Home on the same night.
                 </p>
                 <button class="btn btn-accent" onclick="generateNewSeason()">Generate New Season Fixtures</button>
             </div>
 
+            <!-- PAIRED TEAMS / VENUE CONFLICT SETTINGS -->
+            <div class="card" style="border: 2px solid var(--primary-light);">
+                <h2>🏠 Home Venue Pairing Constraints <span class="locked-badge admin-lock-badge">Unlocked</span></h2>
+                <p style="margin-bottom: 1rem; color: #64748b;">
+                    Pair teams that share the same pub/dartboard (e.g. <em>Miners Arms A</em> and <em>Miners Arms B</em>). Paired teams will <strong>never play Home on the same week</strong>.
+                </p>
+                <form id="pair-team-form" class="flex-row" style="margin-bottom: 1.5rem;">
+                    <div class="form-group">
+                        <label for="pair-team-1">Team 1:</label>
+                        <select id="pair-team-1" required><option value="">-- Select Team 1 --</option></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="pair-team-2">Team 2:</label>
+                        <select id="pair-team-2" required><option value="">-- Select Team 2 --</option></select>
+                    </div>
+                    <button type="submit" class="btn btn-accent">Pair Teams</button>
+                </form>
+
+                <h3 style="font-size: 1rem; color: var(--primary); margin-bottom: 0.5rem;">Active Venue Pairings:</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Team 1</th>
+                            <th>Team 2</th>
+                            <th>Constraint Status</th>
+                            <th style="width: 100px;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="team-pairs-list"></tbody>
+                </table>
+            </div>
+
             <div class="card">
-                <h2>Add New Team <span class="locked-badge admin-lock-badge">Admin Locked</span></h2>
+                <h2>Add New Team <span class="locked-badge admin-lock-badge">Unlocked</span></h2>
                 <form id="team-form" class="flex-row">
                     <div class="form-group">
                         <label for="team-name">Team Venue / Name:</label>
@@ -704,10 +742,10 @@
             </div>
         </div>
 
-        <!-- PLAYER MANAGEMENT TAB -->
-        <div id="players" class="tab-content">
+        <!-- PLAYER MANAGEMENT TAB (ADMIN ONLY) -->
+        <div id="players" class="tab-content admin-only">
             <div class="card">
-                <h2>Add New Player <span class="locked-badge admin-lock-badge">Admin Locked</span></h2>
+                <h2>Add New Player <span class="locked-badge admin-lock-badge">Unlocked</span></h2>
                 <form id="player-form">
                     <div class="form-group">
                         <label for="player-name">Player Name:</label>
@@ -877,7 +915,7 @@
                 document.getElementById('admin-user').value = '';
                 document.getElementById('admin-pass').value = '';
                 updateAdminUI();
-                alert('Admin Login Successful!');
+                alert('Admin Login Successful! Management pages unlocked.');
             } else {
                 alert('Invalid Username or Password.');
             }
@@ -887,24 +925,31 @@
             isAdminLoggedIn = false;
             document.getElementById('admin-login-form').style.display = 'flex';
             document.getElementById('admin-logged-in').style.display = 'none';
+            
+            // If the user is currently viewing an admin-only tab, switch back to Fixtures
+            const activeTab = document.querySelector('.tab-content.active');
+            if (activeTab && (activeTab.id === 'teams' || activeTab.id === 'players')) {
+                showTab('fixtures');
+            }
+
             updateAdminUI();
             alert('Logged out of Admin Mode.');
         }
 
         function updateAdminUI() {
-            const badges = document.querySelectorAll('.admin-lock-badge');
-            badges.forEach(badge => {
+            const adminElements = document.querySelectorAll('.admin-only');
+            adminElements.forEach(el => {
                 if (isAdminLoggedIn) {
-                    badge.textContent = "Unlocked";
-                    badge.style.backgroundColor = "var(--success)";
+                    el.classList.remove('admin-only');
                 } else {
-                    badge.textContent = "Admin Locked";
-                    badge.style.backgroundColor = "var(--danger)";
+                    el.classList.add('admin-only');
                 }
             });
+
             renderTeams();
             renderPlayers();
             renderEvents();
+            renderTeamPairs();
         }
 
         function checkAdminPermission() {
@@ -917,17 +962,21 @@
 
         // Data Stores
         let teams = JSON.parse(localStorage.getItem('rugeley_darts_teams')) || [
-            "The Miners Arms",
-            "Hawain Miners",
+            "The Miners Arms A",
+            "The Miners Arms B",
             "The Cabin",
             "Armitage Legion"
         ];
 
+        let teamPairs = JSON.parse(localStorage.getItem('rugeley_team_pairs')) || [
+            { team1: "The Miners Arms A", team2: "The Miners Arms B" }
+        ];
+
         let players = JSON.parse(localStorage.getItem('rugeley_darts_players')) || [
-            { name: "John Smith", team: "The Miners Arms" },
-            { name: "Pete Jones", team: "The Miners Arms" },
-            { name: "Dave Jones", team: "Hawain Miners" },
-            { name: "Sam Vance", team: "Hawain Miners" },
+            { name: "John Smith", team: "The Miners Arms A" },
+            { name: "Pete Jones", team: "The Miners Arms A" },
+            { name: "Dave Jones", team: "The Miners Arms B" },
+            { name: "Sam Vance", team: "The Miners Arms B" },
             { name: "Mark Wilson", team: "The Cabin" },
             { name: "Chris Evans", team: "Armitage Legion" }
         ];
@@ -957,34 +1006,107 @@
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
             
-            document.getElementById(tabId).classList.add('active');
-            if (event) event.target.classList.add('active');
+            const targetTab = document.getElementById(tabId);
+            if (targetTab) {
+                targetTab.classList.add('active');
+            }
+
+            if (event) {
+                event.target.classList.add('active');
+            } else {
+                const navBtn = document.querySelector(`button[onclick*="'${tabId}'"]`);
+                if (navBtn) navBtn.classList.add('active');
+            }
         }
 
-        // --- TEAM & PLAYER SETUP ---
+        // --- TEAM & VENUE PAIRING MANAGEMENT ---
         const teamForm = document.getElementById('team-form');
         const teamsList = document.getElementById('teams-list');
         const playerTeamSelect = document.getElementById('player-team');
+        const pairTeam1Select = document.getElementById('pair-team-1');
+        const pairTeam2Select = document.getElementById('pair-team-2');
+        const pairTeamForm = document.getElementById('pair-team-form');
+        const teamPairsList = document.getElementById('team-pairs-list');
 
         function renderTeams() {
             teamsList.innerHTML = '';
             playerTeamSelect.innerHTML = '<option value="">-- Select Team --</option>';
+            pairTeam1Select.innerHTML = '<option value="">-- Select Team 1 --</option>';
+            pairTeam2Select.innerHTML = '<option value="">-- Select Team 2 --</option>';
 
             teams.forEach((team, index) => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td><strong>${team}</strong></td>
-                    <td><button class="btn btn-danger" onclick="removeTeam(${index})" ${!isAdminLoggedIn ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>Remove</button></td>
+                    <td><button class="btn btn-danger" onclick="removeTeam(${index})">Remove</button></td>
                 `;
                 teamsList.appendChild(tr);
 
                 const option = document.createElement('option');
                 option.value = team;
                 option.textContent = team;
-                playerTeamSelect.appendChild(option);
+                
+                playerTeamSelect.appendChild(option.cloneNode(true));
+                pairTeam1Select.appendChild(option.cloneNode(true));
+                pairTeam2Select.appendChild(option.cloneNode(true));
             });
 
             localStorage.setItem('rugeley_darts_teams', JSON.stringify(teams));
+        }
+
+        function renderTeamPairs() {
+            teamPairsList.innerHTML = '';
+
+            if (teamPairs.length === 0) {
+                teamPairsList.innerHTML = '<tr><td colspan="4" style="color: #64748b; font-style: italic;">No paired venue restrictions added.</td></tr>';
+                return;
+            }
+
+            teamPairs.forEach((pair, idx) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><strong>${pair.team1}</strong></td>
+                    <td><strong>${pair.team2}</strong></td>
+                    <td><span style="color: #16a34a; font-weight: bold;">🚫 Cannot play Home together</span></td>
+                    <td><button class="btn btn-danger btn-sm" onclick="removeTeamPair(${idx})">Unpair</button></td>
+                `;
+                teamPairsList.appendChild(tr);
+            });
+
+            localStorage.setItem('rugeley_team_pairs', JSON.stringify(teamPairs));
+        }
+
+        pairTeamForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (!checkAdminPermission()) return;
+
+            const t1 = pairTeam1Select.value;
+            const t2 = pairTeam2Select.value;
+
+            if (!t1 || !t2) return;
+
+            if (t1 === t2) {
+                alert('Please select two different teams to pair!');
+                return;
+            }
+
+            const exists = teamPairs.some(p => (p.team1 === t1 && p.team2 === t2) || (p.team1 === t2 && p.team2 === t1));
+            if (exists) {
+                alert('These teams are already paired!');
+                return;
+            }
+
+            teamPairs.push({ team1: t1, team2: t2 });
+            renderTeamPairs();
+            pairTeam1Select.value = '';
+            pairTeam2Select.value = '';
+        });
+
+        function removeTeamPair(index) {
+            if (!checkAdminPermission()) return;
+
+            teamPairs.splice(index, 1);
+            renderTeamPairs();
         }
 
         teamForm.addEventListener('submit', (e) => {
@@ -1004,9 +1126,13 @@
         function removeTeam(index) {
             if (!checkAdminPermission()) return;
 
-            if (confirm(`Are you sure you want to remove "${teams[index]}"?`)) {
+            const removed = teams[index];
+            if (confirm(`Are you sure you want to remove "${removed}"?`)) {
                 teams.splice(index, 1);
+                // Also clean up any venue pairs featuring this team
+                teamPairs = teamPairs.filter(p => p.team1 !== removed && p.team2 !== removed);
                 renderTeams();
+                renderTeamPairs();
             }
         }
 
@@ -1035,7 +1161,7 @@
                         ${evt.notes ? `<div class="event-notes">📝 <strong>Details:</strong> ${evt.notes}</div>` : ''}
                     </div>
                     <div>
-                        <button class="btn btn-danger btn-sm" onclick="removeEvent(${idx})" ${!isAdminLoggedIn ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>Delete</button>
+                        <button class="btn btn-danger btn-sm admin-only" onclick="removeEvent(${idx})">Delete</button>
                     </div>
                 `;
                 container.appendChild(card);
@@ -1090,6 +1216,7 @@
                 name: seasonName,
                 dateArchived: new Date().toLocaleDateString(),
                 teams: [...teams],
+                teamPairs: [...teamPairs],
                 players: [...players],
                 fixtures: generatedFixtures,
                 matchResults: matchResults,
@@ -1125,7 +1252,6 @@
         }
 
         function renderArchivedTabs() {
-            // Clear existing archive buttons in nav
             document.querySelectorAll('.archive-nav-btn').forEach(btn => btn.remove());
             const archiveContainer = document.getElementById('archived-seasons-container');
             archiveContainer.innerHTML = '';
@@ -1133,22 +1259,18 @@
             const nav = document.getElementById('main-nav');
 
             archivedSeasons.forEach(archive => {
-                // 1. Create Nav Button
                 const btn = document.createElement('button');
                 btn.className = 'nav-btn archive-nav-btn archive-tab-btn';
                 btn.textContent = `📁 ${archive.name}`;
                 btn.onclick = (e) => showTab(archive.id, e);
                 nav.appendChild(btn);
 
-                // 2. Create Tab Content View
                 const tabDiv = document.createElement('div');
                 tabDiv.id = archive.id;
                 tabDiv.className = 'tab-content';
 
-                // Calculate archived standings
                 const stats = calculateStatsFromData(archive.teams, archive.players, archive.fixtures, archive.matchResults);
 
-                // Build Archived Events HTML
                 let archivedEventsHTML = '';
                 if (archive.seasonEvents && archive.seasonEvents.length > 0) {
                     archivedEventsHTML = `
@@ -1176,7 +1298,6 @@
                         <p style="color: #64748b; margin-bottom: 1rem;">Archived on ${archive.dateArchived}</p>
                     </div>
 
-                    <!-- Archived Standings Table -->
                     <div class="card">
                         <h2>🏆 Team Standings (${archive.name})</h2>
                         <table>
@@ -1189,7 +1310,6 @@
                         </table>
                     </div>
 
-                    <!-- Archived Achievements -->
                     <div class="card">
                         <h2>League Season Records & Achievements</h2>
                         <div class="achievement-grid">
@@ -1220,7 +1340,6 @@
                         </div>
                     </div>
 
-                    <!-- Archived Singles Table -->
                     <div class="card">
                         <h2>Singles Leaderboard (${archive.name})</h2>
                         <table>
@@ -1240,7 +1359,7 @@
             });
         }
 
-        // --- ROUND ROBIN FIXTURE ALGORITHM ---
+        // --- ROUND ROBIN FIXTURE ALGORITHM WITH HOME/AWAY PAIRING RESOLUTION ---
         function generateNewSeason() {
             if (!checkAdminPermission()) return;
 
@@ -1266,6 +1385,7 @@
             const matchesPerRound = numTeams / 2;
             let scheduleLeg1 = [];
 
+            // Generate initial round robin schedule
             for (let round = 0; round < roundsPerLeg; round++) {
                 let roundMatches = [];
                 for (let match = 0; match < matchesPerRound; match++) {
@@ -1280,6 +1400,10 @@
                 pool.splice(1, 0, pool.pop());
             }
 
+            // Apply Paired Teams (Same Venue) Constraint Adjustments
+            scheduleLeg1 = applyVenuePairingConstraints(scheduleLeg1, teamPairs);
+
+            // Generate Leg 2 (Return Matches)
             let scheduleLeg2 = scheduleLeg1.map(round => {
                 return round.map(m => ({ home: m.away, away: m.home }));
             });
@@ -1290,8 +1414,34 @@
             renderFixtures();
             renderEvents();
             recalculateAllStats();
-            alert('New Season Fixtures generated and previous data archived successfully!');
+            alert('New Season Fixtures generated! All home/away venue constraints applied.');
             showTab('fixtures');
+        }
+
+        // Fixes Home/Away clashes for paired teams in any round
+        function applyVenuePairingConstraints(schedule, pairs) {
+            if (!pairs || pairs.length === 0) return schedule;
+
+            return schedule.map(roundMatches => {
+                let updatedRound = [...roundMatches];
+
+                pairs.forEach(pair => {
+                    const { team1, team2 } = pair;
+                    
+                    // Check if both teams are scheduled Home in this round
+                    const match1Idx = updatedRound.findIndex(m => m.home === team1);
+                    const match2Idx = updatedRound.findIndex(m => m.home === team2);
+
+                    if (match1Idx !== -1 && match2Idx !== -1) {
+                        // Conflict detected! Both team1 and team2 are scheduled Home in the same week.
+                        // Invert team2's match so team2 plays Away this week instead.
+                        const m2 = updatedRound[match2Idx];
+                        updatedRound[match2Idx] = { home: m2.away, away: m2.home };
+                    }
+                });
+
+                return updatedRound;
+            });
         }
 
         function renderFixtures() {
@@ -1360,7 +1510,7 @@
                 tr.innerHTML = `
                     <td>${player.name}</td>
                     <td>${player.team}</td>
-                    <td><button class="btn btn-danger" onclick="removePlayer(${index})" ${!isAdminLoggedIn ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>Delete</button></td>
+                    <td><button class="btn btn-danger" onclick="removePlayer(${index})">Delete</button></td>
                 `;
                 playersList.appendChild(tr);
             });
@@ -1467,7 +1617,6 @@
             // Pre-fill existing data if previously saved
             const savedData = matchResults[matchKey];
             if (savedData) {
-                // Fill Singles
                 savedData.singles.forEach((s, idx) => {
                     const i = idx + 1;
                     if(document.getElementById(`m_s_hp_${i}`)) document.getElementById(`m_s_hp_${i}`).value = s.hp || '';
@@ -1477,7 +1626,6 @@
                     if(document.getElementById(`m_s_180_${i}`)) document.getElementById(`m_s_180_${i}`).value = s.c180 || 0;
                 });
 
-                // Fill Doubles
                 savedData.doubles.forEach((d, idx) => {
                     const i = idx + 1;
                     if(document.getElementById(`m_d_hp1_${i}`)) document.getElementById(`m_d_hp1_${i}`).value = d.hp1 || '';
@@ -1488,7 +1636,6 @@
                     if(document.getElementById(`m_d_as_${i}`)) document.getElementById(`m_d_as_${i}`).value = d.as || 0;
                 });
 
-                // Fill Captains
                 if (savedData.captains) {
                     document.getElementById(`m_c_hp`).value = savedData.captains.hp || '';
                     document.getElementById(`m_c_ap`).value = savedData.captains.ap || '';
@@ -1509,7 +1656,6 @@
             e.preventDefault();
             const matchKey = document.getElementById('modal-match-key').value;
 
-            // Extract Singles Frames
             let singlesData = [];
             let homeTotalLegs = 0;
             let awayTotalLegs = 0;
@@ -1531,7 +1677,6 @@
                 }
             }
 
-            // Extract Doubles Frames
             let doublesData = [];
             for (let i = 1; i <= 2; i++) {
                 const hp1 = document.getElementById(`m_d_hp1_${i}`).value;
@@ -1549,7 +1694,6 @@
                 }
             }
 
-            // Extract Captains Frame
             const c_hp = document.getElementById(`m_c_hp`).value;
             const c_ap = document.getElementById(`m_c_ap`).value;
             const c_hs = parseInt(document.getElementById(`m_c_hs`).value) || 0;
@@ -1562,7 +1706,6 @@
 
             const captainData = { hp: c_hp, ap: c_ap, hs: c_hs, as: c_as, c180: c_180 };
 
-            // Save Match Data
             matchResults[matchKey] = {
                 homeTotalLegs,
                 awayTotalLegs,
@@ -1572,7 +1715,6 @@
                 captains: captainData
             };
 
-            // Check Achievements
             const achPlayer = document.getElementById('modal-ach-player').value;
             if (achPlayer) {
                 const pObj = players.find(p => p.name === achPlayer);
@@ -1761,10 +1903,8 @@
         }
 
         function renderLeaderboardsFromData(teamStats, singlesStats, doublesStats, captainsStats) {
-            // Overall Team Leaderboard
             document.getElementById('overall-team-leaderboard').innerHTML = buildTeamTableHTML(teamStats);
 
-            // Overall Team Shadow League
             const teamShadowContainer = document.getElementById('team-shadow-league-container');
             if (shadowLeagueTeams && shadowLeagueTeams.length > 0) {
                 teamShadowContainer.style.display = 'block';
@@ -1773,7 +1913,6 @@
                 teamShadowContainer.style.display = 'none';
             }
 
-            // Achievements Render
             document.getElementById('ach-least-darts').textContent = achievements.leastDarts.value ? `${achievements.leastDarts.value} Darts` : '-';
             document.getElementById('ach-least-darts-holder').textContent = achievements.leastDarts.player || 'None';
             document.getElementById('ach-least-darts-team').textContent = achievements.leastDarts.team || '';
@@ -1790,10 +1929,8 @@
             document.getElementById('ach-high-start-holder').textContent = achievements.highStart.player || 'None';
             document.getElementById('ach-high-start-team').textContent = achievements.highStart.team || '';
 
-            // Render Singles Leaderboard
             document.getElementById('singles-leaderboard').innerHTML = buildIndivTableHTML(singlesStats, players, true);
 
-            // Render Singles Shadow League
             const shadowContainer = document.getElementById('shadow-league-container');
             if (shadowLeaguePlayers && shadowLeaguePlayers.length > 0) {
                 shadowContainer.style.display = 'block';
@@ -1806,10 +1943,7 @@
                 shadowContainer.style.display = 'none';
             }
 
-            // Render Doubles Leaderboard
             document.getElementById('doubles-leaderboard').innerHTML = buildIndivTableHTML(doublesStats, players, false);
-
-            // Render Captains Leaderboard
             document.getElementById('captains-leaderboard').innerHTML = buildIndivTableHTML(captainsStats, players, true);
         }
 
@@ -1849,18 +1983,31 @@
 
         // --- INITIALIZATION ---
         renderTeams();
+        renderTeamPairs();
         renderPlayers();
         renderEvents();
         renderArchivedTabs();
+        updateAdminUI(); // Ensures admin controls/tabs start hidden
         
         if (!generatedFixtures) {
-            generateNewSeason();
-        } else {
-            renderFixtures();
-            recalculateAllStats();
+            // Generate basic fixtures silently if none exist
+            let pool = [...teams];
+            if (pool.length % 2 !== 0) pool.push("BYE");
+            let schedule = [];
+            for (let r = 0; r < pool.length - 1; r++) {
+                let mList = [];
+                for (let m = 0; m < pool.length / 2; m++) {
+                    mList.push({ home: pool[m], away: pool[pool.length - 1 - m] });
+                }
+                schedule.push(mList);
+                pool.splice(1, 0, pool.pop());
+            }
+            generatedFixtures = schedule;
+            localStorage.setItem('rugeley_darts_fixtures', JSON.stringify(generatedFixtures));
         }
+        
+        renderFixtures();
+        recalculateAllStats();
     </script>
 </body>
 </html>
-
-

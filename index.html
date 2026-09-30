@@ -449,7 +449,7 @@
         </div>
         <div class="admin-bar-group">
             <span id="sync-status" style="font-size: 0.85rem; color: var(--accent);">☁️ Local Mode</span>
-            <button type="button" class="btn btn-sm btn-success" onclick="openCloudConfig()">Cloud Sync Setup</button>
+            <button type="button" class="btn btn-sm btn-success" onclick="openCloudConfig()" style="display: none;">Cloud Sync Setup</button>
             <button type="button" class="btn btn-sm btn-accent" onclick="manualCloudSync()">Sync Now</button>
         </div>
     </div>
@@ -1104,7 +1104,7 @@
             if (cloudConfig.url && document.getElementById('match-modal').style.display !== 'flex') {
                 manualCloudSync(true);
             }
-        }, 15000);
+        }, 30000);
 
         function openCloudConfig() {
             document.getElementById('cloud-url').value = cloudConfig.url || '';

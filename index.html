@@ -448,7 +448,7 @@
             </div>
         </div>
         <div class="admin-bar-group">
-            <span id="sync-status" style="font-size: 0.85rem; color: var(--accent);">🔥 Connecting to Realtime DB...</span>
+            <span id="sync-status" style="font-size: 0.85rem; color: var(--accent);">🔥 Connecting to Firestore...</span>
         </div>
     </div>
 
@@ -847,7 +847,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
-        import { getDatabase, ref, set, get, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyC6pS3Jk7GXrp4i3LSMnCf4UiqPugzDSFg",
@@ -862,7 +862,7 @@
 
         const app = initializeApp(firebaseConfig);
         const analytics = getAnalytics(app);
-        const db = getDatabase(app);
+        const db = getFirestore(app);
 
         const ADMIN_USER = "Gjelly";
         const ADMIN_PASS = "Kevisthebest";
@@ -872,8 +872,8 @@
             isAdminLoggedIn = sessionStorage.getItem('rugeley_admin_logged_in') === 'true';
         } catch (e) {}
 
-        let defaultTeams = ["The Miners Arms A", "The Miners Arms B", "The Cabin", "Armitage Legion"];
-        let defaultPlayers = [
+        const defaultTeams = ["The Miners Arms A", "The Miners Arms B", "The Cabin", "Armitage Legion"];
+        const defaultPlayers = [
             { name: "John Smith", team: "The Miners Arms A" },
             { name: "Pete Jones", team: "The Miners Arms A" },
             { name: "Dave Jones", team: "The Miners Arms B" },
@@ -882,29 +882,29 @@
             { name: "Chris Evans", team: "Armitage Legion" }
         ];
 
-        let teams = JSON.parse(localStorage.getItem('rugeley_darts_teams')) || defaultTeams;
-        let teamPairs = JSON.parse(localStorage.getItem('rugeley_team_pairs')) || [{ team1: "The Miners Arms A", team2: "The Miners Arms B" }];
-        let players = JSON.parse(localStorage.getItem('rugeley_darts_players')) || defaultPlayers;
-        let generatedFixtures = JSON.parse(localStorage.getItem('rugeley_darts_fixtures')) || null;
-        let matchResults = JSON.parse(localStorage.getItem('rugeley_match_results')) || {};
-        let seasonEvents = JSON.parse(localStorage.getItem('rugeley_season_events')) || [];
-        let shadowLeaguePlayers = JSON.parse(localStorage.getItem('rugeley_shadow_players')) || [];
-        let shadowLeagueTeams = JSON.parse(localStorage.getItem('rugeley_shadow_teams')) || [];
-        let archivedSeasons = JSON.parse(localStorage.getItem('rugeley_archived_seasons')) || [];
+        let teams = [...defaultTeams];
+        let teamPairs = [{ team1: "The Miners Arms A", team2: "The Miners Arms B" }];
+        let players = [...defaultPlayers];
+        let generatedFixtures = null;
+        let matchResults = {};
+        let seasonEvents = [];
+        let shadowLeaguePlayers = [];
+        let shadowLeagueTeams = [];
+        let archivedSeasons = [];
         let singlesStats = {};
 
         let isSaving = false;
         
-        // Pointing to Realtime Database path for Monday nightdarts
-        const dbRef = ref(db, 'monday_nightdarts_main');
+        // Firestore document reference for league data
+        const docRef = doc(db, 'leagues', 'monday_nightdarts_main');
 
         async function initCloudSync() {
             try {
-                const snapshot = await get(dbRef);
+                const docSnap = await getDoc(docRef);
                 const statusEl = document.getElementById('sync-status');
 
-                if (snapshot.exists()) {
-                    const data = snapshot.val();
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
                     teams = data.teams || teams;
                     teamPairs = data.teamPairs || teamPairs;
                     players = data.players || players;
@@ -915,27 +915,26 @@
                     shadowLeagueTeams = data.shadowLeagueTeams || shadowLeagueTeams;
                     archivedSeasons = data.archivedSeasons || archivedSeasons;
 
-                    saveToLocalStorageOnly();
                     if (statusEl) {
-                        statusEl.textContent = '🔥 Realtime DB Connected';
+                        statusEl.textContent = '🔥 Firestore Connected';
                         statusEl.style.color = 'var(--success)';
                     }
                 } else {
-                    await pushToDatabase();
+                    await pushToFirestore();
                 }
             } catch (err) {
-                console.warn("Cloud connection fallback to local mode:", err);
+                console.warn("Firestore connection warning:", err);
                 const statusEl = document.getElementById('sync-status');
                 if (statusEl) {
-                    statusEl.textContent = '⚡ Local Mode Active';
-                    statusEl.style.color = 'var(--accent)';
+                    statusEl.textContent = '⚡ Offline / Error';
+                    statusEl.style.color = 'var(--danger)';
                 }
             } finally {
                 renderAllUI();
                 
-                onValue(dbRef, (snapshot) => {
-                    if (isSaving || !snapshot.exists()) return;
-                    const data = snapshot.val();
+                onSnapshot(docRef, (docSnap) => {
+                    if (isSaving || !docSnap.exists()) return;
+                    const data = docSnap.data();
                     if (data) {
                         teams = data.teams || teams;
                         teamPairs = data.teamPairs || teamPairs;
@@ -947,7 +946,6 @@
                         shadowLeagueTeams = data.shadowLeagueTeams || shadowLeagueTeams;
                         archivedSeasons = data.archivedSeasons || archivedSeasons;
 
-                        saveToLocalStorageOnly();
                         if (document.getElementById('match-modal').style.display !== 'flex') {
                             renderAllUI();
                         }
@@ -956,10 +954,10 @@
             }
         }
 
-        async function pushToDatabase() {
+        async function pushToFirestore() {
             isSaving = true;
             try {
-                await set(dbRef, {
+                await setDoc(docRef, {
                     teams, teamPairs, players, generatedFixtures, matchResults,
                     seasonEvents, shadowLeaguePlayers, shadowLeagueTeams, archivedSeasons,
                     updatedAt: new Date().toISOString()
@@ -967,31 +965,19 @@
 
                 const statusEl = document.getElementById('sync-status');
                 if (statusEl) {
-                    statusEl.textContent = '🔥 Realtime DB Connected';
+                    statusEl.textContent = '🔥 Firestore Connected';
                     statusEl.style.color = 'var(--success)';
                 }
             } catch (err) {
-                console.error("Database write skipped/failed:", err);
+                console.error("Firestore write failed:", err);
                 const statusEl = document.getElementById('sync-status');
                 if (statusEl) {
-                    statusEl.textContent = '⚡ Saved Locally';
-                    statusEl.style.color = 'var(--accent)';
+                    statusEl.textContent = '⚡ Save Failed';
+                    statusEl.style.color = 'var(--danger)';
                 }
             } finally {
                 setTimeout(() => { isSaving = false; }, 400);
             }
-        }
-
-        function saveToLocalStorageOnly() {
-            localStorage.setItem('rugeley_darts_teams', JSON.stringify(teams));
-            localStorage.setItem('rugeley_team_pairs', JSON.stringify(teamPairs));
-            localStorage.setItem('rugeley_darts_players', JSON.stringify(players));
-            localStorage.setItem('rugeley_darts_fixtures', JSON.stringify(generatedFixtures));
-            localStorage.setItem('rugeley_match_results', JSON.stringify(matchResults));
-            localStorage.setItem('rugeley_season_events', JSON.stringify(seasonEvents));
-            localStorage.setItem('rugeley_shadow_players', JSON.stringify(shadowLeaguePlayers));
-            localStorage.setItem('rugeley_shadow_teams', JSON.stringify(shadowLeagueTeams));
-            localStorage.setItem('rugeley_archived_seasons', JSON.stringify(archivedSeasons));
         }
 
         const Storage = {
@@ -1006,8 +992,7 @@
                 if (key === 'rugeley_shadow_teams') shadowLeagueTeams = value;
                 if (key === 'rugeley_archived_seasons') archivedSeasons = value;
 
-                saveToLocalStorageOnly();
-                pushToDatabase();
+                pushToFirestore();
             }
         };
 
@@ -1884,9 +1869,8 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            renderAllUI();
             initCloudSync();
         });
     </script>
 </body>
-</html>
+                            </html>

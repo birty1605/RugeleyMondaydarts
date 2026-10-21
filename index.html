@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rugeley Monday Night Darts League</title>
+    <!-- Include Tesseract.js for browser-based OCR photo scanning -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <style>
         :root {
             --primary: #1e3a8a;
@@ -803,6 +805,15 @@
                 <h2 id="modal-title" style="margin: 0; border: none;">Match Scoresheet</h2>
                 <button type="button" class="btn btn-danger" onclick="closeMatchModal()">Close &times;</button>
             </div>
+
+            <!-- AI CARD SCANNER BUTTON -->
+            <div style="background: #eff6ff; border: 2px dashed var(--primary-light); padding: 1rem; border-radius: 6px; margin-bottom: 1.5rem; text-align: center;">
+                <h3 style="font-size: 1rem; color: var(--primary); margin-bottom: 0.4rem;">📸 AI Match Card Scanner</h3>
+                <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 0.8rem;">Take or upload a photo of the completed score card to automatically extract legs and text.</p>
+                <input type="file" id="card-scanner-input" accept="image/*" capture="environment" style="display: none;" onchange="handleScanMatchCard(event)">
+                <button type="button" class="btn btn-sm btn-accent" onclick="document.getElementById('card-scanner-input').click()">Upload / Scan Match Photo</button>
+                <div id="scan-status-msg" style="font-size: 0.85rem; color: #b45309; margin-top: 6px; font-weight: bold;"></div>
+            </div>
             
             <form id="modal-match-form" onsubmit="handleSaveMatchScores(event)">
                 <input type="hidden" id="modal-match-key">
@@ -964,7 +975,6 @@
         async function pushToFirestore() {
             isSaving = true;
             try {
-                // Convert arrays that contain nested arrays into JSON strings to prevent Firestore errors
                 const fixturesStr = generatedFixtures ? JSON.stringify(generatedFixtures) : null;
                 const archivedStr = archivedSeasons ? JSON.stringify(archivedSeasons) : null;
 
@@ -1015,6 +1025,45 @@
 
                 pushToFirestore();
             }
+        };
+
+        // --- AI SCANNER FEATURE ---
+        window.handleScanMatchCard = async function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const msgEl = document.getElementById('scan-status-msg');
+            msgEl.textContent = "⏳ Scanning image and reading scores... Please wait.";
+
+            try {
+                // Run Tesseract OCR on the uploaded image file
+                const { data: { text } } = await Tesseract.recognize(file, 'eng', {
+                    logger: m => {
+                        if (m.status === 'recognizing text') {
+                            msgEl.textContent = `⏳ Scanning text: ${Math.round(m.progress * 100)}%`;
+                        }
+                    }
+                });
+
+                // Extract all numbers found in the scanned text to populate leg scores
+                const numbers = text.match(/\b\d\b/g)?.map(Number) || [];
+                
+                // Automatically fill singles leg input fields found on the form
+                let numIdx = 0;
+                for (let i = 1; i <= 6; i++) {
+                    const hsInput = document.getElementById(`m_s_hs_${i}`);
+                    const asInput = document.getElementById(`m_s_as_${i}`);
+                    if (hsInput && numbers[numIdx] !== undefined) hsInput.value = numbers[numIdx++];
+                    if (asInput && numbers[numIdx] !== undefined) asInput.value = numbers[numIdx++];
+                }
+
+                msgEl.textContent = "✅ Scan complete! Review and adjust scores if needed.";
+                setTimeout(() => { msgEl.textContent = ""; }, 5000);
+            } catch (err) {
+                console.error("OCR Scan failed:", err);
+                msgEl.textContent = "❌ Failed to read image. Please enter scores manually.";
+            }
+            event.target.value = ''; // Reset file input
         };
 
         // --- GLOBAL WINDOW HANDLERS ---
@@ -1303,6 +1352,7 @@
         window.openMatchModal = function(matchKey, homeTeam, awayTeam) {
             document.getElementById('modal-match-key').value = matchKey;
             document.getElementById('modal-title').textContent = `${homeTeam} vs ${awayTeam}`;
+            document.getElementById('scan-status-msg').textContent = '';
 
             const homePlayers = players.filter(p => p.team === homeTeam);
             const awayPlayers = players.filter(p => p.team === awayTeam);

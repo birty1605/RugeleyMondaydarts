@@ -846,7 +846,7 @@
     <!-- FIREBASE & APP SCRIPT -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         // Your web app's Firebase configuration
         const firebaseConfig = {
@@ -875,10 +875,9 @@
             console.warn('SessionStorage unavailable:', e);
         }
 
-        // --- DATA STORES (Defaults) ---
-        let teams = ["The Miners Arms A", "The Miners Arms B", "The Cabin", "Armitage Legion"];
-        let teamPairs = [{ team1: "The Miners Arms A", team2: "The Miners Arms B" }];
-        let players = [
+        // --- DATA STORES (Defaults used ONLY if Firestore document is brand new) ---
+        let defaultTeams = ["The Miners Arms A", "The Miners Arms B", "The Cabin", "Armitage Legion"];
+        let defaultPlayers = [
             { name: "John Smith", team: "The Miners Arms A" },
             { name: "Pete Jones", team: "The Miners Arms A" },
             { name: "Dave Jones", team: "The Miners Arms B" },
@@ -886,6 +885,10 @@
             { name: "Mark Wilson", team: "The Cabin" },
             { name: "Chris Evans", team: "Armitage Legion" }
         ];
+
+        let teams = [...defaultTeams];
+        let teamPairs = [{ team1: "The Miners Arms A", team2: "The Miners Arms B" }];
+        let players = [...defaultPlayers];
         let generatedFixtures = null;
         let matchResults = {};
         let seasonEvents = [];
@@ -895,60 +898,90 @@
         let singlesStats = {};
 
         let isSaving = false;
+        let isInitialized = false;
 
-        // --- FIRESTORE REAL-TIME SYNC ---
         const docRef = doc(db, "leagues", "rugeley_main");
 
-        onSnapshot(docRef, (docSnap) => {
-            const statusEl = document.getElementById('sync-status');
-            if (docSnap.exists()) {
-                const data = docSnap.data();
-                if (data) {
-                    teams = data.teams || teams;
-                    teamPairs = data.teamPairs || teamPairs;
-                    players = data.players || players;
-                    generatedFixtures = data.generatedFixtures !== undefined ? data.generatedFixtures : generatedFixtures;
-                    matchResults = data.matchResults || matchResults;
-                    seasonEvents = data.seasonEvents || seasonEvents;
-                    shadowLeaguePlayers = data.shadowLeaguePlayers || shadowLeaguePlayers;
-                    shadowLeagueTeams = data.shadowLeagueTeams || shadowLeagueTeams;
-                    archivedSeasons = data.archivedSeasons || archivedSeasons;
+        // --- FETCH OR INITIALIZE DATA ON LOAD ---
+        async function initDatabase() {
+            try {
+                const docSnap = await getDoc(docRef);
+                const statusEl = document.getElementById('sync-status');
 
-                    const modalOpen = document.getElementById('match-modal').style.display === 'flex';
-                    if (!modalOpen) {
-                        renderTeams();
-                        renderTeamPairs();
-                        renderPlayers();
-                        renderEvents();
-                        renderArchivedSeasons();
-                        renderFixtures();
-                        recalculateAllStats();
-                    }
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    teams = data.teams || defaultTeams;
+                    teamPairs = data.teamPairs || [];
+                    players = data.players || defaultPlayers;
+                    generatedFixtures = data.generatedFixtures !== undefined ? data.generatedFixtures : null;
+                    matchResults = data.matchResults || {};
+                    seasonEvents = data.seasonEvents || [];
+                    shadowLeaguePlayers = data.shadowLeaguePlayers || [];
+                    shadowLeagueTeams = data.shadowLeagueTeams || [];
+                    archivedSeasons = data.archivedSeasons || [];
 
                     if (statusEl) {
                         statusEl.textContent = '🔥 Live Firestore Synced';
                         statusEl.style.color = 'var(--success)';
                     }
+                } else {
+                    // First time setup: create the document with default/initial values
+                    await setDoc(docRef, {
+                        teams,
+                        teamPairs,
+                        players,
+                        generatedFixtures,
+                        matchResults,
+                        seasonEvents,
+                        shadowLeaguePlayers,
+                        shadowLeagueTeams,
+                        archivedSeasons,
+                        updatedAt: new Date().toISOString()
+                    });
+                    if (statusEl) {
+                        statusEl.textContent = '🔥 Firestore Connected';
+                        statusEl.style.color = 'var(--success)';
+                    }
                 }
-            } else {
-                // Initialize document if it doesn't exist yet
-                saveToFirestore();
+            } catch (err) {
+                console.error("Database initialization error:", err);
+                const statusEl = document.getElementById('sync-status');
                 if (statusEl) {
-                    statusEl.textContent = '🔥 Firestore Connected';
-                    statusEl.style.color = 'var(--success)';
+                    statusEl.textContent = '⚠️ Connection Error';
+                    statusEl.style.color = 'var(--danger)';
                 }
+            } finally {
+                isInitialized = true;
+                renderAllUI();
+                
+                // Start real-time listener for cross-device updates AFTER initial load
+                onSnapshot(docRef, (docSnap) => {
+                    if (!isInitialized || isSaving) return;
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        if (data) {
+                            teams = data.teams || teams;
+                            teamPairs = data.teamPairs || teamPairs;
+                            players = data.players || players;
+                            generatedFixtures = data.generatedFixtures !== undefined ? data.generatedFixtures : generatedFixtures;
+                            matchResults = data.matchResults || matchResults;
+                            seasonEvents = data.seasonEvents || seasonEvents;
+                            shadowLeaguePlayers = data.shadowLeaguePlayers || shadowLeaguePlayers;
+                            shadowLeagueTeams = data.shadowLeagueTeams || shadowLeagueTeams;
+                            archivedSeasons = data.archivedSeasons || archivedSeasons;
+
+                            const modalOpen = document.getElementById('match-modal').style.display === 'flex';
+                            if (!modalOpen) {
+                                renderAllUI();
+                            }
+                        }
+                    }
+                });
             }
-        }, (error) => {
-            console.error("Firestore sync error:", error);
-            const statusEl = document.getElementById('sync-status');
-            if (statusEl) {
-                statusEl.textContent = '⚠️ Sync Error';
-                statusEl.style.color = 'var(--danger)';
-            }
-        });
+        }
 
         async function saveToFirestore() {
-            if (isSaving) return;
+            if (!isInitialized) return;
             isSaving = true;
             try {
                 await setDoc(docRef, {
@@ -976,11 +1009,10 @@
                     statusEl.style.color = 'var(--danger)';
                 }
             } finally {
-                isSaving = false;
+                setTimeout(() => { isSaving = false; }, 500);
             }
         }
 
-        // --- STORAGE HELPER REPLACEMENT ---
         const Storage = {
             set(key, value) {
                 if (key === 'rugeley_darts_teams') teams = value;
@@ -997,7 +1029,7 @@
             }
         };
 
-        // --- EXPOSE FUNCTIONS GLOBALLY FOR HTML ONCLICK ---
+        // --- GLOBAL WINDOW HANDLERS ---
         window.adminLogin = function(e) {
             if (e) e.preventDefault();
             const user = document.getElementById('admin-user').value.trim();
@@ -1066,6 +1098,7 @@
             }
 
             teams.push(teamName);
+            Storage.set('rugeley_darts_teams', teams);
             renderTeams();
             teamNameInput.value = '';
             alert(`Team "${teamName}" added successfully!`);
@@ -1078,6 +1111,8 @@
             if (confirm(`Are you sure you want to remove "${removed}"?`)) {
                 teams.splice(index, 1);
                 teamPairs = teamPairs.filter(p => p.team1 !== removed && p.team2 !== removed);
+                Storage.set('rugeley_darts_teams', teams);
+                Storage.set('rugeley_team_pairs', teamPairs);
                 renderTeams();
                 renderTeamPairs();
             }
@@ -1097,12 +1132,14 @@
             }
 
             teamPairs.push({ team1: t1, team2: t2 });
+            Storage.set('rugeley_team_pairs', teamPairs);
             renderTeamPairs();
         };
 
         window.removeTeamPair = function(index) {
             if (!checkAdminPermission()) return;
             teamPairs.splice(index, 1);
+            Storage.set('rugeley_team_pairs', teamPairs);
             renderTeamPairs();
         };
 
@@ -1117,6 +1154,7 @@
 
             if (title && date && venue) {
                 seasonEvents.push({ title, date, venue, notes });
+                Storage.set('rugeley_season_events', seasonEvents);
                 renderEvents();
                 document.getElementById('event-form').reset();
                 alert('End of Season Event scheduled!');
@@ -1127,6 +1165,7 @@
             if (!checkAdminPermission()) return;
             if (confirm('Delete this event?')) {
                 seasonEvents.splice(index, 1);
+                Storage.set('rugeley_season_events', seasonEvents);
                 renderEvents();
             }
         };
@@ -1140,6 +1179,7 @@
 
             if (nameInput.value && teamSelect.value) {
                 players.push({ name: nameInput.value.trim(), team: teamSelect.value });
+                Storage.set('rugeley_darts_players', players);
                 renderPlayers();
                 nameInput.value = '';
                 teamSelect.value = '';
@@ -1149,6 +1189,7 @@
         window.removePlayer = function(index) {
             if (!checkAdminPermission()) return;
             players.splice(index, 1);
+            Storage.set('rugeley_darts_players', players);
             renderPlayers();
         };
 
@@ -1166,6 +1207,7 @@
                     return;
                 }
                 players.push({ name: playerName, team: playerTeam });
+                Storage.set('rugeley_darts_players', players);
                 renderPlayers();
                 nameInput.value = '';
                 teamSelect.value = '';
@@ -1984,8 +2026,7 @@
             document.getElementById('ach-high-start-team').textContent = rec.highStart.team;
         }
 
-        // Initialize App on Load
-        document.addEventListener('DOMContentLoaded', () => {
+        function renderAllUI() {
             initAdminSession();
             renderTeams();
             renderTeamPairs();
@@ -1994,7 +2035,7 @@
             renderArchivedSeasons();
             updateAdminUI();
 
-            if (!generatedFixtures) {
+            if (!generatedFixtures && teams.length >= 2) {
                 let pool = [...teams];
                 if (pool.length % 2 !== 0) pool.push("BYE");
                 let schedule = [];
@@ -2012,10 +2053,16 @@
                     pool.splice(1, 0, pool.pop());
                 }
                 generatedFixtures = schedule;
+                Storage.set('rugeley_darts_fixtures', generatedFixtures);
             }
 
             renderFixtures();
             recalculateAllStats();
+        }
+
+        // Initialize App on Load
+        document.addEventListener('DOMContentLoaded', () => {
+            initDatabase();
         });
     </script>
 </body>

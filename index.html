@@ -811,8 +811,8 @@
             <!-- AI CARD SCANNER BUTTON -->
             <div style="background: #eff6ff; border: 2px dashed var(--primary-light); padding: 1rem; border-radius: 6px; margin-bottom: 1.5rem; text-align: center;">
                 <h3 style="font-size: 1rem; color: var(--primary); margin-bottom: 0.4rem;">📸 AI Match Card Scanner</h3>
-                <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 0.8rem;">Take or upload a photo of the completed score card to automatically extract legs and text.</p>
-                <input type="file" id="card-scanner-input" accept="image/*" capture="environment" style="display: none;" onchange="handleScanMatchCard(event)">
+                <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 0.8rem;">Take or upload a photo of the completed score card from your phone gallery to automatically extract legs and text.</p>
+                <input type="file" id="card-scanner-input" accept="image/*" style="display: none;" onchange="handleScanMatchCard(event)">
                 <button type="button" class="btn btn-sm btn-accent" onclick="document.getElementById('card-scanner-input').click()">Upload / Scan Match Photo</button>
                 <div id="scan-status-msg" style="font-size: 0.85rem; color: #b45309; margin-top: 6px; font-weight: bold;"></div>
             </div>
@@ -1368,7 +1368,21 @@
             window.showTab('fixtures');
         };
 
-        window.openMatchModal = function(matchKey, homeTeam, awayTeam) {
+        window.openMatchModal = function(matchKey) {
+            let homeTeam = '', awayTeam = '';
+            if (generatedFixtures) {
+                for (let r = 0; r < generatedFixtures.length; r++) {
+                    const roundMatches = generatedFixtures[r];
+                    for (let m = 0; m < roundMatches.length; m++) {
+                        if (`w${r + 1}_m${m}` === matchKey) {
+                            homeTeam = roundMatches[m].home;
+                            awayTeam = roundMatches[m].away;
+                            break;
+                        }
+                    }
+                }
+            }
+
             document.getElementById('modal-match-key').value = matchKey;
             document.getElementById('modal-title').textContent = `${homeTeam} vs ${awayTeam}`;
             document.getElementById('scan-status-msg').textContent = '';
@@ -1746,7 +1760,7 @@
                     }
 
                     let actionBtn = (m.home !== "BYE" && m.away !== "BYE") 
-                        ? `<button type="button" class="btn btn-sm btn-accent admin-only" onclick='openMatchModal("${matchKey}", ${JSON.stringify(m.home)}, ${JSON.stringify(m.away)})'>${buttonText}</button>`
+                        ? `<button type="button" class="btn btn-sm btn-accent admin-only" onclick="openMatchModal('${matchKey}')">${buttonText}</button>`
                         : '-';
 
                     html += `<tr><td><strong>${escapeHtml(m.home)}</strong></td><td class="vs">${scoreDisplay}</td><td><strong>${escapeHtml(m.away)}</strong></td><td>${actionBtn}</td></tr>`;
@@ -1958,4 +1972,4 @@
         });
     </script>
 </body>
-                            </html>
+</html>

@@ -1,309 +1,1979 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rugeley Monday Night Darts League</title>
-  <style>
-    /* Global Styles & Container Reset */
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rugeley Monday Night Darts League</title>
+    <!-- Include Tesseract.js for browser-based OCR photo scanning -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    <!-- Include html2canvas for downloading the scorecard -->
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --primary-light: #3b82f6;
+            --accent: #f59e0b;
+            --danger: #ef4444;
+            --success: #10b981;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+            --border: #e2e8f0;
+            --shadow-league: #475569;
+        }
 
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #121212;
-      color: #e0e0e0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 20px 10px;
-    }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
 
-    /* Standardized max-width across all site sections for consistency */
-    .site-container {
-      width: 100%;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
 
-    /* Top Section / Header - Expanded width to match main layout */
-    header.site-header {
-      width: 100%;
-      max-width: 1200px; /* Full aligned width matching the body container */
-      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-      border: 1px solid #334155;
-      border-radius: 10px;
-      padding: 25px 30px;
-      margin-bottom: 25px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-    }
+        header {
+            background-color: var(--primary);
+            color: white;
+            text-align: center;
+            padding: 2.5rem 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            width: 100%;
+        }
 
-    .header-content {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 15px;
-    }
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
 
-    .site-title {
-      font-size: 2rem;
-      font-weight: 700;
-      color: #38bdf8;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
+        .admin-bar {
+            background-color: #1e293b;
+            color: white;
+            padding: 0.8rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            font-size: 0.95rem;
+            border-bottom: 2px solid var(--accent);
+            width: 100%;
+        }
 
-    .nav-links {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
+        .admin-bar-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
 
-    .nav-btn {
-      background-color: #334155;
-      color: #f8fafc;
-      padding: 10px 18px;
-      border-radius: 6px;
-      text-decoration: none;
-      font-weight: 600;
-      font-size: 0.95rem;
-      transition: background-color 0.2s ease, transform 0.1s ease;
-    }
+        .admin-bar input {
+            padding: 0.4rem 0.6rem;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            width: 150px;
+        }
 
-    .nav-btn:hover {
-      background-color: #0284c7;
-      transform: translateY(-1px);
-    }
+        .admin-bar button {
+            padding: 0.4rem 1rem;
+            font-size: 0.9rem;
+        }
 
-    /* Main Content Layout */
-    main.content-area {
-      width: 100%;
-      max-width: 1200px;
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 25px;
-    }
+        .admin-status {
+            font-weight: bold;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
 
-    .section-title {
-      font-size: 1.5rem;
-      color: #f1f5f9;
-      margin-bottom: 15px;
-      border-bottom: 2px solid #0284c7;
-      padding-bottom: 8px;
-    }
+        nav {
+            display: flex;
+            justify-content: center;
+            background-color: #0f172a;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            flex-wrap: wrap;
+            width: 100%;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
 
-    /* Fixtures & Scorecard Container */
-    .fixtures-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
-      gap: 20px;
-    }
+        nav button {
+            background: none;
+            border: none;
+            color: #94a3b8;
+            padding: 1.1rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
 
-    /* Expanded Fixture Score Box */
-    .fixture-card {
-      background-color: #1e293b;
-      border: 1px solid #334155;
-      border-radius: 8px;
-      padding: 20px; /* Expanded padding */
-      min-height: 180px; /* Increased height to give plenty of breathing room */
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-    }
+        nav button:hover, nav button.active {
+            color: white;
+            border-bottom: 3px solid var(--accent);
+            background-color: rgba(255, 255, 255, 0.05);
+        }
 
-    .fixture-header {
-      font-size: 0.85rem;
-      color: #94a3b8;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 12px;
-      text-align: center;
-    }
+        /* Expanded container width to align with top section */
+        .container {
+            max-width: 1350px;
+            margin: 2.5rem auto;
+            padding: 0 2rem;
+        }
 
-    .fixture-teams-container {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
+        .tab-content {
+            display: none;
+        }
 
-    .team-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background-color: #0f172a;
-      padding: 10px 14px;
-      border-radius: 6px;
-      border: 1px solid #1e293b;
-    }
+        .tab-content.active {
+            display: block;
+        }
 
-    .team-info {
-      display: flex;
-      flex-direction: column;
-      overflow: hidden; /* Prevents overflow clipping */
-      padding-right: 10px;
-    }
+        .card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid var(--border);
+        }
 
-    .team-name {
-      font-weight: 700;
-      font-size: 1.1rem; /* Clearer font size */
-      color: #f8fafc;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
+        .shadow-card {
+            border-left: 5px solid var(--shadow-league);
+        }
 
-    /* Expanded Player Names Visibility Area */
-    .player-names {
-      font-size: 0.95rem; /* Larger font size to comfortably read player names */
-      color: #38bdf8;
-      margin-top: 3px;
-      line-height: 1.3;
-      word-break: break-word; /* Ensures full player names fit properly */
-    }
+        .locked-badge {
+            background-color: var(--danger);
+            color: white;
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            font-weight: bold;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
 
-    .score-badge {
-      font-size: 1.25rem;
-      font-weight: 800;
-      background-color: #334155;
-      color: #f8fafc;
-      padding: 6px 14px;
-      border-radius: 4px;
-      min-width: 45px;
-      text-align: center;
-    }
+        h2 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 0.5rem;
+        }
 
-    .score-badge.winner {
-      background-color: #16a34a;
-      color: #ffffff;
-    }
+        .form-group {
+            margin-bottom: 1rem;
+        }
 
-    /* Responsive Adjustments */
-    @media (max-width: 768px) {
-      header.site-header {
-        padding: 15px;
-      }
-      .fixtures-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-  </style>
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 0.7rem;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .btn {
+            background-color: var(--primary-light);
+            color: white;
+            padding: 0.7rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            display: inline-block;
+            transition: background-color 0.2s;
+        }
+
+        .btn:hover {
+            background-color: var(--primary);
+        }
+
+        .btn-sm {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.9rem;
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+            padding: 0.4rem 0.8rem;
+            font-size: 0.9rem;
+        }
+
+        .btn-danger:hover {
+            background-color: #dc2626;
+        }
+
+        .btn-accent {
+            background-color: var(--accent);
+            color: #000;
+        }
+
+        .btn-accent:hover {
+            background-color: #d97706;
+            color: #fff;
+        }
+
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #059669;
+        }
+
+        .btn-shadow {
+            background-color: var(--shadow-league);
+            color: white;
+        }
+
+        .btn-shadow:hover {
+            background-color: #334155;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        th, td {
+            padding: 0.85rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background-color: #f1f5f9;
+            color: var(--primary);
+        }
+
+        .shadow-table th {
+            background-color: #e2e8f0;
+            color: #0f172a;
+        }
+
+        .vs {
+            font-weight: bold;
+            color: var(--accent);
+            text-align: center;
+        }
+
+        .match-score-badge {
+            background-color: #16a34a;
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        .achievement-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-top: 1rem;
+        }
+
+        .achievement-card {
+            background-color: #f8fafc;
+            border: 2px solid var(--primary-light);
+            border-radius: 8px;
+            padding: 1.2rem;
+            text-align: center;
+        }
+
+        .achievement-card h3 {
+            font-size: 1rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+        }
+
+        .achievement-val {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--accent);
+        }
+
+        .achievement-holder {
+            font-weight: 600;
+            color: var(--text);
+            margin-top: 0.3rem;
+            font-size: 1.05rem;
+        }
+
+        .achievement-team {
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+        }
+
+        /* Expanded modal card width and padding for larger, readable player select rows */
+        .modal-card {
+            background: white;
+            border-radius: 8px;
+            max-width: 1050px;
+            width: 100%;
+            max-height: 92vh;
+            overflow-y: auto;
+            padding: 2.5rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+
+        .scoresheet-table {
+            border: 2px solid #000;
+            margin-top: 1rem;
+        }
+
+        .scoresheet-table th, .scoresheet-table td {
+            border: 1px solid #000;
+            color: #000;
+            padding: 10px;
+        }
+
+        .printable-area {
+            background: white;
+            padding: 25px;
+        }
+
+        .flex-row {
+            display: flex;
+            gap: 15px;
+            align-items: flex-end;
+        }
+
+        .flex-row .form-group {
+            flex-grow: 1;
+            margin-bottom: 0;
+        }
+
+        .event-card-item {
+            background: #f8fafc;
+            border-left: 4px solid var(--accent);
+            padding: 1.2rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 15px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        .event-card-details h3 {
+            color: var(--primary);
+            font-size: 1.2rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .event-meta {
+            font-size: 0.95rem;
+            color: #64748b;
+            margin-bottom: 0.5rem;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .event-notes {
+            font-size: 1rem;
+            color: var(--text);
+            background: #ffffff;
+            padding: 0.6rem;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+        }
+
+        .admin-only {
+            display: none !important;
+        }
+
+        .match-highlights-box {
+            background: #fff8f0;
+            border: 1px solid var(--accent);
+            padding: 1.2rem;
+            border-radius: 6px;
+            margin-top: 2rem;
+        }
+
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #scoresheet, #scoresheet * {
+                visibility: visible;
+            }
+            #scoresheet {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
+    </style>
 </head>
 <body>
 
-  <!-- Top Header Section (Wider & Aligned with Full Site Layout) -->
-  <header class="site-header">
-    <div class="header-content">
-      <h1 class="site-title">Rugeley Monday Night Darts</h1>
-      <nav class="nav-links">
-        <a href="#fixtures" class="nav-btn">Fixtures</a>
-        <a href="#tables" class="nav-btn">League Table</a>
-        <a href="#teams" class="nav-btn">Teams & Players</a>
-      </nav>
+    <header>
+        <h1>Rugeley Monday Night Darts</h1>
+        <p>Official League Hub & Leaderboards</p>
+    </header>
+
+    <div class="admin-bar no-print">
+        <div class="admin-bar-group">
+            <form id="admin-login-form" style="display: flex; gap: 10px; align-items: center;" onsubmit="adminLogin(event)">
+                <span><strong>Admin Login:</strong></span>
+                <input type="text" id="admin-user" placeholder="Username" autocomplete="username">
+                <input type="password" id="admin-pass" placeholder="Password" autocomplete="current-password">
+                <button type="submit" class="btn btn-accent">Login</button>
+            </form>
+            <div id="admin-logged-in" style="display: none;" class="admin-status">
+                <span>🔓 Admin Mode Active (Gjelly)</span>
+                <button type="button" class="btn btn-danger" onclick="adminLogout()">Logout</button>
+            </div>
+        </div>
+        <div class="admin-bar-group">
+            <span id="sync-status" style="font-size: 0.9rem; color: var(--accent);">🔥 Connecting to Firestore (RugeleyMondaydarts)...</span>
+        </div>
     </div>
-  </header>
 
-  <!-- Main Section Containing Expanded Fixture Score Boxes -->
-  <main class="content-area">
-    <section id="fixtures">
-      <h2 class="section-title">Latest Fixture Scores</h2>
-      
-      <div class="fixtures-grid">
+    <nav id="main-nav">
+        <button type="button" class="nav-btn active" onclick="showTab('fixtures', event)">Fixtures</button>
+        <button type="button" class="nav-btn" onclick="showTab('leaderboards', event)">Leaderboards</button>
+        <button type="button" class="nav-btn" onclick="showTab('register-player', event)">Register Player</button>
+        <button type="button" class="nav-btn admin-only" id="nav-teams-btn" onclick="showTab('teams', event)">Manage Teams & Season</button>
+        <button type="button" class="nav-btn admin-only" id="nav-players-btn" onclick="showTab('players', event)">Manage Players</button>
+        <button type="button" class="nav-btn admin-only" id="nav-archive-btn" onclick="showTab('archive', event)">Season Archive</button>
+        <button type="button" class="nav-btn" onclick="showTab('scoresheet', event)">Print Score Sheet</button>
+    </nav>
+
+    <div class="container" id="main-container">
+
+        <!-- FIXTURES TAB -->
+        <div id="fixtures" class="tab-content active">
+            <div class="card">
+                <h2>Season Fixtures (Home & Away)</h2>
+                <div id="fixtures-container"></div>
+            </div>
+
+            <div class="card" style="border: 2px solid var(--accent);">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 1rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem;">
+                    <h2 style="border: none; margin: 0; color: #b45309;">🎯 Post-Season League Events & Tournaments</h2>
+                </div>
+                
+                <p style="margin-bottom: 1rem; color: #64748b;">
+                    Knockout cups, singles competitions, finals nights, and trophy presentations scheduled after league matches conclude.
+                </p>
+
+                <div id="events-list-container"></div>
+
+                <div class="admin-only" style="margin-top: 1.5rem; background: #fff8f0; padding: 1.2rem; border-radius: 6px; border: 1px dashed var(--accent);">
+                    <h3 style="font-size: 1.1rem; color: #b45309; margin-bottom: 0.8rem;">
+                        Add End of Season Event <span class="locked-badge admin-lock-badge">Unlocked</span>
+                    </h3>
+                    <form id="event-form" onsubmit="handleAddEvent(event)">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-bottom: 12px;">
+                            <div class="form-group" style="margin: 0;">
+                                <label for="event-title">Event Title:</label>
+                                <input type="text" id="event-title" placeholder="e.g. League Singles Cup" required>
+                            </div>
+                            <div class="form-group" style="margin: 0;">
+                                <label for="event-date">Date & Time:</label>
+                                <input type="text" id="event-date" placeholder="e.g. Mon 15th Dec @ 8:00 PM" required>
+                            </div>
+                            <div class="form-group" style="margin: 0;">
+                                <label for="event-venue">Venue:</label>
+                                <input type="text" id="event-venue" placeholder="e.g. The Miners Arms" required>
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 12px;">
+                            <label for="event-notes">Event Format / Notes (Optional):</label>
+                            <input type="text" id="event-notes" placeholder="e.g. Best of 5 legs">
+                        </div>
+                        <button type="submit" class="btn btn-accent" style="width: 100%;">Add League Event</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- LEADERBOARDS TAB -->
+        <div id="leaderboards" class="tab-content">
+            <div class="card" style="border: 2px solid var(--primary-light);">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 0.5rem;">
+                    <h2 style="border-bottom: none; margin-bottom: 0;">🏆 Overall Team League Standings</h2>
+                    <button type="button" class="btn btn-shadow admin-only" onclick="generateTeamShadowLeague()">Split Teams into Shadow League</button>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Pos</th><th>Team</th><th>P</th><th>W</th><th>D</th><th>L</th><th>F</th><th>A</th><th>+/-</th><th>Pts</th>
+                        </tr>
+                    </thead>
+                    <tbody id="overall-team-leaderboard"></tbody>
+                </table>
+            </div>
+
+            <div class="card shadow-card" id="team-shadow-league-container" style="display: none;">
+                <h2 style="color: var(--shadow-league);">🌑 Overall Team Shadow League Standings</h2>
+                <table class="shadow-table">
+                    <thead>
+                        <tr>
+                            <th>Pos</th><th>Team</th><th>P</th><th>W</th><th>D</th><th>L</th><th>F</th><th>A</th><th>+/-</th><th>Pts</th>
+                        </tr>
+                    </thead>
+                    <tbody id="team-shadow-leaderboard"></tbody>
+                </table>
+            </div>
+            
+            <div class="card">
+                <h2>League Season Records & Achievements</h2>
+                <div class="achievement-grid">
+                    <div class="achievement-card">
+                        <h3>🎯 Least Darts Leg</h3>
+                        <div class="achievement-val" id="ach-least-darts">-</div>
+                        <div class="achievement-holder" id="ach-least-darts-holder">None</div>
+                        <div class="achievement-team" id="ach-least-darts-team"></div>
+                    </div>
+                    <div class="achievement-card">
+                        <h3>🔥 Highest Score</h3>
+                        <div class="achievement-val" id="ach-high-score">-</div>
+                        <div class="achievement-holder" id="ach-high-score-holder">None</div>
+                        <div class="achievement-team" id="ach-high-score-team"></div>
+                    </div>
+                    <div class="achievement-card">
+                        <h3>🏆 Highest Finish</h3>
+                        <div class="achievement-val" id="ach-high-finish">-</div>
+                        <div class="achievement-holder" id="ach-high-finish-holder">None</div>
+                        <div class="achievement-team" id="ach-high-finish-team"></div>
+                    </div>
+                    <div class="achievement-card">
+                        <h3>🚀 Highest Start</h3>
+                        <div class="achievement-val" id="ach-high-start">-</div>
+                        <div class="achievement-holder" id="ach-high-start-holder">None</div>
+                        <div class="achievement-team" id="ach-high-start-team"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 0.5rem;">
+                    <h2 style="border-bottom: none; margin-bottom: 0;">Main Singles Leaderboard</h2>
+                    <button type="button" class="btn btn-shadow admin-only" onclick="generateShadowLeague()">Split & Generate Singles Shadow League</button>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Pos</th><th>Player</th><th>Team</th><th>P</th><th>W</th><th>L</th><th>F</th><th>A</th><th>+/-</th>
+                        </tr>
+                    </thead>
+                    <tbody id="singles-leaderboard"></tbody>
+                </table>
+            </div>
+
+            <div class="card shadow-card" id="shadow-league-container" style="display: none;">
+                <h2 style="color: var(--shadow-league);">🌑 Singles Shadow League Standings</h2>
+                <table class="shadow-table">
+                    <thead>
+                        <tr>
+                            <th>Pos</th><th>Player</th><th>Team</th><th>P</th><th>W</th><th>L</th><th>F</th><th>A</th><th>+/-</th>
+                        </tr>
+                    </thead>
+                    <tbody id="shadow-leaderboard"></tbody>
+                </table>
+            </div>
+
+            <div class="card">
+                <h2>Doubles Matches Leaderboard</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Pos</th><th>Pair</th><th>P</th><th>W</th><th>L</th><th>F</th><th>A</th><th>+/-</th>
+                        </tr>
+                    </thead>
+                    <tbody id="doubles-leaderboard"></tbody>
+                </table>
+            </div>
+
+            <div class="card">
+                <h2>Captains Matches Leaderboard</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Pos</th><th>Captain</th><th>Team</th><th>P</th><th>W</th><th>L</th><th>F</th><th>A</th><th>+/-</th>
+                        </tr>
+                    </thead>
+                    <tbody id="captains-leaderboard"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- PUBLIC PLAYER REGISTRATION TAB -->
+        <div id="register-player" class="tab-content">
+            <div class="card" style="border: 2px solid var(--success);">
+                <h2 style="color: var(--success);">👤 Player Self-Registration</h2>
+                <p style="margin-bottom: 1rem; color: #64748b;">
+                    Register your name and assign yourself to your team so you can be selected for match scoresheets. No admin login required!
+                </p>
+                <form id="public-player-form" onsubmit="handlePublicPlayerRegistration(event)">
+                    <div class="form-group">
+                        <label for="public-player-name">Your Full Name:</label>
+                        <input type="text" id="public-player-name" placeholder="Enter your full name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="public-player-team">Select Your Team:</label>
+                        <select id="public-player-team" required><option value="">-- Select Team --</option></select>
+                    </div>
+                    <button type="submit" class="btn btn-success">Register Player</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- TEAMS & SEASON MANAGEMENT TAB -->
+        <div id="teams" class="tab-content admin-only">
+            <div class="card">
+                <h2>Generate New Season <span class="locked-badge admin-lock-badge">Unlocked</span></h2>
+                <p style="margin-bottom: 1rem; color: #64748b;">
+                    Configure paired venue restrictions below, then click <strong>"Generate New Season Fixtures"</strong>.
+                </p>
+                <button type="button" class="btn btn-accent" onclick="generateNewSeason()">Generate New Season Fixtures</button>
+            </div>
+
+            <div class="card" style="border: 2px solid var(--primary-light);">
+                <h2>🏠 Home Venue Pairing Constraints <span class="locked-badge admin-lock-badge">Unlocked</span></h2>
+                <form id="pair-team-form" class="flex-row" style="margin-bottom: 1.5rem;" onsubmit="handlePairTeams(event)">
+                    <div class="form-group">
+                        <label for="pair-team-1">Team 1:</label>
+                        <select id="pair-team-1" required><option value="">-- Select Team 1 --</option></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="pair-team-2">Team 2:</label>
+                        <select id="pair-team-2" required><option value="">-- Select Team 2 --</option></select>
+                    </div>
+                    <button type="submit" class="btn btn-accent">Pair Teams</button>
+                </form>
+
+                <h3 style="font-size: 1.1rem; color: var(--primary); margin-bottom: 0.8rem;">Active Venue Pairings:</h3>
+                <table>
+                    <thead>
+                        <tr><th>Team 1</th><th>Team 2</th><th>Constraint Status</th><th style="width: 120px;">Action</th></tr>
+                    </thead>
+                    <tbody id="team-pairs-list"></tbody>
+                </table>
+            </div>
+
+            <div class="card">
+                <h2>Add New Team <span class="locked-badge admin-lock-badge">Unlocked</span></h2>
+                <form id="team-form" class="flex-row" onsubmit="handleAddTeam(event)">
+                    <div class="form-group">
+                        <label for="team-name">Team Venue / Name:</label>
+                        <input type="text" id="team-name" placeholder="e.g. The Red Lion" required>
+                    </div>
+                    <button type="submit" class="btn">Add Team</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h2>Current League Teams</h2>
+                <table>
+                    <thead>
+                        <tr><th>Team Name</th><th style="width: 120px;">Action</th></tr>
+                    </thead>
+                    <tbody id="teams-list"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- PLAYER MANAGEMENT TAB -->
+        <div id="players" class="tab-content admin-only">
+            <div class="card">
+                <h2>Add New Player <span class="locked-badge admin-lock-badge">Unlocked</span></h2>
+                <form id="player-form" onsubmit="handleAddPlayer(event)">
+                    <div class="form-group">
+                        <label for="player-name">Player Name:</label>
+                        <input type="text" id="player-name" placeholder="Enter full name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="player-team">Assign to Team:</label>
+                        <select id="player-team" required><option value="">-- Select Team --</option></select>
+                    </div>
+                    <button type="submit" class="btn">Add Player</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h2>Registered Players</h2>
+                <table>
+                    <thead>
+                        <tr><th>Player Name</th><th>Team</th><th style="width: 120px;">Action</th></tr>
+                    </thead>
+                    <tbody id="players-list"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ARCHIVE TAB -->
+        <div id="archive" class="tab-content admin-only">
+            <div class="card" style="border: 2px solid var(--accent);">
+                <h2>Archive Current Season <span class="locked-badge admin-lock-badge">Unlocked</span></h2>
+                <p style="margin-bottom: 1rem; color: #64748b;">
+                    Save the final standings, match results, and records of the current season into permanent storage archives, then clear the database to prepare for a fresh season.
+                </p>
+                <div class="form-group">
+                    <label for="archive-season-name">Season Label / Name:</label>
+                    <input type="text" id="archive-season-name" placeholder="e.g. 2025/2026 Winter Season" required>
+                </div>
+                <button type="button" class="btn btn-accent" onclick="archiveCurrentSeason()">Archive Season & Reset Data</button>
+            </div>
+
+            <div class="card">
+                <h2>Past Archived Seasons</h2>
+                <div id="archived-seasons-container">
+                    <p style="color: #64748b; font-style: italic;">No archived seasons found.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SCORE SHEET TAB -->
+        <div id="scoresheet" class="tab-content">
+            <div class="no-print" style="margin-bottom: 1rem; display: flex; gap: 10px;">
+                <button type="button" class="btn" onclick="window.print()">Print Score Sheet</button>
+                <button type="button" class="btn btn-accent" onclick="downloadScoreSheet()">Download Score Sheet (PNG)</button>
+            </div>
+            
+            <div class="printable-area card" id="printable-scoresheet-area">
+                <div style="text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 15px;">
+                    <h2>RUGELEY MONDAY NIGHT DARTS LEAGUE</h2>
+                    <h3>Official Match Result Sheet</h3>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-weight: bold;">
+                    <div>HOME TEAM: ______________________</div>
+                    <div>AWAY TEAM: ______________________</div>
+                    <div>DATE: ____________</div>
+                </div>
+
+                <table class="scoresheet-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 8%;">Game</th>
+                            <th style="width: 41%;">Home Player(s)</th>
+                            <th style="width: 10%;">Legs</th>
+                            <th style="width: 10%;">Legs</th>
+                            <th style="width: 41%;">Away Player(s)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="background-color: #f1f5f9;"><td colspan="5" style="text-align: center; font-weight: bold;">SINGLES MATCHES (1 v 1)</td></tr>
+                        <tr><td>1</td><td></td><td></td><td></td><td></td></tr>
+                        <tr><td>2</td><td></td><td></td><td></td><td></td></tr>
+                        <tr><td>3</td><td></td><td></td><td></td><td></td></tr>
+                        <tr><td>4</td><td></td><td></td><td></td><td></td></tr>
+                        <tr><td>5</td><td></td><td></td><td></td><td></td></tr>
+                        <tr><td>6</td><td></td><td></td><td></td><td></td></tr>
+                        <tr style="background-color: #f1f5f9;"><td colspan="5" style="text-align: center; font-weight: bold;">DOUBLES MATCHES (2 v 2)</td></tr>
+                        <tr><td>7</td><td>1.<br>2.</td><td></td><td></td><td>1.<br>2.</td></tr>
+                        <tr><td>8</td><td>1.<br>2.</td><td></td><td></td><td>1.<br>2.</td></tr>
+                        <tr style="background-color: #f1f5f9;"><td colspan="5" style="text-align: center; font-weight: bold;">CAPTAINS MATCH (1 v 1)</td></tr>
+                        <tr><td>9</td><td>Cap:</td><td></td><td></td><td>Cap:</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- MATCH SCORESHEET POPUP MODAL -->
+    <div id="match-modal" class="modal-overlay">
+        <div class="modal-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem;">
+                <h2 id="modal-title" style="margin: 0; border: none;">Match Scoresheet</h2>
+                <button type="button" class="btn btn-danger" onclick="closeMatchModal()">Close &times;</button>
+            </div>
+
+            <!-- AI CARD SCANNER BUTTON -->
+            <div style="background: #eff6ff; border: 2px dashed var(--primary-light); padding: 1.2rem; border-radius: 6px; margin-bottom: 1.5rem; text-align: center;">
+                <h3 style="font-size: 1.1rem; color: var(--primary); margin-bottom: 0.4rem;">📸 AI Match Card Scanner</h3>
+                <p style="font-size: 0.95rem; color: #64748b; margin-bottom: 0.8rem;">Take or upload a photo of the completed score card from your phone gallery to automatically extract legs and text.</p>
+                <input type="file" id="card-scanner-input" accept="image/*" style="display: none;" onchange="handleScanMatchCard(event)">
+                <button type="button" class="btn btn-accent" onclick="document.getElementById('card-scanner-input').click()">Upload / Scan Match Photo</button>
+                <div id="scan-status-msg" style="font-size: 0.9rem; color: #b45309; margin-top: 8px; font-weight: bold;"></div>
+            </div>
+            
+            <form id="modal-match-form" onsubmit="handleSaveMatchScores(event)">
+                <input type="hidden" id="modal-match-key">
+
+                <h3 style="color: var(--primary); margin-top: 0.5rem; margin-bottom: 0.8rem;">Singles Frames (1 v 1)</h3>
+                <div id="modal-singles-rows"></div>
+
+                <h3 style="color: var(--primary); margin-top: 2rem; margin-bottom: 0.8rem;">Doubles Frames (2 v 2)</h3>
+                <div id="modal-doubles-rows"></div>
+
+                <h3 style="color: var(--primary); margin-top: 2rem; margin-bottom: 0.8rem;">Captains Match (1 v 1)</h3>
+                <div id="modal-captain-row"></div>
+
+                <!-- HIGHLIGHTS & ACHIEVEMENTS SECTION -->
+                <div class="match-highlights-box">
+                    <h3 style="color: #b45309; margin-bottom: 0.8rem; font-size: 1.1rem;">🌟 Match Achievements & Records</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px;">
+                        <div class="form-group" style="margin: 0;">
+                            <label style="font-size: 0.9rem;">Highest Checkout (Finish):</label>
+                            <input type="number" id="m_hi_finish" min="0" max="170" placeholder="e.g. 160">
+                            <select id="m_hi_finish_player" style="margin-top: 6px; font-size: 0.9rem;"></select>
+                        </div>
+                        <div class="form-group" style="margin: 0;">
+                            <label style="font-size: 0.9rem;">Highest Score:</label>
+                            <input type="number" id="m_hi_score" min="0" max="180" placeholder="e.g. 180">
+                            <select id="m_hi_score_player" style="margin-top: 6px; font-size: 0.9rem;"></select>
+                        </div>
+                        <div class="form-group" style="margin: 0;">
+                            <label style="font-size: 0.9rem;">Highest Start:</label>
+                            <input type="number" id="m_hi_start" min="0" max="180" placeholder="e.g. 160">
+                            <select id="m_hi_start_player" style="margin-top: 6px; font-size: 0.9rem;"></select>
+                        </div>
+                        <div class="form-group" style="margin: 0;">
+                            <label style="font-size: 0.9rem;">Least Darts Leg:</label>
+                            <input type="number" id="m_least_darts" min="9" max="60" placeholder="e.g. 12">
+                            <select id="m_least_darts_player" style="margin-top: 6px; font-size: 0.9rem;"></select>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-accent" style="width: 100%; font-size: 1.15rem; margin-top: 2rem; padding: 1rem;">Save & Submit Match Results</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- FIREBASE & APP SCRIPT -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
+        import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC6pS3Jk7GXrp4i3LSMnCf4UiqPugzDSFg",
+            authDomain: "mondaynightdarts-9c1c8.firebaseapp.com",
+            databaseURL: "https://mondaynightdarts-9c1c8-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "mondaynightdarts-9c1c8",
+            storageBucket: "mondaynightdarts-9c1c8.firebasestorage.app",
+            messagingSenderId: "833168552581",
+            appId: "1:833168552581:web:dbadcdcb616239d8366fec",
+            measurementId: "G-706N8B9KS0"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const db = getFirestore(app);
+
+        const ADMIN_USER = "Gjelly";
+        const ADMIN_PASS = "Kevisthebest";
+
+        let isAdminLoggedIn = false;
+        try {
+            isAdminLoggedIn = sessionStorage.getItem('rugeley_admin_logged_in') === 'true';
+        } catch (e) {}
+
+        const defaultTeams = [
+            "Pear Tree Club", "Brereton Lions", "Hawaiian Miners", "JBC Mossley", 
+            "Miners B", "Red Lion Rugeley", "Dartridge in a PT", "Albion Pensioners", 
+            "The Chase", "Albion Warriors", "Mossley Crew", "ARB Legion", "Kevs Lions", "The Cabin"
+        ];
         
-        <!-- Fixture 1 -->
-        <div class="fixture-card">
-          <div class="fixture-header">Week 10 - Division 1</div>
-          <div class="fixture-teams-container">
-            <div class="team-row">
-              <div class="team-info">
-                <span class="team-name">Pear Tree Club</span>
-                <span class="player-names">Players: J. Smith, M. Johnson, D. Williams</span>
-              </div>
-              <span class="score-badge winner">5</span>
-            </div>
-            <div class="team-row">
-              <div class="team-info">
-                <span class="team-name">Brereton Lions</span>
-                <span class="player-names">Players: A. Brown, C. Davis, E. Wilson</span>
-              </div>
-              <span class="score-badge">4</span>
-            </div>
-          </div>
-        </div>
+        let teams = [...defaultTeams];
+        let teamPairs = [];
+        let players = [];
+        let generatedFixtures = null;
+        let matchResults = {};
+        let seasonEvents = [];
+        let shadowLeaguePlayers = [];
+        let shadowLeagueTeams = [];
+        let archivedSeasons = [];
+        let singlesStats = {};
 
-        <!-- Fixture 2 -->
-        <div class="fixture-card">
-          <div class="fixture-header">Week 10 - Division 1</div>
-          <div class="fixture-teams-container">
-            <div class="team-row">
-              <div class="team-info">
-                <span class="team-name">Hawaiian Miners</span>
-                <span class="player-names">Players: G. Taylor, R. Anderson, T. Thomas</span>
-              </div>
-              <span class="score-badge">3</span>
-            </div>
-            <div class="team-row">
-              <div class="team-info">
-                <span class="team-name">JBC Mossley</span>
-                <span class="player-names">Players: S. Jackson, P. White, K. Harris</span>
-              </div>
-              <span class="score-badge winner">6</span>
-            </div>
-          </div>
-        </div>
+        let isSaving = false;
+        
+        const docRef = doc(db, "RugeleyMondaydarts", "main_league");
 
-        <!-- Fixture 3 -->
-        <div class="fixture-card">
-          <div class="fixture-header">Week 10 - Division 1</div>
-          <div class="fixture-teams-container">
-            <div class="team-row">
-              <div class="team-info">
-                <span class="team-name">Red Lion Rugeley</span>
-                <span class="player-names">Players: L. Martin, B. Thompson, N. Garcia</span>
-              </div>
-              <span class="score-badge winner">7</span>
-            </div>
-            <div class="team-row">
-              <div class="team-info">
-                <span class="team-name">Kevs Lions</span>
-                <span class="player-names">Players: H. Martinez, J. Robinson, C. Clark</span>
-              </div>
-              <span class="score-badge">2</span>
-            </div>
-          </div>
-        </div>
+        function parseJsonOrRaw(val) {
+            if (!val) return val;
+            if (typeof val === 'string') {
+                try { return JSON.parse(val); } catch (e) { return val; }
+            }
+            return val;
+        }
 
-        <!-- Fixture 4 -->
-        <div class="fixture-card">
-          <div class="fixture-header">Week 10 - Division 1</div>
-          <div class="fixture-teams-container">
-            <div class="team-row">
-              <div class="team-info">
-                <span class="team-name">The Cabin</span>
-                <span class="player-names">Players: D. Lewis, E. Lee, J. Walker</span>
-              </div>
-              <span class="score-badge">4</span>
-            </div>
-            <div class="team-row">
-              <div class="team-info">
-                <span class="team-name">Albion Warriors</span>
-                <span class="player-names">Players: M. Hall, A. Allen, R. Young</span>
-              </div>
-              <span class="score-badge winner">5</span>
-            </div>
-          </div>
-        </div>
+        async function initCloudSync() {
+            try {
+                const docSnap = await getDoc(docRef);
+                const statusEl = document.getElementById('sync-status');
 
-      </div>
-    </section>
-  </main>
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    teams = data.teams || teams;
+                    teamPairs = data.teamPairs || teamPairs;
+                    players = data.players || players;
+                    generatedFixtures = data.generatedFixtures !== undefined ? parseJsonOrRaw(data.generatedFixtures) : generatedFixtures;
+                    matchResults = data.matchResults || matchResults;
+                    seasonEvents = data.seasonEvents || seasonEvents;
+                    shadowLeaguePlayers = data.shadowLeaguePlayers || shadowLeaguePlayers;
+                    shadowLeagueTeams = data.shadowLeagueTeams || shadowLeagueTeams;
+                    archivedSeasons = data.archivedSeasons !== undefined ? parseJsonOrRaw(data.archivedSeasons) : archivedSeasons;
 
+                    if (statusEl) {
+                        statusEl.textContent = '🔥 Firestore Connected (RugeleyMondaydarts)';
+                        statusEl.style.color = 'var(--success)';
+                    }
+                } else {
+                    await pushToFirestore();
+                }
+            } catch (err) {
+                console.warn("Firestore connection warning:", err);
+                const statusEl = document.getElementById('sync-status');
+                if (statusEl) {
+                    statusEl.textContent = '⚡ Offline / Error';
+                    statusEl.style.color = 'var(--danger)';
+                }
+            } finally {
+                renderAllUI();
+                
+                onSnapshot(docRef, (docSnap) => {
+                    if (isSaving || !docSnap.exists()) return;
+                    const data = docSnap.data();
+                    if (data) {
+                        teams = data.teams || teams;
+                        teamPairs = data.teamPairs || teamPairs;
+                        players = data.players || players;
+                        generatedFixtures = data.generatedFixtures !== undefined ? parseJsonOrRaw(data.generatedFixtures) : generatedFixtures;
+                        matchResults = data.matchResults || matchResults;
+                        seasonEvents = data.seasonEvents || seasonEvents;
+                        shadowLeaguePlayers = data.shadowLeaguePlayers || shadowLeaguePlayers;
+                        shadowLeagueTeams = data.shadowLeagueTeams || shadowLeagueTeams;
+                        archivedSeasons = data.archivedSeasons !== undefined ? parseJsonOrRaw(data.archivedSeasons) : archivedSeasons;
+
+                        if (document.getElementById('match-modal').style.display !== 'flex') {
+                            renderAllUI();
+                        }
+                    }
+                });
+            }
+        }
+
+        async function pushToFirestore() {
+            isSaving = true;
+            try {
+                const fixturesStr = generatedFixtures ? JSON.stringify(generatedFixtures) : null;
+                const archivedStr = archivedSeasons ? JSON.stringify(archivedSeasons) : null;
+
+                const cleanPayload = JSON.parse(JSON.stringify({
+                    teams, 
+                    teamPairs, 
+                    players, 
+                    generatedFixtures: fixturesStr, 
+                    matchResults,
+                    seasonEvents, 
+                    shadowLeaguePlayers, 
+                    shadowLeagueTeams, 
+                    archivedSeasons: archivedStr,
+                    updatedAt: new Date().toISOString()
+                }));
+
+                await setDoc(docRef, cleanPayload);
+
+                const statusEl = document.getElementById('sync-status');
+                if (statusEl) {
+                    statusEl.textContent = '🔥 Firestore Connected (RugeleyMondaydarts)';
+                    statusEl.style.color = 'var(--success)';
+                }
+            } catch (err) {
+                console.error("Firestore write failed with error:", err);
+                alert("Save Failed: " + err.message);
+                const statusEl = document.getElementById('sync-status');
+                if (statusEl) {
+                    statusEl.textContent = '⚡ Save Failed';
+                    statusEl.style.color = 'var(--danger)';
+                }
+            } finally {
+                setTimeout(() => { isSaving = false; }, 400);
+            }
+        }
+
+        const Storage = {
+            set(key, value) {
+                if (key === 'rugeley_darts_teams') teams = value;
+                if (key === 'rugeley_team_pairs') teamPairs = value;
+                if (key === 'rugeley_darts_players') players = value;
+                if (key === 'rugeley_darts_fixtures') generatedFixtures = value;
+                if (key === 'rugeley_match_results') matchResults = value;
+                if (key === 'rugeley_season_events') seasonEvents = value;
+                if (key === 'rugeley_shadow_players') shadowLeaguePlayers = value;
+                if (key === 'rugeley_shadow_teams') shadowLeagueTeams = value;
+                if (key === 'rugeley_archived_seasons') archivedSeasons = value;
+
+                pushToFirestore();
+            }
+        };
+
+        // --- DOWNLOAD SCORE SHEET FEATURE ---
+        window.downloadScoreSheet = function() {
+            const area = document.getElementById('printable-scoresheet-area');
+            if (!area) return;
+            html2canvas(area, { scale: 2 }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'darts-scoresheet.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            }).catch(err => {
+                console.error("Failed to download scoresheet image:", err);
+                alert("Could not generate scoresheet download.");
+            });
+        };
+
+        // --- AI SCANNER FEATURE ---
+        window.handleScanMatchCard = async function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const msgEl = document.getElementById('scan-status-msg');
+            msgEl.textContent = "⏳ Scanning image and reading scores... Please wait.";
+
+            try {
+                const { data: { text } } = await Tesseract.recognize(file, 'eng', {
+                    logger: m => {
+                        if (m.status === 'recognizing text') {
+                            msgEl.textContent = `⏳ Scanning text: ${Math.round(m.progress * 100)}%`;
+                        }
+                    }
+                });
+
+                const numbers = text.match(/\b\d\b/g)?.map(Number) || [];
+                
+                let numIdx = 0;
+                for (let i = 1; i <= 6; i++) {
+                    const hsInput = document.getElementById(`m_s_hs_${i}`);
+                    const asInput = document.getElementById(`m_s_as_${i}`);
+                    if (hsInput && numbers[numIdx] !== undefined) hsInput.value = numbers[numIdx++];
+                    if (asInput && numbers[numIdx] !== undefined) asInput.value = numbers[numIdx++];
+                }
+
+                msgEl.textContent = "✅ Scan complete! Review and adjust scores if needed.";
+                setTimeout(() => { msgEl.textContent = ""; }, 5000);
+            } catch (err) {
+                console.error("OCR Scan failed:", err);
+                msgEl.textContent = "❌ Failed to read image. Please enter scores manually.";
+            }
+            event.target.value = '';
+        };
+
+        // --- GLOBAL WINDOW HANDLERS ---
+        window.adminLogin = function(e) {
+            if (e) e.preventDefault();
+            const user = document.getElementById('admin-user').value.trim();
+            const pass = document.getElementById('admin-pass').value.trim();
+
+            if (user === ADMIN_USER && pass === ADMIN_PASS) {
+                isAdminLoggedIn = true;
+                try { sessionStorage.setItem('rugeley_admin_logged_in', 'true'); } catch (e) {}
+                document.getElementById('admin-login-form').style.display = 'none';
+                document.getElementById('admin-logged-in').style.display = 'flex';
+                document.getElementById('admin-user').value = '';
+                document.getElementById('admin-pass').value = '';
+                updateAdminUI();
+            } else {
+                alert('Invalid Username or Password.');
+            }
+        };
+
+        window.adminLogout = function() {
+            isAdminLoggedIn = false;
+            try { sessionStorage.removeItem('rugeley_admin_logged_in'); } catch (e) {}
+            document.getElementById('admin-login-form').style.display = 'flex';
+            document.getElementById('admin-logged-in').style.display = 'none';
+            
+            const activeTab = document.querySelector('.tab-content.active');
+            if (activeTab && ['teams', 'players', 'archive'].includes(activeTab.id)) {
+                window.showTab('fixtures');
+            }
+            updateAdminUI();
+        };
+
+        window.showTab = function(tabId, event) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            
+            const targetTab = document.getElementById(tabId);
+            if (targetTab) targetTab.classList.add('active');
+
+            if (event && event.currentTarget) {
+                event.currentTarget.classList.add('active');
+            } else {
+                const navBtn = document.querySelector(`button[onclick*="'${tabId}'"]`);
+                if (navBtn) navBtn.classList.add('active');
+            }
+            if (tabId === 'register-player') renderPublicPlayerTeams();
+        };
+
+        window.handleAddTeam = function(e) {
+            e.preventDefault();
+            if (!checkAdminPermission()) return;
+
+            const teamNameInput = document.getElementById('team-name');
+            const teamName = teamNameInput.value.trim();
+            if (!teamName) return;
+
+            if (teams.some(t => t.toLowerCase() === teamName.toLowerCase())) {
+                alert(`The team "${teamName}" already exists!`);
+                return;
+            }
+
+            teams.push(teamName);
+            Storage.set('rugeley_darts_teams', teams);
+            renderTeams();
+            teamNameInput.value = '';
+            alert(`Team "${teamName}" added successfully!`);
+        };
+
+        window.removeTeam = function(index) {
+            if (!checkAdminPermission()) return;
+            const removed = teams[index];
+            if (confirm(`Are you sure you want to remove "${removed}"?`)) {
+                teams.splice(index, 1);
+                teamPairs = teamPairs.filter(p => p.team1 !== removed && p.team2 !== removed);
+                Storage.set('rugeley_darts_teams', teams);
+                Storage.set('rugeley_team_pairs', teamPairs);
+                renderTeams();
+                renderTeamPairs();
+            }
+        };
+
+        window.handlePairTeams = function(e) {
+            e.preventDefault();
+            if (!checkAdminPermission()) return;
+            const t1 = document.getElementById('pair-team-1').value;
+            const t2 = document.getElementById('pair-team-2').value;
+
+            if (!t1 || !t2) return;
+            if (t1 === t2) {
+                alert('Please select two different teams to pair!');
+                return;
+            }
+
+            teamPairs.push({ team1: t1, team2: t2 });
+            Storage.set('rugeley_team_pairs', teamPairs);
+            renderTeamPairs();
+        };
+
+        window.removeTeamPair = function(index) {
+            if (!checkAdminPermission()) return;
+            teamPairs.splice(index, 1);
+            Storage.set('rugeley_team_pairs', teamPairs);
+            renderTeamPairs();
+        };
+
+        window.handleAddEvent = function(e) {
+            e.preventDefault();
+            if (!checkAdminPermission()) return;
+            const title = document.getElementById('event-title').value.trim();
+            const date = document.getElementById('event-date').value.trim();
+            const venue = document.getElementById('event-venue').value.trim();
+            const notes = document.getElementById('event-notes').value.trim();
+
+            if (title && date && venue) {
+                seasonEvents.push({ title, date, venue, notes });
+                Storage.set('rugeley_season_events', seasonEvents);
+                renderEvents();
+                document.getElementById('event-form').reset();
+                alert('End of Season Event scheduled!');
+            }
+        };
+
+        window.removeEvent = function(index) {
+            if (!checkAdminPermission()) return;
+            if (confirm('Delete this event?')) {
+                seasonEvents.splice(index, 1);
+                Storage.set('rugeley_season_events', seasonEvents);
+                renderEvents();
+            }
+        };
+
+        window.handleAddPlayer = function(e) {
+            e.preventDefault();
+            if (!checkAdminPermission()) return;
+            const nameInput = document.getElementById('player-name');
+            const teamSelect = document.getElementById('player-team');
+
+            if (nameInput.value && teamSelect.value) {
+                players.push({ name: nameInput.value.trim(), team: teamSelect.value });
+                Storage.set('rugeley_darts_players', players);
+                renderPlayers();
+                nameInput.value = '';
+                teamSelect.value = '';
+            }
+        };
+
+        window.removePlayer = function(index) {
+            if (!checkAdminPermission()) return;
+            players.splice(index, 1);
+            Storage.set('rugeley_darts_players', players);
+            renderPlayers();
+        };
+
+        window.handlePublicPlayerRegistration = function(e) {
+            e.preventDefault();
+            const nameInput = document.getElementById('public-player-name');
+            const teamSelect = document.getElementById('public-player-team');
+            const playerName = nameInput.value.trim();
+            const playerTeam = teamSelect.value;
+
+            if (playerName && playerTeam) {
+                const exists = players.some(p => p.name.toLowerCase() === playerName.toLowerCase() && p.team === playerTeam);
+                if (exists) {
+                    alert('A player with this name is already registered for this team.');
+                    return;
+                }
+                players.push({ name: playerName, team: playerTeam });
+                Storage.set('rugeley_darts_players', players);
+                renderPlayers();
+                nameInput.value = '';
+                teamSelect.value = '';
+                alert('Successfully registered! You can now be selected on match score sheets.');
+                window.showTab('fixtures');
+            }
+        };
+
+        window.archiveCurrentSeason = function() {
+            if (!checkAdminPermission()) return;
+            const seasonName = document.getElementById('archive-season-name').value.trim();
+            if (!seasonName) {
+                alert('Please enter a label or name for the season you are archiving.');
+                return;
+            }
+
+            if (!confirm(`Archive "${seasonName}"? This saves all stats and clears active fixtures.`)) return;
+
+            const finalStats = calculateStatsFromData(teams, players, generatedFixtures, matchResults);
+            archivedSeasons.push({
+                name: seasonName,
+                dateArchived: new Date().toLocaleDateString(),
+                teams: [...teams],
+                players: [...players],
+                teamStats: finalStats.teamStats,
+                singlesStats: finalStats.singlesStats,
+                matchResults: {...matchResults}
+            });
+
+            matchResults = {};
+            generatedFixtures = null;
+            shadowLeaguePlayers = [];
+            shadowLeagueTeams = [];
+
+            Storage.set('rugeley_archived_seasons', archivedSeasons);
+            Storage.set('rugeley_match_results', matchResults);
+            Storage.set('rugeley_darts_fixtures', generatedFixtures);
+            Storage.set('rugeley_shadow_players', shadowLeaguePlayers);
+            Storage.set('rugeley_shadow_teams', shadowLeagueTeams);
+
+            document.getElementById('archive-season-name').value = '';
+            renderArchivedSeasons();
+            recalculateAllStats();
+            renderFixtures();
+            alert(`Successfully archived "${seasonName}"!`);
+            window.showTab('fixtures');
+        };
+
+        window.deleteArchive = function(index) {
+            if (!checkAdminPermission()) return;
+            if (confirm('Permanently delete this archived season record?')) {
+                archivedSeasons.splice(index, 1);
+                Storage.set('rugeley_archived_seasons', archivedSeasons);
+                renderArchivedSeasons();
+            }
+        };
+
+        window.viewArchiveModal = function(index) {
+            const season = archivedSeasons[index];
+            let summaryHTML = `<h2>Final Standings: ${escapeHtml(season.name)}</h2><table><thead><tr><th>Pos</th><th>Team</th><th>P</th><th>W</th><th>D</th><th>L</th><th>Pts</th></tr></thead><tbody>`;
+            let sortedTeams = Object.keys(season.teamStats).map(tName => ({
+                team: tName, ...season.teamStats[tName]
+            })).sort((a, b) => b.pts - a.pts);
+
+            sortedTeams.forEach((t, i) => {
+                summaryHTML += `<tr><td>${i+1}</td><td><strong>${escapeHtml(t.team)}</strong></td><td>${t.p}</td><td>${t.w}</td><td>${t.d}</td><td>${t.l}</td><td><strong>${t.pts}</strong></td></tr>`;
+            });
+            summaryHTML += `</tbody></table>`;
+
+            const win = window.open('', '_blank');
+            if (win) {
+                win.document.write(`<html><head><title>${escapeHtml(season.name)} Standings</title><style>body{font-family:sans-serif;padding:2rem;}table{width:100%;border-collapse:collapse;}th,td{padding:8px;border:1px solid #ccc;text-align:left;}th{background:#f1f5f9;}</style></head><body>${summaryHTML}</body></html>`);
+            }
+        };
+
+        window.generateNewSeason = function() {
+            if (!checkAdminPermission()) return;
+            if (teams.length < 2) {
+                alert('You need at least 2 teams to generate a season schedule.');
+                return;
+            }
+
+            let pool = [...teams];
+            if (pool.length % 2 !== 0) pool.push("BYE");
+
+            const numTeams = pool.length;
+            const roundsPerLeg = numTeams - 1;
+            const matchesPerRound = numTeams / 2;
+            let scheduleLeg1 = [];
+
+            for (let round = 0; round < roundsPerLeg; round++) {
+                let roundMatches = [];
+                for (let match = 0; match < matchesPerRound; match++) {
+                    let home = pool[match];
+                    let away = pool[numTeams - 1 - match];
+                    if (round % 2 === 1 && match === 0) {
+                        const temp = home; home = away; away = temp;
+                    }
+                    if (home !== "BYE" && away !== "BYE") roundMatches.push({ home, away });
+                }
+                scheduleLeg1.push(roundMatches);
+                pool.splice(1, 0, pool.pop());
+            }
+
+            scheduleLeg1 = applyVenuePairingConstraints(scheduleLeg1, teamPairs);
+            let scheduleLeg2 = scheduleLeg1.map(round => round.map(m => ({ home: m.away, away: m.home })));
+
+            generatedFixtures = [...scheduleLeg1, ...scheduleLeg2];
+            Storage.set('rugeley_darts_fixtures', generatedFixtures);
+            renderFixtures();
+            recalculateAllStats();
+            alert('New Season Fixtures generated successfully!');
+            window.showTab('fixtures');
+        };
+
+        window.openMatchModal = function(matchKey) {
+            let homeTeam = '', awayTeam = '';
+            if (generatedFixtures) {
+                for (let r = 0; r < generatedFixtures.length; r++) {
+                    const roundMatches = generatedFixtures[r];
+                    for (let m = 0; m < roundMatches.length; m++) {
+                        if (`w${r + 1}_m${m}` === matchKey) {
+                            homeTeam = roundMatches[m].home;
+                            awayTeam = roundMatches[m].away;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            document.getElementById('modal-match-key').value = matchKey;
+            document.getElementById('modal-title').textContent = `${homeTeam} vs ${awayTeam}`;
+            document.getElementById('scan-status-msg').textContent = '';
+
+            const homePlayers = players.filter(p => p.team === homeTeam);
+            const awayPlayers = players.filter(p => p.team === awayTeam);
+            const allMatchPlayers = [...homePlayers, ...awayPlayers];
+
+            const buildOptions = (arr) => {
+                let opt = '<option value="">-- Select Player --</option>';
+                arr.forEach(p => opt += `<option value="${escapeHtml(p.name)}">${escapeHtml(p.name)}</option>`);
+                return opt;
+            };
+
+            const homeOpts = buildOptions(homePlayers);
+            const awayOpts = buildOptions(awayPlayers);
+            const allOpts = buildOptions(allMatchPlayers);
+
+            ['m_hi_finish_player', 'm_hi_score_player', 'm_hi_start_player', 'm_least_darts_player'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.innerHTML = allOpts;
+            });
+
+            // Enhanced width and padding for match score sheet player rows
+            let singlesHTML = '';
+            for (let i = 1; i <= 6; i++) {
+                singlesHTML += `
+                    <div style="display: flex; gap: 12px; margin-bottom: 12px; align-items: center; background: #f1f5f9; padding: 10px 14px; border-radius: 6px;">
+                        <span style="font-weight: bold; width: 30px; font-size: 1.05rem;">#${i}</span>
+                        <select id="m_s_hp_${i}" style="flex: 2; padding: 0.6rem; font-size: 1rem;">${homeOpts}</select>
+                        <input type="number" id="m_s_hs_${i}" min="0" value="0" style="width: 60px; text-align: center; padding: 0.6rem; font-size: 1.05rem;">
+                        <span style="font-weight: bold;">-</span>
+                        <input type="number" id="m_s_as_${i}" min="0" value="0" style="width: 60px; text-align: center; padding: 0.6rem; font-size: 1.05rem;">
+                        <select id="m_s_ap_${i}" style="flex: 2; padding: 0.6rem; font-size: 1rem;">${awayOpts}</select>
+                    </div>
+                `;
+            }
+            document.getElementById('modal-singles-rows').innerHTML = singlesHTML;
+
+            let doublesHTML = '';
+            for (let i = 1; i <= 2; i++) {
+                doublesHTML += `
+                    <div style="display: flex; gap: 12px; margin-bottom: 12px; align-items: center; background: #f1f5f9; padding: 10px 14px; border-radius: 6px;">
+                        <span style="font-weight: bold; width: 45px; font-size: 1.05rem;">D${i}</span>
+                        <div style="flex: 2; display: flex; flex-direction: column; gap: 6px;">
+                            <select id="m_d_hp1_${i}" style="padding: 0.5rem; font-size: 0.95rem;">${homeOpts}</select>
+                            <select id="m_d_hp2_${i}" style="padding: 0.5rem; font-size: 0.95rem;">${homeOpts}</select>
+                        </div>
+                        <input type="number" id="m_d_hs_${i}" min="0" value="0" style="width: 60px; text-align: center; padding: 0.6rem; font-size: 1.05rem;">
+                        <span style="font-weight: bold;">-</span>
+                        <input type="number" id="m_d_as_${i}" min="0" value="0" style="width: 60px; text-align: center; padding: 0.6rem; font-size: 1.05rem;">
+                        <div style="flex: 2; display: flex; flex-direction: column; gap: 6px;">
+                            <select id="m_d_ap1_${i}" style="padding: 0.5rem; font-size: 0.95rem;">${awayOpts}</select>
+                            <select id="m_d_ap2_${i}" style="padding: 0.5rem; font-size: 0.95rem;">${awayOpts}</select>
+                        </div>
+                    </div>
+                `;
+            }
+            document.getElementById('modal-doubles-rows').innerHTML = doublesHTML;
+
+            let captainHTML = `
+                <div style="display: flex; gap: 12px; margin-bottom: 12px; align-items: center; background: #f1f5f9; padding: 10px 14px; border-radius: 6px;">
+                    <span style="font-weight: bold; width: 45px; font-size: 1.05rem;">Cap</span>
+                    <select id="m_c_hp" style="flex: 2; padding: 0.6rem; font-size: 1rem;">${homeOpts}</select>
+                    <input type="number" id="m_c_hs" min="0" value="0" style="width: 60px; text-align: center; padding: 0.6rem; font-size: 1.05rem;">
+                    <span style="font-weight: bold;">-</span>
+                    <input type="number" id="m_c_as" min="0" value="0" style="width: 60px; text-align: center; padding: 0.6rem; font-size: 1.05rem;">
+                    <select id="m_c_ap" style="flex: 2; padding: 0.6rem; font-size: 1rem;">${awayOpts}</select>
+                </div>
+            `;
+            document.getElementById('modal-captain-row').innerHTML = captainHTML;
+
+            const savedData = matchResults[matchKey];
+            if (savedData) {
+                if (savedData.singles) {
+                    for (let i = 1; i <= 6; i++) {
+                        const s = savedData.singles[i - 1];
+                        if (s) {
+                            if (document.getElementById(`m_s_hp_${i}`)) document.getElementById(`m_s_hp_${i}`).value = s.hp || '';
+                            if (document.getElementById(`m_s_ap_${i}`)) document.getElementById(`m_s_ap_${i}`).value = s.ap || '';
+                            if (document.getElementById(`m_s_hs_${i}`)) document.getElementById(`m_s_hs_${i}`).value = s.hs || 0;
+                            if (document.getElementById(`m_s_as_${i}`)) document.getElementById(`m_s_as_${i}`).value = s.as || 0;
+                        }
+                    }
+                }
+                if (savedData.doubles) {
+                    for (let i = 1; i <= 2; i++) {
+                        const d = savedData.doubles[i - 1];
+                        if (d) {
+                            if (document.getElementById(`m_d_hp1_${i}`)) document.getElementById(`m_d_hp1_${i}`).value = d.hp1 || '';
+                            if (document.getElementById(`m_d_hp2_${i}`)) document.getElementById(`m_d_hp2_${i}`).value = d.hp2 || '';
+                            if (document.getElementById(`m_d_ap1_${i}`)) document.getElementById(`m_d_ap1_${i}`).value = d.ap1 || '';
+                            if (document.getElementById(`m_d_ap2_${i}`)) document.getElementById(`m_d_ap2_${i}`).value = d.ap2 || '';
+                            if (document.getElementById(`m_d_hs_${i}`)) document.getElementById(`m_d_hs_${i}`).value = d.hs || 0;
+                            if (document.getElementById(`m_d_as_${i}`)) document.getElementById(`m_d_as_${i}`).value = d.as || 0;
+                        }
+                    }
+                }
+                if (savedData.captains) {
+                    const c = savedData.captains;
+                    if (document.getElementById('m_c_hp')) document.getElementById('m_c_hp').value = c.hp || '';
+                    if (document.getElementById('m_c_ap')) document.getElementById('m_c_ap').value = c.ap || '';
+                    if (document.getElementById('m_c_hs')) document.getElementById('m_c_hs').value = c.hs || 0;
+                    if (document.getElementById('m_c_as')) document.getElementById('m_c_as').value = c.as || 0;
+                }
+                if (savedData.highlights) {
+                    const h = savedData.highlights;
+                    if (document.getElementById('m_hi_finish')) document.getElementById('m_hi_finish').value = h.highFinish || '';
+                    if (document.getElementById('m_hi_finish_player')) document.getElementById('m_hi_finish_player').value = h.highFinishPlayer || '';
+                    if (document.getElementById('m_hi_score')) document.getElementById('m_hi_score').value = h.highScore || '';
+                    if (document.getElementById('m_hi_score_player')) document.getElementById('m_hi_score_player').value = h.highScorePlayer || '';
+                    if (document.getElementById('m_hi_start')) document.getElementById('m_hi_start').value = h.highStart || '';
+                    if (document.getElementById('m_hi_start_player')) document.getElementById('m_hi_start_player').value = h.highStartPlayer || '';
+                    if (document.getElementById('m_least_darts')) document.getElementById('m_least_darts').value = h.leastDarts || '';
+                    if (document.getElementById('m_least_darts_player')) document.getElementById('m_least_darts_player').value = h.leastDartsPlayer || '';
+                }
+            }
+            document.getElementById('match-modal').style.display = 'flex';
+        };
+
+        window.closeMatchModal = function() {
+            document.getElementById('match-modal').style.display = 'none';
+        };
+
+        window.handleSaveMatchScores = function(e) {
+            e.preventDefault();
+            const matchKey = document.getElementById('modal-match-key').value;
+
+            let singlesData = [];
+            let doublesData = [];
+            let homeTotalLegs = 0;
+            let awayTotalLegs = 0;
+
+            for (let i = 1; i <= 6; i++) {
+                const hp = document.getElementById(`m_s_hp_${i}`).value;
+                const ap = document.getElementById(`m_s_ap_${i}`).value;
+                const hs = parseInt(document.getElementById(`m_s_hs_${i}`).value) || 0;
+                const as = parseInt(document.getElementById(`m_s_as_${i}`).value) || 0;
+                homeTotalLegs += hs; awayTotalLegs += as;
+                singlesData.push({ hp, ap, hs, as });
+            }
+
+            for (let i = 1; i <= 2; i++) {
+                const hp1 = document.getElementById(`m_d_hp1_${i}`).value;
+                const hp2 = document.getElementById(`m_d_hp2_${i}`).value;
+                const ap1 = document.getElementById(`m_d_ap1_${i}`).value;
+                const ap2 = document.getElementById(`m_d_ap2_${i}`).value;
+                const hs = parseInt(document.getElementById(`m_d_hs_${i}`).value) || 0;
+                const as = parseInt(document.getElementById(`m_d_as_${i}`).value) || 0;
+                homeTotalLegs += hs; awayTotalLegs += as;
+                doublesData.push({ hp1, hp2, ap1, ap2, hs, as });
+            }
+
+            const c_hp = document.getElementById('m_c_hp').value;
+            const c_ap = document.getElementById('m_c_ap').value;
+            const c_hs = parseInt(document.getElementById('m_c_hs').value) || 0;
+            const c_as = parseInt(document.getElementById('m_c_as').value) || 0;
+            homeTotalLegs += c_hs; awayTotalLegs += c_as;
+
+            matchResults[matchKey] = {
+                homeTotalLegs, awayTotalLegs,
+                singles: singlesData, doubles: doublesData,
+                captains: { hp: c_hp, ap: c_ap, hs: c_hs, as: c_as },
+                highlights: {
+                    highFinish: parseInt(document.getElementById('m_hi_finish').value) || null,
+                    highFinishPlayer: document.getElementById('m_hi_finish_player').value || '',
+                    highScore: parseInt(document.getElementById('m_hi_score').value) || null,
+                    highScorePlayer: document.getElementById('m_hi_score_player').value || '',
+                    highStart: parseInt(document.getElementById('m_hi_start').value) || null,
+                    highStartPlayer: document.getElementById('m_hi_start_player').value || '',
+                    leastDarts: parseInt(document.getElementById('m_least_darts').value) || null,
+                    leastDartsPlayer: document.getElementById('m_least_darts_player').value || ''
+                }
+            };
+            
+            Storage.set('rugeley_match_results', matchResults);
+            window.closeMatchModal();
+            renderFixtures();
+            recalculateAllStats();
+            alert('Match Scoresheet Saved Successfully!');
+        };
+
+        window.generateShadowLeague = function() {
+            if (!checkAdminPermission()) return;
+            const sortedSingles = Object.keys(singlesStats).sort((a,b) => singlesStats[b].w - singlesStats[a].w);
+            if (sortedSingles.length < 2) {
+                alert('Not enough ranked players to generate a shadow league.');
+                return;
+            }
+            shadowLeaguePlayers = sortedSingles.slice(Math.ceil(sortedSingles.length / 2));
+            Storage.set('rugeley_shadow_players', shadowLeaguePlayers);
+            recalculateAllStats();
+            alert('Singles Shadow League generated!');
+        };
+
+        window.generateTeamShadowLeague = function() {
+            if (!checkAdminPermission()) return;
+            if (teams.length < 2) return;
+            shadowLeagueTeams = teams.slice(Math.ceil(teams.length / 2));
+            Storage.set('rugeley_shadow_teams', shadowLeagueTeams);
+            recalculateAllStats();
+            alert('Team Shadow League generated!');
+        };
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+
+        function checkAdminPermission() {
+            if (!isAdminLoggedIn) {
+                alert('Permission Denied! You must be logged in as Admin (Gjelly) to perform this action.');
+                return false;
+            }
+            return true;
+        }
+
+        function initAdminSession() {
+            if (isAdminLoggedIn) {
+                const loginForm = document.getElementById('admin-login-form');
+                const loggedInView = document.getElementById('admin-logged-in');
+                if (loginForm) loginForm.style.display = 'none';
+                if (loggedInView) loggedInView.style.display = 'flex';
+                updateAdminUI();
+            }
+        }
+
+        function updateAdminUI() {
+            document.querySelectorAll('.admin-only').forEach(el => {
+                if (isAdminLoggedIn) el.classList.remove('admin-only');
+                else el.classList.add('admin-only');
+            });
+            renderTeams(); renderPlayers(); renderEvents(); renderTeamPairs(); renderArchivedSeasons(); renderFixtures();
+        }
+
+        function renderTeams() {
+            const teamsList = document.getElementById('teams-list');
+            const playerTeamSelect = document.getElementById('player-team');
+            const pairTeam1Select = document.getElementById('pair-team-1');
+            const pairTeam2Select = document.getElementById('pair-team-2');
+            if (!teamsList) return;
+
+            teamsList.innerHTML = '';
+            if (playerTeamSelect) playerTeamSelect.innerHTML = '<option value="">-- Select Team --</option>';
+            if (pairTeam1Select) pairTeam1Select.innerHTML = '<option value="">-- Select Team 1 --</option>';
+            if (pairTeam2Select) pairTeam2Select.innerHTML = '<option value="">-- Select Team 2 --</option>';
+
+            teams.forEach((team, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td><strong>${escapeHtml(team)}</strong></td><td><button type="button" class="btn btn-danger" onclick="removeTeam(${index})">Remove</button></td>`;
+                teamsList.appendChild(tr);
+
+                const option = document.createElement('option');
+                option.value = team; option.textContent = team;
+                if (playerTeamSelect) playerTeamSelect.appendChild(option.cloneNode(true));
+                if (pairTeam1Select) pairTeam1Select.appendChild(option.cloneNode(true));
+                if (pairTeam2Select) pairTeam2Select.appendChild(option.cloneNode(true));
+            });
+            renderPublicPlayerTeams();
+            recalculateAllStats();
+        }
+
+        function renderTeamPairs() {
+            const teamPairsList = document.getElementById('team-pairs-list');
+            if (!teamPairsList) return;
+            teamPairsList.innerHTML = '';
+            if (teamPairs.length === 0) {
+                teamPairsList.innerHTML = '<tr><td colspan="4" style="color: #64748b; font-style: italic;">No paired venue restrictions added.</td></tr>';
+                return;
+            }
+            teamPairs.forEach((pair, idx) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td><strong>${escapeHtml(pair.team1)}</strong></td><td><strong>${escapeHtml(pair.team2)}</strong></td><td><span style="color: #16a34a; font-weight: bold;">🚫 Cannot play Home together</span></td><td><button type="button" class="btn btn-danger btn-sm" onclick="removeTeamPair(${idx})">Unpair</button></td>`;
+                teamPairsList.appendChild(tr);
+            });
+        }
+
+        function renderEvents() {
+            const container = document.getElementById('events-list-container');
+            if (!container) return;
+            container.innerHTML = '';
+            if (seasonEvents.length === 0) {
+                container.innerHTML = '<p style="color: #64748b; font-style: italic;">No post-season events currently scheduled.</p>';
+                return;
+            }
+            seasonEvents.forEach((evt, idx) => {
+                const card = document.createElement('div');
+                card.className = 'event-card-item';
+                card.innerHTML = `<div class="event-card-details"><h3>🏆 ${escapeHtml(evt.title)}</h3><div class="event-meta"><span>📅 <strong>Date:</strong> ${escapeHtml(evt.date)}</span><span>📍 <strong>Venue:</strong> ${escapeHtml(evt.venue)}</span></div>${evt.notes ? `<div class="event-notes">📝 <strong>Details:</strong> ${escapeHtml(evt.notes)}</div>` : ''}</div><div><button type="button" class="btn btn-danger btn-sm admin-only" onclick="removeEvent(${idx})">Delete</button></div>`;
+                container.appendChild(card);
+            });
+        }
+
+        function renderPlayers() {
+            const playersList = document.getElementById('players-list');
+            if (!playersList) return;
+            playersList.innerHTML = '';
+            players.forEach((player, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td>${escapeHtml(player.name)}</td><td>${escapeHtml(player.team)}</td><td><button type="button" class="btn btn-danger" onclick="removePlayer(${index})">Delete</button></td>`;
+                playersList.appendChild(tr);
+            });
+            renderPublicPlayerTeams();
+            recalculateAllStats();
+        }
+
+        function renderPublicPlayerTeams() {
+            const select = document.getElementById('public-player-team');
+            if (!select) return;
+            select.innerHTML = '<option value="">-- Select Team --</option>';
+            teams.forEach(t => {
+                const opt = document.createElement('option'); opt.value = t; opt.textContent = t;
+                select.appendChild(opt);
+            });
+        }
+
+        function renderArchivedSeasons() {
+            const container = document.getElementById('archived-seasons-container');
+            if (!container) return;
+            if (!archivedSeasons || archivedSeasons.length === 0) {
+                container.innerHTML = '<p style="color: #64748b; font-style: italic;">No archived seasons found.</p>';
+                return;
+            }
+            container.innerHTML = '';
+            archivedSeasons.forEach((season, idx) => {
+                const card = document.createElement('div');
+                card.className = 'card'; card.style.border = '2px solid var(--shadow-league)';
+                card.innerHTML = `<h3 style="color: var(--shadow-league); margin-bottom: 0.5rem;">📁 Archive: ${escapeHtml(season.name)}</h3><p style="font-size: 0.9rem; color: #64748b; margin-bottom: 1rem;">Archived on: ${escapeHtml(season.dateArchived)}</p><button type="button" class="btn btn-sm btn-shadow" onclick="viewArchiveModal(${idx})">View Final Standings</button><button type="button" class="btn btn-sm btn-danger" onclick="deleteArchive(${idx})" style="margin-left: 8px;">Delete Archive</button>`;
+                container.appendChild(card);
+            });
+        }
+
+        function applyVenuePairingConstraints(schedule, pairs) {
+            if (!pairs || pairs.length === 0) return schedule;
+            return schedule.map(roundMatches => {
+                let updatedRound = [...roundMatches];
+                pairs.forEach(pair => {
+                    const match2Idx = updatedRound.findIndex(m => m.home === pair.team2);
+                    if (match2Idx !== -1) {
+                        const m2 = updatedRound[match2Idx];
+                        updatedRound[match2Idx] = { home: m2.away, away: m2.home };
+                    }
+                });
+                return updatedRound;
+            });
+        }
+
+        function renderFixtures() {
+            const container = document.getElementById('fixtures-container');
+            if (!container) return;
+            container.innerHTML = '';
+            if (!generatedFixtures || generatedFixtures.length === 0) {
+                container.innerHTML = '<p style="color: #64748b;">No fixtures generated yet. Use Admin mode to generate a new season.</p>';
+                return;
+            }
+
+            const totalLeg1Weeks = generatedFixtures.length / 2;
+            generatedFixtures.forEach((roundMatches, rIdx) => {
+                const weekNum = rIdx + 1;
+                const isReturn = weekNum > totalLeg1Weeks;
+                const weekDiv = document.createElement('div');
+                weekDiv.style.marginBottom = '2rem';
+                
+                let html = `<h3>Week ${weekNum} ${isReturn ? '(Return Leg)' : ''}</h3><table>`;
+                html += `<thead><tr><th style="width: 35%;">Home Team</th><th class="vs" style="width: 20%;">Score</th><th style="width: 35%;">Away Team</th><th style="width: 12%;">Action</th></tr></thead><tbody>`;
+
+                roundMatches.forEach((m, mIdx) => {
+                    const matchKey = `w${weekNum}_m${mIdx}`;
+                    const res = matchResults[matchKey];
+                    let scoreDisplay = `<span class="vs">VS</span>`;
+                    let buttonText = "Enter Scores";
+
+                    if (res) {
+                        scoreDisplay = `<span class="match-score-badge">${res.homeTotalLegs} - ${res.awayTotalLegs}</span>`;
+                        buttonText = "Edit / View";
+                    }
+
+                    let actionBtn = (m.home !== "BYE" && m.away !== "BYE") 
+                        ? `<button type="button" class="btn btn-sm btn-accent admin-only" onclick="openMatchModal('${matchKey}')">${buttonText}</button>`
+                        : '-';
+
+                    html += `<tr><td><strong>${escapeHtml(m.home)}</strong></td><td class="vs">${scoreDisplay}</td><td><strong>${escapeHtml(m.away)}</strong></td><td>${actionBtn}</td></tr>`;
+                });
+                html += `</tbody></table>`;
+                weekDiv.innerHTML = html;
+                container.appendChild(weekDiv);
+            });
+            updateAdminUIStateOnly();
+        }
+
+        function updateAdminUIStateOnly() {
+            document.querySelectorAll('.admin-only').forEach(el => {
+                if (isAdminLoggedIn) el.classList.remove('admin-only');
+                else el.classList.add('admin-only');
+            });
+        }
+
+        function calculateStatsFromData(teamsList, playersList, fixturesList, resultsMap) {
+            let teamStats = {};
+            let singlesStats = {};
+            let doublesStats = {};
+            let captainsStats = {};
+
+            teamsList.forEach(t => { teamStats[t] = { p: 0, w: 0, d: 0, l: 0, f: 0, a: 0, pts: 0 }; });
+            let bestRecords = {
+                leastDarts: { val: null, player: 'None', team: '' },
+                highScore: { val: null, player: 'None', team: '' },
+                highFinish: { val: null, player: 'None', team: '' },
+                highStart: { val: null, player: 'None', team: '' }
+            };
+
+            if (fixturesList) {
+                fixturesList.forEach((roundMatches, rIdx) => {
+                    const weekNum = rIdx + 1;
+                    roundMatches.forEach((m, mIdx) => {
+                        const matchKey = `w${weekNum}_m${mIdx}`;
+                        const res = resultsMap[matchKey];
+                        if (res && m.home !== "BYE" && m.away !== "BYE") {
+                            const hTeam = m.home; const aTeam = m.away;
+                            if (!teamStats[hTeam]) teamStats[hTeam] = { p: 0, w: 0, d: 0, l: 0, f: 0, a: 0, pts: 0 };
+                            if (!teamStats[aTeam]) teamStats[aTeam] = { p: 0, w: 0, d: 0, l: 0, f: 0, a: 0, pts: 0 };
+
+                            teamStats[hTeam].p++; teamStats[aTeam].p++;
+                            teamStats[hTeam].f += res.homeTotalLegs; teamStats[hTeam].a += res.awayTotalLegs;
+                            teamStats[aTeam].f += res.awayTotalLegs; teamStats[aTeam].a += res.homeTotalLegs;
+
+                            if (res.homeTotalLegs > res.awayTotalLegs) { teamStats[hTeam].w++; teamStats[hTeam].pts += 2; teamStats[aTeam].l++; }
+                            else if (res.homeTotalLegs === res.awayTotalLegs) { teamStats[hTeam].d++; teamStats[hTeam].pts++; teamStats[aTeam].d++; teamStats[aTeam].pts++; }
+                            else { teamStats[aTeam].w++; teamStats[aTeam].pts += 2; teamStats[hTeam].l++; }
+
+                            if (res.singles) {
+                                res.singles.forEach(s => {
+                                    if (s.hp) updateIndivStats(singlesStats, s.hp, s.hs, s.as);
+                                    if (s.ap) updateIndivStats(singlesStats, s.ap, s.as, s.hs);
+                                });
+                            }
+                            if (res.doubles) {
+                                res.doubles.forEach(d => {
+                                    let hPairKey = [d.hp1, d.hp2].filter(Boolean).sort().join(" & ");
+                                    let aPairKey = [d.ap1, d.ap2].filter(Boolean).sort().join(" & ");
+                                    if (hPairKey) updateIndivStats(doublesStats, hPairKey, d.hs, d.as);
+                                    if (aPairKey) updateIndivStats(doublesStats, aPairKey, d.as, d.hs);
+                                });
+                            }
+                            if (res.captains) {
+                                let c = res.captains;
+                                if (c.hp) updateIndivStats(captainsStats, c.hp, c.hs, c.as);
+                                if (c.ap) updateIndivStats(captainsStats, c.ap, c.as, c.hs);
+                            }
+                            if (res.highlights) {
+                                const h = res.highlights;
+                                const findTeam = (pName) => { const pObj = playersList.find(p => p.name === pName); return pObj ? pObj.team : ''; };
+                                if (h.highFinish && (!bestRecords.highFinish.val || h.highFinish > bestRecords.highFinish.val)) {
+                                    bestRecords.highFinish = { val: h.highFinish, player: h.highFinishPlayer || 'Unknown', team: findTeam(h.highFinishPlayer) };
+                                }
+                                if (h.highScore && (!bestRecords.highScore.val || h.highScore > bestRecords.highScore.val)) {
+                                    bestRecords.highScore = { val: h.highScore, player: h.highScorePlayer || 'Unknown', team: findTeam(h.highScorePlayer) };
+                                }
+                                if (h.highStart && (!bestRecords.highStart.val || h.highStart > bestRecords.highStart.val)) {
+                                    bestRecords.highStart = { val: h.highStart, player: h.highStartPlayer || 'Unknown', team: findTeam(h.highStartPlayer) };
+                                }
+                                if (h.leastDarts && (!bestRecords.leastDarts.val || h.leastDarts < bestRecords.leastDarts.val)) {
+                                    bestRecords.leastDarts = { val: h.leastDarts, player: h.leastDartsPlayer || 'Unknown', team: findTeam(h.leastDartsPlayer) };
+                                }
+                            }
+                        }
+                    });
+                });
+            }
+            return { teamStats, singlesStats, doublesStats, captainsStats, bestRecords };
+        }
+
+        function updateIndivStats(statObj, playerName, scoreFor, scoreAgainst) {
+            if (!playerName) return;
+            if (!statObj[playerName]) statObj[playerName] = { p: 0, w: 0, l: 0, f: 0, a: 0 };
+            statObj[playerName].p++;
+            if (scoreFor > scoreAgainst) statObj[playerName].w++; else statObj[playerName].l++;
+            statObj[playerName].f += scoreFor; statObj[playerName].a += scoreAgainst;
+        }
+
+        function buildTeamTableHTML(teamStats, shadowFilter = null) {
+            let sorted = Object.keys(teamStats).map(tName => ({
+                team: tName, ...teamStats[tName], diff: teamStats[tName].f - teamStats[tName].a
+            })).sort((a, b) => b.pts - a.pts || b.diff - a.diff || b.f - a.f);
+
+            if (shadowFilter && shadowFilter.length > 0) sorted = sorted.filter(t => shadowFilter.includes(t.team));
+            else if (shadowFilter && shadowFilter.length === 0) return '';
+
+            return sorted.map((t, idx) => `
+                <tr>
+                    <td><strong>${idx + 1}</strong></td><td><strong>${escapeHtml(t.team)}</strong></td>
+                    <td>${t.p}</td><td>${t.w}</td><td>${t.d}</td><td>${t.l}</td>
+                    <td>${t.f}</td><td>${t.a}</td><td>${t.diff > 0 ? '+' + t.diff : t.diff}</td>
+                    <td><strong>${t.pts}</strong></td>
+                </tr>
+            `).join('');
+        }
+
+        function buildIndivTableHTML(statsObj, playerList, isDoubles = false, shadowFilter = null) {
+            let rows = Object.keys(statsObj).map(name => {
+                let teamVal = '-';
+                if (!isDoubles) {
+                    const playerObj = playerList.find(p => p.name === name);
+                    teamVal = playerObj ? playerObj.team : '-';
+                }
+                return { name, team: teamVal, ...statsObj[name], diff: statsObj[name].f - statsObj[name].a };
+            }).sort((a, b) => b.w - a.w || b.diff - a.diff || b.f - a.f);
+
+            if (shadowFilter && shadowFilter.length > 0) rows = rows.filter(r => shadowFilter.includes(r.name));
+
+            return rows.map((s, idx) => {
+                if (isDoubles) {
+                    return `<tr><td><strong>${idx + 1}</strong></td><td>${escapeHtml(s.name)}</td><td>${s.p}</td><td>${s.w}</td><td>${s.l}</td><td>${s.f}</td><td>${s.a}</td><td>${s.diff > 0 ? '+' + s.diff : s.diff}</td></tr>`;
+                } else {
+                    return `<tr><td><strong>${idx + 1}</strong></td><td>${escapeHtml(s.name)}</td><td>${escapeHtml(s.team)}</td><td>${s.p}</td><td>${s.w}</td><td>${s.l}</td><td>${s.f}</td><td>${s.a}</td><td>${s.diff > 0 ? '+' + s.diff : s.diff}</td></tr>`;
+                }
+            }).join('');
+        }
+
+        function recalculateAllStats() {
+            const currentStats = calculateStatsFromData(teams, players, generatedFixtures, matchResults);
+            singlesStats = currentStats.singlesStats;
+
+            document.getElementById('overall-team-leaderboard').innerHTML = buildTeamTableHTML(currentStats.teamStats);
+            document.getElementById('singles-leaderboard').innerHTML = buildIndivTableHTML(singlesStats, players);
+            document.getElementById('doubles-leaderboard').innerHTML = buildIndivTableHTML(currentStats.doublesStats, players, true);
+            document.getElementById('captains-leaderboard').innerHTML = buildIndivTableHTML(currentStats.captainsStats, players);
+
+            if (shadowLeagueTeams.length > 0) {
+                document.getElementById('team-shadow-league-container').style.display = 'block';
+                document.getElementById('team-shadow-leaderboard').innerHTML = buildTeamTableHTML(currentStats.teamStats, shadowLeagueTeams);
+            } else {
+                document.getElementById('team-shadow-league-container').style.display = 'none';
+            }
+
+            if (shadowLeaguePlayers.length > 0) {
+                document.getElementById('shadow-league-container').style.display = 'block';
+                document.getElementById('shadow-leaderboard').innerHTML = buildIndivTableHTML(singlesStats, players, false, shadowLeaguePlayers);
+            } else {
+                document.getElementById('shadow-league-container').style.display = 'none';
+            }
+
+            const rec = currentStats.bestRecords;
+            document.getElementById('ach-least-darts').textContent = rec.leastDarts.val ? `${rec.leastDarts.val} Darts` : '-';
+            document.getElementById('ach-least-darts-holder').textContent = rec.leastDarts.player;
+            document.getElementById('ach-least-darts-team').textContent = rec.leastDarts.team;
+
+            document.getElementById('ach-high-score').textContent = rec.highScore.val ? rec.highScore.val : '-';
+            document.getElementById('ach-high-score-holder').textContent = rec.highScore.player;
+            document.getElementById('ach-high-score-team').textContent = rec.highScore.team;
+
+            document.getElementById('ach-high-finish').textContent = rec.highFinish.val ? rec.highFinish.val : '-';
+            document.getElementById('ach-high-finish-holder').textContent = rec.highFinish.player;
+            document.getElementById('ach-high-finish-team').textContent = rec.highFinish.team;
+
+            document.getElementById('ach-high-start').textContent = rec.highStart.val ? rec.highStart.val : '-';
+            document.getElementById('ach-high-start-holder').textContent = rec.highStart.player;
+            document.getElementById('ach-high-start-team').textContent = rec.highStart.team;
+        }
+
+        function renderAllUI() {
+            initAdminSession();
+            renderTeams(); renderTeamPairs(); renderPlayers(); renderEvents(); renderArchivedSeasons(); updateAdminUI();
+
+            if (!generatedFixtures && teams.length >= 2) {
+                let pool = [...teams];
+                if (pool.length % 2 !== 0) pool.push("BYE");
+                let schedule = [];
+                for (let r = 0; r < pool.length - 1; r++) {
+                    let mList = [];
+                    for (let m = 0; m < pool.length / 2; m++) {
+                        let home = pool[m]; let away = pool[pool.length - 1 - m];
+                        if (r % 2 === 1 && m === 0) { const temp = home; home = away; away = temp; }
+                        mList.push({ home, away });
+                    }
+                    schedule.push(mList);
+                    pool.splice(1, 0, pool.pop());
+                }
+                generatedFixtures = schedule;
+                Storage.set('rugeley_darts_fixtures', generatedFixtures);
+            }
+            renderFixtures();
+            recalculateAllStats();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initCloudSync();
+        });
+    </script>
 </body>
 </html>

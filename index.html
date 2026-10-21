@@ -448,7 +448,7 @@
             </div>
         </div>
         <div class="admin-bar-group">
-            <span id="sync-status" style="font-size: 0.85rem; color: var(--accent);">🔥 Connecting to Firestore...</span>
+            <span id="sync-status" style="font-size: 0.85rem; color: var(--accent);">🔥 Connecting to Firebase...</span>
         </div>
     </div>
 
@@ -846,9 +846,10 @@
     <!-- FIREBASE & APP SCRIPT -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
         import { getFirestore, doc, setDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // Your web app's Firebase configuration
+        // Your exact web app's Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyC6pS3Jk7GXrp4i3LSMnCf4UiqPugzDSFg",
             authDomain: "mondaynightdarts-9c1c8.firebaseapp.com",
@@ -860,22 +861,20 @@
             measurementId: "G-706N8B9KS0"
         };
 
-        // Initialize Firebase
+        // Initialize Firebase & Analytics
         const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
         const db = getFirestore(app);
 
-        // Authentication Credentials
         const ADMIN_USER = "Gjelly";
         const ADMIN_PASS = "Kevisthebest";
 
         let isAdminLoggedIn = false;
         try {
             isAdminLoggedIn = sessionStorage.getItem('rugeley_admin_logged_in') === 'true';
-        } catch (e) {
-            console.warn('SessionStorage unavailable:', e);
-        }
+        } catch (e) {}
 
-        // --- DATA STORES (Defaults used ONLY if Firestore document is brand new) ---
+        // Load Defaults or Local Cache First
         let defaultTeams = ["The Miners Arms A", "The Miners Arms B", "The Cabin", "Armitage Legion"];
         let defaultPlayers = [
             { name: "John Smith", team: "The Miners Arms A" },
@@ -886,131 +885,118 @@
             { name: "Chris Evans", team: "Armitage Legion" }
         ];
 
-        let teams = [...defaultTeams];
-        let teamPairs = [{ team1: "The Miners Arms A", team2: "The Miners Arms B" }];
-        let players = [...defaultPlayers];
-        let generatedFixtures = null;
-        let matchResults = {};
-        let seasonEvents = [];
-        let shadowLeaguePlayers = [];
-        let shadowLeagueTeams = [];
-        let archivedSeasons = [];
+        let teams = JSON.parse(localStorage.getItem('rugeley_darts_teams')) || defaultTeams;
+        let teamPairs = JSON.parse(localStorage.getItem('rugeley_team_pairs')) || [{ team1: "The Miners Arms A", team2: "The Miners Arms B" }];
+        let players = JSON.parse(localStorage.getItem('rugeley_darts_players')) || defaultPlayers;
+        let generatedFixtures = JSON.parse(localStorage.getItem('rugeley_darts_fixtures')) || null;
+        let matchResults = JSON.parse(localStorage.getItem('rugeley_match_results')) || {};
+        let seasonEvents = JSON.parse(localStorage.getItem('rugeley_season_events')) || [];
+        let shadowLeaguePlayers = JSON.parse(localStorage.getItem('rugeley_shadow_players')) || [];
+        let shadowLeagueTeams = JSON.parse(localStorage.getItem('rugeley_shadow_teams')) || [];
+        let archivedSeasons = JSON.parse(localStorage.getItem('rugeley_archived_seasons')) || [];
         let singlesStats = {};
 
         let isSaving = false;
-        let isInitialized = false;
+        
+        // POINTING TO COLLECTION "Monday nightdarts" AND DOCUMENT ID "main"
+        const docRef = doc(db, "Monday nightdarts", "main");
 
-        const docRef = doc(db, "leagues", "rugeley_main");
-
-        // --- FETCH OR INITIALIZE DATA ON LOAD ---
-        async function initDatabase() {
+        // Dual Storage Sync Engine
+        async function initCloudSync() {
             try {
                 const docSnap = await getDoc(docRef);
                 const statusEl = document.getElementById('sync-status');
 
                 if (docSnap.exists()) {
                     const data = docSnap.data();
-                    teams = data.teams || defaultTeams;
-                    teamPairs = data.teamPairs || [];
-                    players = data.players || defaultPlayers;
-                    generatedFixtures = data.generatedFixtures !== undefined ? data.generatedFixtures : null;
-                    matchResults = data.matchResults || {};
-                    seasonEvents = data.seasonEvents || [];
-                    shadowLeaguePlayers = data.shadowLeaguePlayers || [];
-                    shadowLeagueTeams = data.shadowLeagueTeams || [];
-                    archivedSeasons = data.archivedSeasons || [];
+                    teams = data.teams || teams;
+                    teamPairs = data.teamPairs || teamPairs;
+                    players = data.players || players;
+                    generatedFixtures = data.generatedFixtures !== undefined ? data.generatedFixtures : generatedFixtures;
+                    matchResults = data.matchResults || matchResults;
+                    seasonEvents = data.seasonEvents || seasonEvents;
+                    shadowLeaguePlayers = data.shadowLeaguePlayers || shadowLeaguePlayers;
+                    shadowLeagueTeams = data.shadowLeagueTeams || shadowLeagueTeams;
+                    archivedSeasons = data.archivedSeasons || archivedSeasons;
 
+                    saveToLocalStorageOnly();
                     if (statusEl) {
-                        statusEl.textContent = '🔥 Live Firestore Synced';
+                        statusEl.textContent = '🔥 Firebase Connected';
                         statusEl.style.color = 'var(--success)';
                     }
                 } else {
-                    // First time setup: create the document with default/initial values
-                    await setDoc(docRef, {
-                        teams,
-                        teamPairs,
-                        players,
-                        generatedFixtures,
-                        matchResults,
-                        seasonEvents,
-                        shadowLeaguePlayers,
-                        shadowLeagueTeams,
-                        archivedSeasons,
-                        updatedAt: new Date().toISOString()
-                    });
-                    if (statusEl) {
-                        statusEl.textContent = '🔥 Firestore Connected';
-                        statusEl.style.color = 'var(--success)';
-                    }
+                    await pushToFirestore();
                 }
             } catch (err) {
-                console.error("Database initialization error:", err);
+                console.warn("Cloud connection fallback to local mode:", err);
                 const statusEl = document.getElementById('sync-status');
                 if (statusEl) {
-                    statusEl.textContent = '⚠️ Connection Error';
-                    statusEl.style.color = 'var(--danger)';
+                    statusEl.textContent = '⚡ Local Mode Active';
+                    statusEl.style.color = 'var(--accent)';
                 }
             } finally {
-                isInitialized = true;
                 renderAllUI();
                 
-                // Start real-time listener for cross-device updates AFTER initial load
+                // Real-time listener for background updates from other devices
                 onSnapshot(docRef, (docSnap) => {
-                    if (!isInitialized || isSaving) return;
-                    if (docSnap.exists()) {
-                        const data = docSnap.data();
-                        if (data) {
-                            teams = data.teams || teams;
-                            teamPairs = data.teamPairs || teamPairs;
-                            players = data.players || players;
-                            generatedFixtures = data.generatedFixtures !== undefined ? data.generatedFixtures : generatedFixtures;
-                            matchResults = data.matchResults || matchResults;
-                            seasonEvents = data.seasonEvents || seasonEvents;
-                            shadowLeaguePlayers = data.shadowLeaguePlayers || shadowLeaguePlayers;
-                            shadowLeagueTeams = data.shadowLeagueTeams || shadowLeagueTeams;
-                            archivedSeasons = data.archivedSeasons || archivedSeasons;
+                    if (isSaving || !docSnap.exists()) return;
+                    const data = docSnap.data();
+                    if (data) {
+                        teams = data.teams || teams;
+                        teamPairs = data.teamPairs || teamPairs;
+                        players = data.players || players;
+                        generatedFixtures = data.generatedFixtures !== undefined ? data.generatedFixtures : generatedFixtures;
+                        matchResults = data.matchResults || matchResults;
+                        seasonEvents = data.seasonEvents || seasonEvents;
+                        shadowLeaguePlayers = data.shadowLeaguePlayers || shadowLeaguePlayers;
+                        shadowLeagueTeams = data.shadowLeagueTeams || shadowLeagueTeams;
+                        archivedSeasons = data.archivedSeasons || archivedSeasons;
 
-                            const modalOpen = document.getElementById('match-modal').style.display === 'flex';
-                            if (!modalOpen) {
-                                renderAllUI();
-                            }
+                        saveToLocalStorageOnly();
+                        if (document.getElementById('match-modal').style.display !== 'flex') {
+                            renderAllUI();
                         }
                     }
-                });
+                }, (err) => {});
             }
         }
 
-        async function saveToFirestore() {
-            if (!isInitialized) return;
+        async function pushToFirestore() {
             isSaving = true;
             try {
                 await setDoc(docRef, {
-                    teams,
-                    teamPairs,
-                    players,
-                    generatedFixtures,
-                    matchResults,
-                    seasonEvents,
-                    shadowLeaguePlayers,
-                    shadowLeagueTeams,
-                    archivedSeasons,
+                    teams, teamPairs, players, generatedFixtures, matchResults,
+                    seasonEvents, shadowLeaguePlayers, shadowLeagueTeams, archivedSeasons,
                     updatedAt: new Date().toISOString()
-                });
+                }, { merge: true });
+
                 const statusEl = document.getElementById('sync-status');
                 if (statusEl) {
-                    statusEl.textContent = '🔥 Live Firestore Synced';
+                    statusEl.textContent = '🔥 Firebase Connected';
                     statusEl.style.color = 'var(--success)';
                 }
             } catch (err) {
-                console.error("Error writing to Firestore:", err);
+                console.error("Firestore write skipped/failed:", err);
                 const statusEl = document.getElementById('sync-status');
                 if (statusEl) {
-                    statusEl.textContent = '⚠️ Save Failed';
-                    statusEl.style.color = 'var(--danger)';
+                    statusEl.textContent = '⚡ Saved Locally';
+                    statusEl.style.color = 'var(--accent)';
                 }
             } finally {
-                setTimeout(() => { isSaving = false; }, 500);
+                setTimeout(() => { isSaving = false; }, 400);
             }
+        }
+
+        function saveToLocalStorageOnly() {
+            localStorage.setItem('rugeley_darts_teams', JSON.stringify(teams));
+            localStorage.setItem('rugeley_team_pairs', JSON.stringify(teamPairs));
+            localStorage.setItem('rugeley_darts_players', JSON.stringify(players));
+            localStorage.setItem('rugeley_darts_fixtures', JSON.stringify(generatedFixtures));
+            localStorage.setItem('rugeley_match_results', JSON.stringify(matchResults));
+            localStorage.setItem('rugeley_season_events', JSON.stringify(seasonEvents));
+            localStorage.setItem('rugeley_shadow_players', JSON.stringify(shadowLeaguePlayers));
+            localStorage.setItem('rugeley_shadow_teams', JSON.stringify(shadowLeagueTeams));
+            localStorage.setItem('rugeley_archived_seasons', JSON.stringify(archivedSeasons));
         }
 
         const Storage = {
@@ -1025,7 +1011,8 @@
                 if (key === 'rugeley_shadow_teams') shadowLeagueTeams = value;
                 if (key === 'rugeley_archived_seasons') archivedSeasons = value;
 
-                saveToFirestore();
+                saveToLocalStorageOnly();
+                pushToFirestore();
             }
         };
 
@@ -1037,9 +1024,7 @@
 
             if (user === ADMIN_USER && pass === ADMIN_PASS) {
                 isAdminLoggedIn = true;
-                try {
-                    sessionStorage.setItem('rugeley_admin_logged_in', 'true');
-                } catch (e) {}
+                try { sessionStorage.setItem('rugeley_admin_logged_in', 'true'); } catch (e) {}
                 document.getElementById('admin-login-form').style.display = 'none';
                 document.getElementById('admin-logged-in').style.display = 'flex';
                 document.getElementById('admin-user').value = '';
@@ -1052,9 +1037,7 @@
 
         window.adminLogout = function() {
             isAdminLoggedIn = false;
-            try {
-                sessionStorage.removeItem('rugeley_admin_logged_in');
-            } catch (e) {}
+            try { sessionStorage.removeItem('rugeley_admin_logged_in'); } catch (e) {}
             document.getElementById('admin-login-form').style.display = 'flex';
             document.getElementById('admin-logged-in').style.display = 'none';
             
@@ -1062,7 +1045,6 @@
             if (activeTab && ['teams', 'players', 'archive'].includes(activeTab.id)) {
                 window.showTab('fixtures');
             }
-
             updateAdminUI();
         };
 
@@ -1088,11 +1070,9 @@
 
             const teamNameInput = document.getElementById('team-name');
             const teamName = teamNameInput.value.trim();
-
             if (!teamName) return;
 
-            const isDuplicate = teams.some(t => t.toLowerCase() === teamName.toLowerCase());
-            if (isDuplicate) {
+            if (teams.some(t => t.toLowerCase() === teamName.toLowerCase())) {
                 alert(`The team "${teamName}" already exists!`);
                 return;
             }
@@ -1106,7 +1086,6 @@
 
         window.removeTeam = function(index) {
             if (!checkAdminPermission()) return;
-
             const removed = teams[index];
             if (confirm(`Are you sure you want to remove "${removed}"?`)) {
                 teams.splice(index, 1);
@@ -1121,7 +1100,6 @@
         window.handlePairTeams = function(e) {
             e.preventDefault();
             if (!checkAdminPermission()) return;
-
             const t1 = document.getElementById('pair-team-1').value;
             const t2 = document.getElementById('pair-team-2').value;
 
@@ -1146,7 +1124,6 @@
         window.handleAddEvent = function(e) {
             e.preventDefault();
             if (!checkAdminPermission()) return;
-
             const title = document.getElementById('event-title').value.trim();
             const date = document.getElementById('event-date').value.trim();
             const venue = document.getElementById('event-venue').value.trim();
@@ -1173,7 +1150,6 @@
         window.handleAddPlayer = function(e) {
             e.preventDefault();
             if (!checkAdminPermission()) return;
-
             const nameInput = document.getElementById('player-name');
             const teamSelect = document.getElementById('player-team');
 
@@ -1224,13 +1200,10 @@
                 return;
             }
 
-            if (!confirm(`Are you sure you want to archive "${seasonName}"? This will save all current stats and reset active fixtures and results for the new season.`)) {
-                return;
-            }
+            if (!confirm(`Archive "${seasonName}"? This saves all stats and clears active fixtures.`)) return;
 
             const finalStats = calculateStatsFromData(teams, players, generatedFixtures, matchResults);
-
-            const archiveRecord = {
+            archivedSeasons.push({
                 name: seasonName,
                 dateArchived: new Date().toLocaleDateString(),
                 teams: [...teams],
@@ -1238,9 +1211,8 @@
                 teamStats: finalStats.teamStats,
                 singlesStats: finalStats.singlesStats,
                 matchResults: {...matchResults}
-            };
+            });
 
-            archivedSeasons.push(archiveRecord);
             matchResults = {};
             generatedFixtures = null;
             shadowLeaguePlayers = [];
@@ -1256,7 +1228,6 @@
             renderArchivedSeasons();
             recalculateAllStats();
             renderFixtures();
-
             alert(`Successfully archived "${seasonName}"!`);
             window.showTab('fixtures');
         };
@@ -1273,7 +1244,6 @@
         window.viewArchiveModal = function(index) {
             const season = archivedSeasons[index];
             let summaryHTML = `<h2>Final Standings: ${escapeHtml(season.name)}</h2><table><thead><tr><th>Pos</th><th>Team</th><th>P</th><th>W</th><th>D</th><th>L</th><th>Pts</th></tr></thead><tbody>`;
-            
             let sortedTeams = Object.keys(season.teamStats).map(tName => ({
                 team: tName, ...season.teamStats[tName]
             })).sort((a, b) => b.pts - a.pts);
@@ -1309,14 +1279,10 @@
                 for (let match = 0; match < matchesPerRound; match++) {
                     let home = pool[match];
                     let away = pool[numTeams - 1 - match];
-
                     if (round % 2 === 1 && match === 0) {
                         const temp = home; home = away; away = temp;
                     }
-
-                    if (home !== "BYE" && away !== "BYE") {
-                        roundMatches.push({ home, away });
-                    }
+                    if (home !== "BYE" && away !== "BYE") roundMatches.push({ home, away });
                 }
                 scheduleLeg1.push(roundMatches);
                 pool.splice(1, 0, pool.pop());
@@ -1327,7 +1293,6 @@
 
             generatedFixtures = [...scheduleLeg1, ...scheduleLeg2];
             Storage.set('rugeley_darts_fixtures', generatedFixtures);
-
             renderFixtures();
             recalculateAllStats();
             alert('New Season Fixtures generated successfully!');
@@ -1454,7 +1419,6 @@
                     if (document.getElementById('m_least_darts_player')) document.getElementById('m_least_darts_player').value = h.leastDartsPlayer || '';
                 }
             }
-
             document.getElementById('match-modal').style.display = 'flex';
         };
 
@@ -1478,11 +1442,7 @@
                 const hs = parseInt(document.getElementById(`m_s_hs_${i}`).value) || 0;
                 const as = parseInt(document.getElementById(`m_s_as_${i}`).value) || 0;
                 const c180 = parseInt(document.getElementById(`m_s_180_${i}`).value) || 0;
-
-                homeTotalLegs += hs;
-                awayTotalLegs += as;
-                total180s += c180;
-
+                homeTotalLegs += hs; awayTotalLegs += as; total180s += c180;
                 singlesData.push({ hp, ap, hs, as, c180 });
             }
 
@@ -1494,11 +1454,7 @@
                 const hs = parseInt(document.getElementById(`m_d_hs_${i}`).value) || 0;
                 const as = parseInt(document.getElementById(`m_d_as_${i}`).value) || 0;
                 const c180 = parseInt(document.getElementById(`m_d_180_${i}`).value) || 0;
-
-                homeTotalLegs += hs;
-                awayTotalLegs += as;
-                total180s += c180;
-
+                homeTotalLegs += hs; awayTotalLegs += as; total180s += c180;
                 doublesData.push({ hp1, hp2, ap1, ap2, hs, as, c180 });
             }
 
@@ -1507,30 +1463,23 @@
             const c_hs = parseInt(document.getElementById('m_c_hs').value) || 0;
             const c_as = parseInt(document.getElementById('m_c_as').value) || 0;
             const c_c180 = parseInt(document.getElementById('m_c_180').value) || 0;
-
-            homeTotalLegs += c_hs;
-            awayTotalLegs += c_as;
-            total180s += c_c180;
-
-            let captainsData = { hp: c_hp, ap: c_ap, hs: c_hs, as: c_as, c180: c_c180 };
-
-            let highlightsData = {
-                highFinish: parseInt(document.getElementById('m_hi_finish').value) || null,
-                highFinishPlayer: document.getElementById('m_hi_finish_player').value || '',
-                highStart: parseInt(document.getElementById('m_hi_start').value) || null,
-                highStartPlayer: document.getElementById('m_hi_start_player').value || '',
-                leastDarts: parseInt(document.getElementById('m_least_darts').value) || null,
-                leastDartsPlayer: document.getElementById('m_least_darts_player').value || ''
-            };
+            homeTotalLegs += c_hs; awayTotalLegs += c_as; total180s += c_c180;
 
             matchResults[matchKey] = {
                 homeTotalLegs, awayTotalLegs, total180s,
-                singles: singlesData, doubles: doublesData, captains: captainsData,
-                highlights: highlightsData
+                singles: singlesData, doubles: doublesData,
+                captains: { hp: c_hp, ap: c_ap, hs: c_hs, as: c_as, c180: c_c180 },
+                highlights: {
+                    highFinish: parseInt(document.getElementById('m_hi_finish').value) || null,
+                    highFinishPlayer: document.getElementById('m_hi_finish_player').value || '',
+                    highStart: parseInt(document.getElementById('m_hi_start').value) || null,
+                    highStartPlayer: document.getElementById('m_hi_start_player').value || '',
+                    leastDarts: parseInt(document.getElementById('m_least_darts').value) || null,
+                    leastDartsPlayer: document.getElementById('m_least_darts_player').value || ''
+                }
             };
             
             Storage.set('rugeley_match_results', matchResults);
-
             window.closeMatchModal();
             renderFixtures();
             recalculateAllStats();
@@ -1544,8 +1493,7 @@
                 alert('Not enough ranked players to generate a shadow league.');
                 return;
             }
-            const midpoint = Math.ceil(sortedSingles.length / 2);
-            shadowLeaguePlayers = sortedSingles.slice(midpoint);
+            shadowLeaguePlayers = sortedSingles.slice(Math.ceil(sortedSingles.length / 2));
             Storage.set('rugeley_shadow_players', shadowLeaguePlayers);
             recalculateAllStats();
             alert('Singles Shadow League generated!');
@@ -1554,22 +1502,16 @@
         window.generateTeamShadowLeague = function() {
             if (!checkAdminPermission()) return;
             if (teams.length < 2) return;
-            const midpoint = Math.ceil(teams.length / 2);
-            shadowLeagueTeams = teams.slice(midpoint);
+            shadowLeagueTeams = teams.slice(Math.ceil(teams.length / 2));
             Storage.set('rugeley_shadow_teams', shadowLeagueTeams);
             recalculateAllStats();
             alert('Team Shadow League generated!');
         };
 
-        // --- INTERNAL HELPERS ---
+        // UI Rendering & Helpers
         function escapeHtml(str) {
             if (!str) return '';
-            return String(str)
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;")
-                .replace(/'/g, "&#039;");
+            return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
         }
 
         function checkAdminPermission() {
@@ -1581,10 +1523,9 @@
         }
 
         function initAdminSession() {
-            const loginForm = document.getElementById('admin-login-form');
-            const loggedInView = document.getElementById('admin-logged-in');
-
             if (isAdminLoggedIn) {
+                const loginForm = document.getElementById('admin-login-form');
+                const loggedInView = document.getElementById('admin-logged-in');
                 if (loginForm) loginForm.style.display = 'none';
                 if (loggedInView) loggedInView.style.display = 'flex';
                 updateAdminUI();
@@ -1592,21 +1533,11 @@
         }
 
         function updateAdminUI() {
-            const adminElements = document.querySelectorAll('.admin-only');
-            adminElements.forEach(el => {
-                if (isAdminLoggedIn) {
-                    el.classList.remove('admin-only');
-                } else {
-                    el.classList.add('admin-only');
-                }
+            document.querySelectorAll('.admin-only').forEach(el => {
+                if (isAdminLoggedIn) el.classList.remove('admin-only');
+                else el.classList.add('admin-only');
             });
-
-            renderTeams();
-            renderPlayers();
-            renderEvents();
-            renderTeamPairs();
-            renderArchivedSeasons();
-            renderFixtures();
+            renderTeams(); renderPlayers(); renderEvents(); renderTeamPairs(); renderArchivedSeasons(); renderFixtures();
         }
 
         function renderTeams() {
@@ -1614,7 +1545,6 @@
             const playerTeamSelect = document.getElementById('player-team');
             const pairTeam1Select = document.getElementById('pair-team-1');
             const pairTeam2Select = document.getElementById('pair-team-2');
-
             if (!teamsList) return;
 
             teamsList.innerHTML = '';
@@ -1624,43 +1554,30 @@
 
             teams.forEach((team, index) => {
                 const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td><strong>${escapeHtml(team)}</strong></td>
-                    <td><button type="button" class="btn btn-danger" onclick="removeTeam(${index})">Remove</button></td>
-                `;
+                tr.innerHTML = `<td><strong>${escapeHtml(team)}</strong></td><td><button type="button" class="btn btn-danger" onclick="removeTeam(${index})">Remove</button></td>`;
                 teamsList.appendChild(tr);
 
                 const option = document.createElement('option');
-                option.value = team;
-                option.textContent = team;
-                
+                option.value = team; option.textContent = team;
                 if (playerTeamSelect) playerTeamSelect.appendChild(option.cloneNode(true));
                 if (pairTeam1Select) pairTeam1Select.appendChild(option.cloneNode(true));
                 if (pairTeam2Select) pairTeam2Select.appendChild(option.cloneNode(true));
             });
-
             renderPublicPlayerTeams();
-            recalculateAllStats(); 
+            recalculateAllStats();
         }
 
         function renderTeamPairs() {
             const teamPairsList = document.getElementById('team-pairs-list');
             if (!teamPairsList) return;
             teamPairsList.innerHTML = '';
-
             if (teamPairs.length === 0) {
                 teamPairsList.innerHTML = '<tr><td colspan="4" style="color: #64748b; font-style: italic;">No paired venue restrictions added.</td></tr>';
                 return;
             }
-
             teamPairs.forEach((pair, idx) => {
                 const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td><strong>${escapeHtml(pair.team1)}</strong></td>
-                    <td><strong>${escapeHtml(pair.team2)}</strong></td>
-                    <td><span style="color: #16a34a; font-weight: bold;">🚫 Cannot play Home together</span></td>
-                    <td><button type="button" class="btn btn-danger btn-sm" onclick="removeTeamPair(${idx})">Unpair</button></td>
-                `;
+                tr.innerHTML = `<td><strong>${escapeHtml(pair.team1)}</strong></td><td><strong>${escapeHtml(pair.team2)}</strong></td><td><span style="color: #16a34a; font-weight: bold;">🚫 Cannot play Home together</span></td><td><button type="button" class="btn btn-danger btn-sm" onclick="removeTeamPair(${idx})">Unpair</button></td>`;
                 teamPairsList.appendChild(tr);
             });
         }
@@ -1669,28 +1586,14 @@
             const container = document.getElementById('events-list-container');
             if (!container) return;
             container.innerHTML = '';
-
             if (seasonEvents.length === 0) {
                 container.innerHTML = '<p style="color: #64748b; font-style: italic;">No post-season events currently scheduled.</p>';
                 return;
             }
-
             seasonEvents.forEach((evt, idx) => {
                 const card = document.createElement('div');
                 card.className = 'event-card-item';
-                card.innerHTML = `
-                    <div class="event-card-details">
-                        <h3>🏆 ${escapeHtml(evt.title)}</h3>
-                        <div class="event-meta">
-                            <span>📅 <strong>Date:</strong> ${escapeHtml(evt.date)}</span>
-                            <span>📍 <strong>Venue:</strong> ${escapeHtml(evt.venue)}</span>
-                        </div>
-                        ${evt.notes ? `<div class="event-notes">📝 <strong>Details:</strong> ${escapeHtml(evt.notes)}</div>` : ''}
-                    </div>
-                    <div>
-                        <button type="button" class="btn btn-danger btn-sm admin-only" onclick="removeEvent(${idx})">Delete</button>
-                    </div>
-                `;
+                card.innerHTML = `<div class="event-card-details"><h3>🏆 ${escapeHtml(evt.title)}</h3><div class="event-meta"><span>📅 <strong>Date:</strong> ${escapeHtml(evt.date)}</span><span>📍 <strong>Venue:</strong> ${escapeHtml(evt.venue)}</span></div>${evt.notes ? `<div class="event-notes">📝 <strong>Details:</strong> ${escapeHtml(evt.notes)}</div>` : ''}</div><div><button type="button" class="btn btn-danger btn-sm admin-only" onclick="removeEvent(${idx})">Delete</button></div>`;
                 container.appendChild(card);
             });
         }
@@ -1699,14 +1602,9 @@
             const playersList = document.getElementById('players-list');
             if (!playersList) return;
             playersList.innerHTML = '';
-
             players.forEach((player, index) => {
                 const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${escapeHtml(player.name)}</td>
-                    <td>${escapeHtml(player.team)}</td>
-                    <td><button type="button" class="btn btn-danger" onclick="removePlayer(${index})">Delete</button></td>
-                `;
+                tr.innerHTML = `<td>${escapeHtml(player.name)}</td><td>${escapeHtml(player.team)}</td><td><button type="button" class="btn btn-danger" onclick="removePlayer(${index})">Delete</button></td>`;
                 playersList.appendChild(tr);
             });
             renderPublicPlayerTeams();
@@ -1718,9 +1616,7 @@
             if (!select) return;
             select.innerHTML = '<option value="">-- Select Team --</option>';
             teams.forEach(t => {
-                const opt = document.createElement('option');
-                opt.value = t;
-                opt.textContent = t;
+                const opt = document.createElement('option'); opt.value = t; opt.textContent = t;
                 select.appendChild(opt);
             });
         }
@@ -1728,23 +1624,15 @@
         function renderArchivedSeasons() {
             const container = document.getElementById('archived-seasons-container');
             if (!container) return;
-
             if (archivedSeasons.length === 0) {
                 container.innerHTML = '<p style="color: #64748b; font-style: italic;">No archived seasons found.</p>';
                 return;
             }
-
             container.innerHTML = '';
             archivedSeasons.forEach((season, idx) => {
                 const card = document.createElement('div');
-                card.className = 'card';
-                card.style.border = '2px solid var(--shadow-league)';
-                card.innerHTML = `
-                    <h3 style="color: var(--shadow-league); margin-bottom: 0.5rem;">📁 Archive: ${escapeHtml(season.name)}</h3>
-                    <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 1rem;">Archived on: ${escapeHtml(season.dateArchived)}</p>
-                    <button type="button" class="btn btn-sm btn-shadow" onclick="viewArchiveModal(${idx})">View Final Standings</button>
-                    <button type="button" class="btn btn-sm btn-danger" onclick="deleteArchive(${idx})" style="margin-left: 8px;">Delete Archive</button>
-                `;
+                card.className = 'card'; card.style.border = '2px solid var(--shadow-league)';
+                card.innerHTML = `<h3 style="color: var(--shadow-league); margin-bottom: 0.5rem;">📁 Archive: ${escapeHtml(season.name)}</h3><p style="font-size: 0.85rem; color: #64748b; margin-bottom: 1rem;">Archived on: ${escapeHtml(season.dateArchived)}</p><button type="button" class="btn btn-sm btn-shadow" onclick="viewArchiveModal(${idx})">View Final Standings</button><button type="button" class="btn btn-sm btn-danger" onclick="deleteArchive(${idx})" style="margin-left: 8px;">Delete Archive</button>`;
                 container.appendChild(card);
             });
         }
@@ -1768,18 +1656,15 @@
             const container = document.getElementById('fixtures-container');
             if (!container) return;
             container.innerHTML = '';
-
             if (!generatedFixtures || generatedFixtures.length === 0) {
                 container.innerHTML = '<p style="color: #64748b;">No fixtures generated yet. Use Admin mode to generate a new season.</p>';
                 return;
             }
 
             const totalLeg1Weeks = generatedFixtures.length / 2;
-
             generatedFixtures.forEach((roundMatches, rIdx) => {
                 const weekNum = rIdx + 1;
                 const isReturn = weekNum > totalLeg1Weeks;
-                
                 const weekDiv = document.createElement('div');
                 weekDiv.style.marginBottom = '1.5rem';
                 
@@ -1803,23 +1688,17 @@
 
                     html += `<tr><td><strong>${escapeHtml(m.home)}</strong></td><td class="vs">${scoreDisplay}</td><td><strong>${escapeHtml(m.away)}</strong></td><td>${actionBtn}</td></tr>`;
                 });
-
                 html += `</tbody></table>`;
                 weekDiv.innerHTML = html;
                 container.appendChild(weekDiv);
             });
-
             updateAdminUIStateOnly();
         }
 
         function updateAdminUIStateOnly() {
-            const adminElements = document.querySelectorAll('.admin-only');
-            adminElements.forEach(el => {
-                if (isAdminLoggedIn) {
-                    el.classList.remove('admin-only');
-                } else {
-                    el.classList.add('admin-only');
-                }
+            document.querySelectorAll('.admin-only').forEach(el => {
+                if (isAdminLoggedIn) el.classList.remove('admin-only');
+                else el.classList.add('admin-only');
             });
         }
 
@@ -1829,10 +1708,7 @@
             let doublesStats = {};
             let captainsStats = {};
 
-            teamsList.forEach(t => {
-                teamStats[t] = { p: 0, w: 0, d: 0, l: 0, f: 0, a: 0, c180: 0, pts: 0 };
-            });
-
+            teamsList.forEach(t => { teamStats[t] = { p: 0, w: 0, d: 0, l: 0, f: 0, a: 0, c180: 0, pts: 0 }; });
             let bestRecords = {
                 leastDarts: { val: null, player: 'None', team: '' },
                 highScore: { val: 180, player: 'Multiple', team: 'League' },
@@ -1846,11 +1722,8 @@
                     roundMatches.forEach((m, mIdx) => {
                         const matchKey = `w${weekNum}_m${mIdx}`;
                         const res = resultsMap[matchKey];
-
                         if (res && m.home !== "BYE" && m.away !== "BYE") {
-                            const hTeam = m.home;
-                            const aTeam = m.away;
-
+                            const hTeam = m.home; const aTeam = m.away;
                             if (!teamStats[hTeam]) teamStats[hTeam] = { p: 0, w: 0, d: 0, l: 0, f: 0, a: 0, c180: 0, pts: 0 };
                             if (!teamStats[aTeam]) teamStats[aTeam] = { p: 0, w: 0, d: 0, l: 0, f: 0, a: 0, c180: 0, pts: 0 };
 
@@ -1859,13 +1732,9 @@
                             teamStats[aTeam].f += res.awayTotalLegs; teamStats[aTeam].a += res.homeTotalLegs;
                             teamStats[hTeam].c180 += res.total180s;
 
-                            if (res.homeTotalLegs > res.awayTotalLegs) {
-                                teamStats[hTeam].w++; teamStats[hTeam].pts += 2; teamStats[aTeam].l++;
-                            } else if (res.homeTotalLegs === res.awayTotalLegs) {
-                                teamStats[hTeam].d++; teamStats[hTeam].pts++; teamStats[aTeam].d++; teamStats[aTeam].pts++;
-                            } else {
-                                teamStats[aTeam].w++; teamStats[aTeam].pts += 2; teamStats[hTeam].l++;
-                            }
+                            if (res.homeTotalLegs > res.awayTotalLegs) { teamStats[hTeam].w++; teamStats[hTeam].pts += 2; teamStats[aTeam].l++; }
+                            else if (res.homeTotalLegs === res.awayTotalLegs) { teamStats[hTeam].d++; teamStats[hTeam].pts++; teamStats[aTeam].d++; teamStats[aTeam].pts++; }
+                            else { teamStats[aTeam].w++; teamStats[aTeam].pts += 2; teamStats[hTeam].l++; }
 
                             if (res.singles) {
                                 res.singles.forEach(s => {
@@ -1873,7 +1742,6 @@
                                     if (s.ap) updateIndivStats(singlesStats, s.ap, s.as, s.hs, 0);
                                 });
                             }
-
                             if (res.doubles) {
                                 res.doubles.forEach(d => {
                                     let hPairKey = [d.hp1, d.hp2].filter(Boolean).sort().join(" & ");
@@ -1882,20 +1750,14 @@
                                     if (aPairKey) updateIndivStats(doublesStats, aPairKey, d.as, d.hs, 0);
                                 });
                             }
-
                             if (res.captains) {
                                 let c = res.captains;
                                 if (c.hp) updateIndivStats(captainsStats, c.hp, c.hs, c.as, c.c180);
                                 if (c.ap) updateIndivStats(captainsStats, c.ap, c.as, c.hs, 0);
                             }
-
                             if (res.highlights) {
                                 const h = res.highlights;
-                                const findTeam = (pName) => {
-                                    const pObj = playersList.find(p => p.name === pName);
-                                    return pObj ? pObj.team : '';
-                                };
-
+                                const findTeam = (pName) => { const pObj = playersList.find(p => p.name === pName); return pObj ? pObj.team : ''; };
                                 if (h.highFinish && (!bestRecords.highFinish.val || h.highFinish > bestRecords.highFinish.val)) {
                                     bestRecords.highFinish = { val: h.highFinish, player: h.highFinishPlayer || 'Unknown', team: findTeam(h.highFinishPlayer) };
                                 }
@@ -1910,35 +1772,24 @@
                     });
                 });
             }
-
             return { teamStats, singlesStats, doublesStats, captainsStats, bestRecords };
         }
 
         function updateIndivStats(statObj, playerName, scoreFor, scoreAgainst, num180s) {
             if (!playerName) return;
             if (!statObj[playerName]) statObj[playerName] = { p: 0, w: 0, l: 0, f: 0, a: 0, c180: 0 };
-
             statObj[playerName].p++;
-            if (scoreFor > scoreAgainst) statObj[playerName].w++;
-            else statObj[playerName].l++;
-
-            statObj[playerName].f += scoreFor;
-            statObj[playerName].a += scoreAgainst;
-            statObj[playerName].c180 += num180s;
+            if (scoreFor > scoreAgainst) statObj[playerName].w++; else statObj[playerName].l++;
+            statObj[playerName].f += scoreFor; statObj[playerName].a += scoreAgainst; statObj[playerName].c180 += num180s;
         }
 
         function buildTeamTableHTML(teamStats, shadowFilter = null) {
             let sorted = Object.keys(teamStats).map(tName => ({
-                team: tName,
-                ...teamStats[tName],
-                diff: teamStats[tName].f - teamStats[tName].a
+                team: tName, ...teamStats[tName], diff: teamStats[tName].f - teamStats[tName].a
             })).sort((a, b) => b.pts - a.pts || b.diff - a.diff || b.f - a.f);
 
-            if (shadowFilter && shadowFilter.length > 0) {
-                sorted = sorted.filter(t => shadowFilter.includes(t.team));
-            } else if (shadowFilter && shadowFilter.length === 0) {
-                return '';
-            }
+            if (shadowFilter && shadowFilter.length > 0) sorted = sorted.filter(t => shadowFilter.includes(t.team));
+            else if (shadowFilter && shadowFilter.length === 0) return '';
 
             return sorted.map((t, idx) => `
                 <tr>
@@ -1960,27 +1811,13 @@
                 return { name, team: teamVal, ...statsObj[name], diff: statsObj[name].f - statsObj[name].a };
             }).sort((a, b) => b.w - a.w || b.diff - a.diff || b.f - a.f);
 
-            if (shadowFilter && shadowFilter.length > 0) {
-                rows = rows.filter(r => shadowFilter.includes(r.name));
-            }
+            if (shadowFilter && shadowFilter.length > 0) rows = rows.filter(r => shadowFilter.includes(r.name));
 
             return rows.map((s, idx) => {
                 if (isDoubles) {
-                    return `
-                        <tr>
-                            <td><strong>${idx + 1}</strong></td><td>${escapeHtml(s.name)}</td>
-                            <td>${s.p}</td><td>${s.w}</td><td>${s.l}</td><td>${s.f}</td><td>${s.a}</td>
-                            <td>${s.diff > 0 ? '+' + s.diff : s.diff}</td>
-                        </tr>
-                    `;
+                    return `<tr><td><strong>${idx + 1}</strong></td><td>${escapeHtml(s.name)}</td><td>${s.p}</td><td>${s.w}</td><td>${s.l}</td><td>${s.f}</td><td>${s.a}</td><td>${s.diff > 0 ? '+' + s.diff : s.diff}</td></tr>`;
                 } else {
-                    return `
-                        <tr>
-                            <td><strong>${idx + 1}</strong></td><td>${escapeHtml(s.name)}</td><td>${escapeHtml(s.team)}</td>
-                            <td>${s.p}</td><td>${s.w}</td><td>${s.l}</td><td>${s.f}</td><td>${s.a}</td>
-                            <td>${s.diff > 0 ? '+' + s.diff : s.diff}</td><td>${s.c180}</td>
-                        </tr>
-                    `;
+                    return `<tr><td><strong>${idx + 1}</strong></td><td>${escapeHtml(s.name)}</td><td>${escapeHtml(s.team)}</td><td>${s.p}</td><td>${s.w}</td><td>${s.l}</td><td>${s.f}</td><td>${s.a}</td><td>${s.diff > 0 ? '+' + s.diff : s.diff}</td><td>${s.c180}</td></tr>`;
                 }
             }).join('');
         }
@@ -2028,12 +1865,7 @@
 
         function renderAllUI() {
             initAdminSession();
-            renderTeams();
-            renderTeamPairs();
-            renderPlayers();
-            renderEvents();
-            renderArchivedSeasons();
-            updateAdminUI();
+            renderTeams(); renderTeamPairs(); renderPlayers(); renderEvents(); renderArchivedSeasons(); updateAdminUI();
 
             if (!generatedFixtures && teams.length >= 2) {
                 let pool = [...teams];
@@ -2042,11 +1874,8 @@
                 for (let r = 0; r < pool.length - 1; r++) {
                     let mList = [];
                     for (let m = 0; m < pool.length / 2; m++) {
-                        let home = pool[m];
-                        let away = pool[pool.length - 1 - m];
-                        if (r % 2 === 1 && m === 0) {
-                            const temp = home; home = away; away = temp;
-                        }
+                        let home = pool[m]; let away = pool[pool.length - 1 - m];
+                        if (r % 2 === 1 && m === 0) { const temp = home; home = away; away = temp; }
                         mList.push({ home, away });
                     }
                     schedule.push(mList);
@@ -2055,14 +1884,13 @@
                 generatedFixtures = schedule;
                 Storage.set('rugeley_darts_fixtures', generatedFixtures);
             }
-
             renderFixtures();
             recalculateAllStats();
         }
 
-        // Initialize App on Load
         document.addEventListener('DOMContentLoaded', () => {
-            initDatabase();
+            renderAllUI();
+            initCloudSync();
         });
     </script>
 </body>

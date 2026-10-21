@@ -448,7 +448,7 @@
             </div>
         </div>
         <div class="admin-bar-group">
-            <span id="sync-status" style="font-size: 0.85rem; color: var(--accent);">🔥 Connecting to Firebase...</span>
+            <span id="sync-status" style="font-size: 0.85rem; color: var(--accent);">🔥 Connecting to Realtime DB...</span>
         </div>
     </div>
 
@@ -847,9 +847,8 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
-        import { getFirestore, doc, setDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getDatabase, ref, set, get, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        // Your exact web app's Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyC6pS3Jk7GXrp4i3LSMnCf4UiqPugzDSFg",
             authDomain: "mondaynightdarts-9c1c8.firebaseapp.com",
@@ -861,10 +860,9 @@
             measurementId: "G-706N8B9KS0"
         };
 
-        // Initialize Firebase & Analytics
         const app = initializeApp(firebaseConfig);
         const analytics = getAnalytics(app);
-        const db = getFirestore(app);
+        const db = getDatabase(app);
 
         const ADMIN_USER = "Gjelly";
         const ADMIN_PASS = "Kevisthebest";
@@ -874,7 +872,6 @@
             isAdminLoggedIn = sessionStorage.getItem('rugeley_admin_logged_in') === 'true';
         } catch (e) {}
 
-        // Load Defaults or Local Cache First
         let defaultTeams = ["The Miners Arms A", "The Miners Arms B", "The Cabin", "Armitage Legion"];
         let defaultPlayers = [
             { name: "John Smith", team: "The Miners Arms A" },
@@ -898,17 +895,16 @@
 
         let isSaving = false;
         
-        // POINTING TO COLLECTION "Monday nightdarts" AND DOCUMENT ID "main"
-        const docRef = doc(db, "Monday nightdarts", "main");
+        // Pointing to Realtime Database path for Monday nightdarts
+        const dbRef = ref(db, 'monday_nightdarts_main');
 
-        // Dual Storage Sync Engine
         async function initCloudSync() {
             try {
-                const docSnap = await getDoc(docRef);
+                const snapshot = await get(dbRef);
                 const statusEl = document.getElementById('sync-status');
 
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
                     teams = data.teams || teams;
                     teamPairs = data.teamPairs || teamPairs;
                     players = data.players || players;
@@ -921,11 +917,11 @@
 
                     saveToLocalStorageOnly();
                     if (statusEl) {
-                        statusEl.textContent = '🔥 Firebase Connected';
+                        statusEl.textContent = '🔥 Realtime DB Connected';
                         statusEl.style.color = 'var(--success)';
                     }
                 } else {
-                    await pushToFirestore();
+                    await pushToDatabase();
                 }
             } catch (err) {
                 console.warn("Cloud connection fallback to local mode:", err);
@@ -937,10 +933,9 @@
             } finally {
                 renderAllUI();
                 
-                // Real-time listener for background updates from other devices
-                onSnapshot(docRef, (docSnap) => {
-                    if (isSaving || !docSnap.exists()) return;
-                    const data = docSnap.data();
+                onValue(dbRef, (snapshot) => {
+                    if (isSaving || !snapshot.exists()) return;
+                    const data = snapshot.val();
                     if (data) {
                         teams = data.teams || teams;
                         teamPairs = data.teamPairs || teamPairs;
@@ -957,26 +952,26 @@
                             renderAllUI();
                         }
                     }
-                }, (err) => {});
+                });
             }
         }
 
-        async function pushToFirestore() {
+        async function pushToDatabase() {
             isSaving = true;
             try {
-                await setDoc(docRef, {
+                await set(dbRef, {
                     teams, teamPairs, players, generatedFixtures, matchResults,
                     seasonEvents, shadowLeaguePlayers, shadowLeagueTeams, archivedSeasons,
                     updatedAt: new Date().toISOString()
-                }, { merge: true });
+                });
 
                 const statusEl = document.getElementById('sync-status');
                 if (statusEl) {
-                    statusEl.textContent = '🔥 Firebase Connected';
+                    statusEl.textContent = '🔥 Realtime DB Connected';
                     statusEl.style.color = 'var(--success)';
                 }
             } catch (err) {
-                console.error("Firestore write skipped/failed:", err);
+                console.error("Database write skipped/failed:", err);
                 const statusEl = document.getElementById('sync-status');
                 if (statusEl) {
                     statusEl.textContent = '⚡ Saved Locally';
@@ -1012,7 +1007,7 @@
                 if (key === 'rugeley_archived_seasons') archivedSeasons = value;
 
                 saveToLocalStorageOnly();
-                pushToFirestore();
+                pushToDatabase();
             }
         };
 

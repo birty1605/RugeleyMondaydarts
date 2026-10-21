@@ -448,9 +448,7 @@
             </div>
         </div>
         <div class="admin-bar-group">
-            <span id="sync-status" style="font-size: 0.85rem; color: var(--accent);">☁️ Local Mode</span>
-            <button type="button" class="btn btn-sm btn-success" onclick="openCloudConfig()" style="display: none;">Cloud Sync Setup</button>
-            <button type="button" class="btn btn-sm btn-accent" onclick="manualCloudSync()">Sync Now</button>
+            <span id="sync-status" style="font-size: 0.85rem; color: var(--accent);">🔥 Connecting to Firestore...</span>
         </div>
     </div>
 
@@ -845,43 +843,31 @@
         </div>
     </div>
 
-    <!-- CLOUD CONFIG MODAL -->
-    <div id="cloud-modal" class="modal-overlay">
-        <div class="modal-card" style="max-width: 500px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem;">
-                <h2 style="margin: 0; border: none; font-size: 1.2rem;">☁️ Cloud Sync Configuration</h2>
-                <button type="button" class="btn btn-danger btn-sm" onclick="closeCloudConfig()">Close &times;</button>
-            </div>
-            <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 1rem;">
-                Enter a shared JSONBin.io API URL or custom endpoint to sync matches and player registrations online across multiple devices in real-time.
-            </p>
-            <div class="form-group">
-                <label for="cloud-url">Cloud Endpoint URL / Bin URL:</label>
-                <input type="text" id="cloud-url" placeholder="https://api.jsonbin.io/v3/b/...">
-            </div>
-            <div class="form-group">
-                <label for="cloud-key">Secret Key (X-Master-Key):</label>
-                <input type="password" id="cloud-key" placeholder="$2a$10$...">
-            </div>
-            <div style="display: flex; gap: 10px; margin-top: 1.5rem;">
-                <button type="button" class="btn btn-success" style="flex: 1;" onclick="saveCloudConfig()">Connect & Sync</button>
-                <button type="button" class="btn btn-danger" onclick="disconnectCloud()">Disconnect</button>
-            </div>
-        </div>
-    </div>
+    <!-- FIREBASE & APP SCRIPT -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    <script>
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyC6pS3Jk7GXrp4i3LSMnCf4UiqPugzDSFg",
+            authDomain: "mondaynightdarts-9c1c8.firebaseapp.com",
+            databaseURL: "https://mondaynightdarts-9c1c8-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "mondaynightdarts-9c1c8",
+            storageBucket: "mondaynightdarts-9c1c8.firebasestorage.app",
+            messagingSenderId: "833168552581",
+            appId: "1:833168552581:web:dbadcdcb616239d8366fec",
+            measurementId: "G-706N8B9KS0"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
         // Authentication Credentials
         const ADMIN_USER = "Gjelly";
         const ADMIN_PASS = "Kevisthebest";
-        
-        // Default Cloud Synchronization Credentials
-        const DEFAULT_CLOUD_URL = "https://api.jsonbin.io/v3/b/6abd12bfffd5d160533f3294";
-        const DEFAULT_CLOUD_KEY = "$2a$10$MlLdxnTNv20bewKldU8KH./2tDI55dCC0lSjC1Eaak4jbXxLh/xDa";
 
-        // ==========================================
-        // SAFE STORAGE HELPER & SESSION INITIALIZATION
-        // ==========================================
         let isAdminLoggedIn = false;
         try {
             isAdminLoggedIn = sessionStorage.getItem('rugeley_admin_logged_in') === 'true';
@@ -889,20 +875,130 @@
             console.warn('SessionStorage unavailable:', e);
         }
 
-        let isSyncing = false;
+        // --- DATA STORES (Defaults) ---
+        let teams = ["The Miners Arms A", "The Miners Arms B", "The Cabin", "Armitage Legion"];
+        let teamPairs = [{ team1: "The Miners Arms A", team2: "The Miners Arms B" }];
+        let players = [
+            { name: "John Smith", team: "The Miners Arms A" },
+            { name: "Pete Jones", team: "The Miners Arms A" },
+            { name: "Dave Jones", team: "The Miners Arms B" },
+            { name: "Sam Vance", team: "The Miners Arms B" },
+            { name: "Mark Wilson", team: "The Cabin" },
+            { name: "Chris Evans", team: "Armitage Legion" }
+        ];
+        let generatedFixtures = null;
+        let matchResults = {};
+        let seasonEvents = [];
+        let shadowLeaguePlayers = [];
+        let shadowLeagueTeams = [];
+        let archivedSeasons = [];
+        let singlesStats = {};
 
-        function initAdminSession() {
-            const loginForm = document.getElementById('admin-login-form');
-            const loggedInView = document.getElementById('admin-logged-in');
+        let isSaving = false;
 
-            if (isAdminLoggedIn) {
-                if (loginForm) loginForm.style.display = 'none';
-                if (loggedInView) loggedInView.style.display = 'flex';
-                updateAdminUI();
+        // --- FIRESTORE REAL-TIME SYNC ---
+        const docRef = doc(db, "leagues", "rugeley_main");
+
+        onSnapshot(docRef, (docSnap) => {
+            const statusEl = document.getElementById('sync-status');
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                if (data) {
+                    teams = data.teams || teams;
+                    teamPairs = data.teamPairs || teamPairs;
+                    players = data.players || players;
+                    generatedFixtures = data.generatedFixtures !== undefined ? data.generatedFixtures : generatedFixtures;
+                    matchResults = data.matchResults || matchResults;
+                    seasonEvents = data.seasonEvents || seasonEvents;
+                    shadowLeaguePlayers = data.shadowLeaguePlayers || shadowLeaguePlayers;
+                    shadowLeagueTeams = data.shadowLeagueTeams || shadowLeagueTeams;
+                    archivedSeasons = data.archivedSeasons || archivedSeasons;
+
+                    const modalOpen = document.getElementById('match-modal').style.display === 'flex';
+                    if (!modalOpen) {
+                        renderTeams();
+                        renderTeamPairs();
+                        renderPlayers();
+                        renderEvents();
+                        renderArchivedSeasons();
+                        renderFixtures();
+                        recalculateAllStats();
+                    }
+
+                    if (statusEl) {
+                        statusEl.textContent = '🔥 Live Firestore Synced';
+                        statusEl.style.color = 'var(--success)';
+                    }
+                }
+            } else {
+                // Initialize document if it doesn't exist yet
+                saveToFirestore();
+                if (statusEl) {
+                    statusEl.textContent = '🔥 Firestore Connected';
+                    statusEl.style.color = 'var(--success)';
+                }
+            }
+        }, (error) => {
+            console.error("Firestore sync error:", error);
+            const statusEl = document.getElementById('sync-status');
+            if (statusEl) {
+                statusEl.textContent = '⚠️ Sync Error';
+                statusEl.style.color = 'var(--danger)';
+            }
+        });
+
+        async function saveToFirestore() {
+            if (isSaving) return;
+            isSaving = true;
+            try {
+                await setDoc(docRef, {
+                    teams,
+                    teamPairs,
+                    players,
+                    generatedFixtures,
+                    matchResults,
+                    seasonEvents,
+                    shadowLeaguePlayers,
+                    shadowLeagueTeams,
+                    archivedSeasons,
+                    updatedAt: new Date().toISOString()
+                });
+                const statusEl = document.getElementById('sync-status');
+                if (statusEl) {
+                    statusEl.textContent = '🔥 Live Firestore Synced';
+                    statusEl.style.color = 'var(--success)';
+                }
+            } catch (err) {
+                console.error("Error writing to Firestore:", err);
+                const statusEl = document.getElementById('sync-status');
+                if (statusEl) {
+                    statusEl.textContent = '⚠️ Save Failed';
+                    statusEl.style.color = 'var(--danger)';
+                }
+            } finally {
+                isSaving = false;
             }
         }
 
-        function adminLogin(e) {
+        // --- STORAGE HELPER REPLACEMENT ---
+        const Storage = {
+            set(key, value) {
+                if (key === 'rugeley_darts_teams') teams = value;
+                if (key === 'rugeley_team_pairs') teamPairs = value;
+                if (key === 'rugeley_darts_players') players = value;
+                if (key === 'rugeley_darts_fixtures') generatedFixtures = value;
+                if (key === 'rugeley_match_results') matchResults = value;
+                if (key === 'rugeley_season_events') seasonEvents = value;
+                if (key === 'rugeley_shadow_players') shadowLeaguePlayers = value;
+                if (key === 'rugeley_shadow_teams') shadowLeagueTeams = value;
+                if (key === 'rugeley_archived_seasons') archivedSeasons = value;
+
+                saveToFirestore();
+            }
+        };
+
+        // --- EXPOSE FUNCTIONS GLOBALLY FOR HTML ONCLICK ---
+        window.adminLogin = function(e) {
             if (e) e.preventDefault();
             const user = document.getElementById('admin-user').value.trim();
             const pass = document.getElementById('admin-pass').value.trim();
@@ -920,9 +1016,9 @@
             } else {
                 alert('Invalid Username or Password.');
             }
-        }
+        };
 
-        function adminLogout() {
+        window.adminLogout = function() {
             isAdminLoggedIn = false;
             try {
                 sessionStorage.removeItem('rugeley_admin_logged_in');
@@ -932,265 +1028,13 @@
             
             const activeTab = document.querySelector('.tab-content.active');
             if (activeTab && ['teams', 'players', 'archive'].includes(activeTab.id)) {
-                showTab('fixtures');
+                window.showTab('fixtures');
             }
 
             updateAdminUI();
-        }
-
-        function escapeHtml(str) {
-            if (!str) return '';
-            return String(str)
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;")
-                .replace(/'/g, "&#039;");
-        }
-
-        // --- SAFE STORAGE WRAPPER ---
-        const Storage = {
-            get(key, fallback) {
-                try {
-                    const item = localStorage.getItem(key);
-                    return item ? JSON.parse(item) : fallback;
-                } catch (e) {
-                    return fallback;
-                }
-            },
-            set(key, value) {
-                try {
-                    localStorage.setItem(key, JSON.stringify(value));
-                    triggerCloudSync();
-                } catch (e) {
-                    console.error('Storage write error:', e);
-                }
-            },
-            remove(key) {
-                try {
-                    localStorage.removeItem(key);
-                } catch (e) {}
-            }
         };
 
-        let cloudConfig = Storage.get('rugeley_cloud_config', {
-            url: DEFAULT_CLOUD_URL,
-            key: DEFAULT_CLOUD_KEY
-        });
-
-        if (!cloudConfig || !cloudConfig.url) {
-            cloudConfig = {
-                url: DEFAULT_CLOUD_URL,
-                key: DEFAULT_CLOUD_KEY
-            };
-            Storage.set('rugeley_cloud_config', cloudConfig);
-        }
-
-        async function triggerCloudSync() {
-            if (!cloudConfig.url || isSyncing) return;
-            isSyncing = true;
-            try {
-                const payload = {
-                    teams, teamPairs, players, generatedFixtures, matchResults, seasonEvents, shadowLeaguePlayers, shadowLeagueTeams, archivedSeasons
-                };
-                const headers = { 'Content-Type': 'application/json' };
-                if (cloudConfig.key) headers['X-Master-Key'] = cloudConfig.key;
-
-                const response = await fetch(cloudConfig.url, {
-                    method: 'PUT',
-                    headers: headers,
-                    body: JSON.stringify(payload)
-                });
-
-                const statusEl = document.getElementById('sync-status');
-                if (response.ok) {
-                    if (statusEl) {
-                        statusEl.textContent = '☁️️ Synced Online';
-                        statusEl.style.color = 'var(--success)';
-                    }
-                } else {
-                    throw new Error('Sync status ' + response.status);
-                }
-            } catch (err) {
-                const statusEl = document.getElementById('sync-status');
-                if (statusEl) {
-                    statusEl.textContent = '⚠️ Sync Failed';
-                    statusEl.style.color = 'var(--danger)';
-                }
-            } finally {
-                isSyncing = false;
-            }
-        }
-
-        async function manualCloudSync(silent = false) {
-            if (!cloudConfig.url) {
-                if (!silent) {
-                    alert('Please configure Cloud Sync first by clicking "Cloud Sync Setup".');
-                    openCloudConfig();
-                }
-                return;
-            }
-            if (isSyncing) return;
-            isSyncing = true;
-
-            const statusEl = document.getElementById('sync-status');
-            if (statusEl) {
-                statusEl.textContent = '🔄 Syncing...';
-                statusEl.style.color = 'var(--accent)';
-            }
-
-            try {
-                const headers = { 'Content-Type': 'application/json' };
-                if (cloudConfig.key) headers['X-Master-Key'] = cloudConfig.key;
-
-                const res = await fetch(cloudConfig.url, { headers });
-                if (res.ok) {
-                    const json = await res.json();
-                    const data = json.record || json;
-                    if (data.teams) {
-                        teams = data.teams;
-                        teamPairs = data.teamPairs || [];
-                        players = data.players || [];
-                        generatedFixtures = data.generatedFixtures || null;
-                        matchResults = data.matchResults || {};
-                        seasonEvents = data.seasonEvents || [];
-                        shadowLeaguePlayers = data.shadowLeaguePlayers || [];
-                        shadowLeagueTeams = data.shadowLeagueTeams || [];
-                        archivedSeasons = data.archivedSeasons || [];
-
-                        Storage.set('rugeley_darts_teams', teams);
-                        Storage.set('rugeley_team_pairs', teamPairs);
-                        Storage.set('rugeley_darts_players', players);
-                        Storage.set('rugeley_darts_fixtures', generatedFixtures);
-                        Storage.set('rugeley_match_results', matchResults);
-                        Storage.set('rugeley_season_events', seasonEvents);
-                        Storage.set('rugeley_shadow_players', shadowLeaguePlayers);
-                        Storage.set('rugeley_shadow_teams', shadowLeagueTeams);
-                        Storage.set('rugeley_archived_seasons', archivedSeasons);
-
-                        const modalOpen = document.getElementById('match-modal').style.display === 'flex';
-                        if (!modalOpen) {
-                            renderTeams();
-                            renderTeamPairs();
-                            renderPlayers();
-                            renderEvents();
-                            renderArchivedSeasons();
-                            renderFixtures();
-                            recalculateAllStats();
-                        }
-
-                        if (statusEl) {
-                            statusEl.textContent = '☁️ Synced Online';
-                            statusEl.style.color = 'var(--success)';
-                        }
-                        if (!silent) alert('Cloud data successfully synchronized!');
-                    }
-                } else {
-                    throw new Error(`Cloud fetch status ${res.status}`);
-                }
-            } catch (err) {
-                console.error('Cloud Sync Error:', err);
-                if (statusEl) {
-                    statusEl.textContent = '⚠️ Sync Failed';
-                    statusEl.style.color = 'var(--danger)';
-                }
-                if (!silent) alert('Could not pull data from cloud. Verify URL and API Key.');
-            } finally {
-                isSyncing = false;
-            }
-        }
-
-        setInterval(() => {
-            if (cloudConfig.url && document.getElementById('match-modal').style.display !== 'flex') {
-                manualCloudSync(true);
-            }
-        }, 30000);
-
-        function openCloudConfig() {
-            document.getElementById('cloud-url').value = cloudConfig.url || '';
-            document.getElementById('cloud-key').value = cloudConfig.key || '';
-            document.getElementById('cloud-modal').style.display = 'flex';
-        }
-
-        function closeCloudConfig() {
-            document.getElementById('cloud-modal').style.display = 'none';
-        }
-
-        function saveCloudConfig() {
-            cloudConfig.url = document.getElementById('cloud-url').value.trim();
-            cloudConfig.key = document.getElementById('cloud-key').value.trim();
-            Storage.set('rugeley_cloud_config', cloudConfig);
-            closeCloudConfig();
-            if (cloudConfig.url) manualCloudSync();
-        }
-
-        function disconnectCloud() {
-            cloudConfig = { url: '', key: '' };
-            Storage.remove('rugeley_cloud_config');
-            const statusEl = document.getElementById('sync-status');
-            if (statusEl) {
-                statusEl.textContent = '☁️ Local Mode';
-                statusEl.style.color = 'var(--accent)';
-            }
-            closeCloudConfig();
-            alert('Disconnected from cloud sync.');
-        }
-
-        if (cloudConfig.url) {
-            const statusEl = document.getElementById('sync-status');
-            if (statusEl) {
-                statusEl.textContent = '☁️ Cloud Connected';
-                statusEl.style.color = 'var(--success)';
-            }
-        }
-
-        function updateAdminUI() {
-            const adminElements = document.querySelectorAll('.admin-only');
-            adminElements.forEach(el => {
-                if (isAdminLoggedIn) {
-                    el.classList.remove('admin-only');
-                } else {
-                    el.classList.add('admin-only');
-                }
-            });
-
-            renderTeams();
-            renderPlayers();
-            renderEvents();
-            renderTeamPairs();
-            renderArchivedSeasons();
-            renderFixtures();
-        }
-
-        function checkAdminPermission() {
-            if (!isAdminLoggedIn) {
-                alert('Permission Denied! You must be logged in as Admin (Gjelly) to perform this action.');
-                return false;
-            }
-            return true;
-        }
-
-        // --- DATA STORES ---
-        let teams = Storage.get('rugeley_darts_teams', ["The Miners Arms A", "The Miners Arms B", "The Cabin", "Armitage Legion"]);
-        let teamPairs = Storage.get('rugeley_team_pairs', [{ team1: "The Miners Arms A", team2: "The Miners Arms B" }]);
-        let players = Storage.get('rugeley_darts_players', [
-            { name: "John Smith", team: "The Miners Arms A" },
-            { name: "Pete Jones", team: "The Miners Arms A" },
-            { name: "Dave Jones", team: "The Miners Arms B" },
-            { name: "Sam Vance", team: "The Miners Arms B" },
-            { name: "Mark Wilson", team: "The Cabin" },
-            { name: "Chris Evans", team: "Armitage Legion" }
-        ]);
-
-        let generatedFixtures = Storage.get('rugeley_darts_fixtures', null);
-        let matchResults = Storage.get('rugeley_match_results', {});
-        let seasonEvents = Storage.get('rugeley_season_events', []);
-        let shadowLeaguePlayers = Storage.get('rugeley_shadow_players', []);
-        let shadowLeagueTeams = Storage.get('rugeley_shadow_teams', []);
-        let archivedSeasons = Storage.get('rugeley_archived_seasons', []);
-        let singlesStats = {};
-
-        function showTab(tabId, event) {
+        window.showTab = function(tabId, event) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
             
@@ -1204,44 +1048,9 @@
                 if (navBtn) navBtn.classList.add('active');
             }
             if (tabId === 'register-player') renderPublicPlayerTeams();
-        }
+        };
 
-        function renderTeams() {
-            const teamsList = document.getElementById('teams-list');
-            const playerTeamSelect = document.getElementById('player-team');
-            const pairTeam1Select = document.getElementById('pair-team-1');
-            const pairTeam2Select = document.getElementById('pair-team-2');
-
-            if (!teamsList) return;
-
-            teamsList.innerHTML = '';
-            if (playerTeamSelect) playerTeamSelect.innerHTML = '<option value="">-- Select Team --</option>';
-            if (pairTeam1Select) pairTeam1Select.innerHTML = '<option value="">-- Select Team 1 --</option>';
-            if (pairTeam2Select) pairTeam2Select.innerHTML = '<option value="">-- Select Team 2 --</option>';
-
-            teams.forEach((team, index) => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td><strong>${escapeHtml(team)}</strong></td>
-                    <td><button type="button" class="btn btn-danger" onclick="removeTeam(${index})">Remove</button></td>
-                `;
-                teamsList.appendChild(tr);
-
-                const option = document.createElement('option');
-                option.value = team;
-                option.textContent = team;
-                
-                if (playerTeamSelect) playerTeamSelect.appendChild(option.cloneNode(true));
-                if (pairTeam1Select) pairTeam1Select.appendChild(option.cloneNode(true));
-                if (pairTeam2Select) pairTeam2Select.appendChild(option.cloneNode(true));
-            });
-
-            Storage.set('rugeley_darts_teams', teams);
-            renderPublicPlayerTeams();
-            recalculateAllStats(); 
-        }
-
-        function handleAddTeam(e) {
+        window.handleAddTeam = function(e) {
             e.preventDefault();
             if (!checkAdminPermission()) return;
 
@@ -1260,9 +1069,9 @@
             renderTeams();
             teamNameInput.value = '';
             alert(`Team "${teamName}" added successfully!`);
-        }
+        };
 
-        function removeTeam(index) {
+        window.removeTeam = function(index) {
             if (!checkAdminPermission()) return;
 
             const removed = teams[index];
@@ -1272,33 +1081,9 @@
                 renderTeams();
                 renderTeamPairs();
             }
-        }
+        };
 
-        function renderTeamPairs() {
-            const teamPairsList = document.getElementById('team-pairs-list');
-            if (!teamPairsList) return;
-            teamPairsList.innerHTML = '';
-
-            if (teamPairs.length === 0) {
-                teamPairsList.innerHTML = '<tr><td colspan="4" style="color: #64748b; font-style: italic;">No paired venue restrictions added.</td></tr>';
-                return;
-            }
-
-            teamPairs.forEach((pair, idx) => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td><strong>${escapeHtml(pair.team1)}</strong></td>
-                    <td><strong>${escapeHtml(pair.team2)}</strong></td>
-                    <td><span style="color: #16a34a; font-weight: bold;">🚫 Cannot play Home together</span></td>
-                    <td><button type="button" class="btn btn-danger btn-sm" onclick="removeTeamPair(${idx})">Unpair</button></td>
-                `;
-                teamPairsList.appendChild(tr);
-            });
-
-            Storage.set('rugeley_team_pairs', teamPairs);
-        }
-
-        function handlePairTeams(e) {
+        window.handlePairTeams = function(e) {
             e.preventDefault();
             if (!checkAdminPermission()) return;
 
@@ -1313,47 +1098,15 @@
 
             teamPairs.push({ team1: t1, team2: t2 });
             renderTeamPairs();
-        }
+        };
 
-        function removeTeamPair(index) {
+        window.removeTeamPair = function(index) {
             if (!checkAdminPermission()) return;
             teamPairs.splice(index, 1);
             renderTeamPairs();
-        }
+        };
 
-        function renderEvents() {
-            const container = document.getElementById('events-list-container');
-            if (!container) return;
-            container.innerHTML = '';
-
-            if (seasonEvents.length === 0) {
-                container.innerHTML = '<p style="color: #64748b; font-style: italic;">No post-season events currently scheduled.</p>';
-                return;
-            }
-
-            seasonEvents.forEach((evt, idx) => {
-                const card = document.createElement('div');
-                card.className = 'event-card-item';
-                card.innerHTML = `
-                    <div class="event-card-details">
-                        <h3>🏆 ${escapeHtml(evt.title)}</h3>
-                        <div class="event-meta">
-                            <span>📅 <strong>Date:</strong> ${escapeHtml(evt.date)}</span>
-                            <span>📍 <strong>Venue:</strong> ${escapeHtml(evt.venue)}</span>
-                        </div>
-                        ${evt.notes ? `<div class="event-notes">📝 <strong>Details:</strong> ${escapeHtml(evt.notes)}</div>` : ''}
-                    </div>
-                    <div>
-                        <button type="button" class="btn btn-danger btn-sm admin-only" onclick="removeEvent(${idx})">Delete</button>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-
-            Storage.set('rugeley_season_events', seasonEvents);
-        }
-
-        function handleAddEvent(e) {
+        window.handleAddEvent = function(e) {
             e.preventDefault();
             if (!checkAdminPermission()) return;
 
@@ -1368,36 +1121,17 @@
                 document.getElementById('event-form').reset();
                 alert('End of Season Event scheduled!');
             }
-        }
+        };
 
-        function removeEvent(index) {
+        window.removeEvent = function(index) {
             if (!checkAdminPermission()) return;
             if (confirm('Delete this event?')) {
                 seasonEvents.splice(index, 1);
                 renderEvents();
             }
-        }
+        };
 
-        function renderPlayers() {
-            const playersList = document.getElementById('players-list');
-            if (!playersList) return;
-            playersList.innerHTML = '';
-
-            players.forEach((player, index) => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${escapeHtml(player.name)}</td>
-                    <td>${escapeHtml(player.team)}</td>
-                    <td><button type="button" class="btn btn-danger" onclick="removePlayer(${index})">Delete</button></td>
-                `;
-                playersList.appendChild(tr);
-            });
-            Storage.set('rugeley_darts_players', players);
-            renderPublicPlayerTeams();
-            recalculateAllStats();
-        }
-
-        function handleAddPlayer(e) {
+        window.handleAddPlayer = function(e) {
             e.preventDefault();
             if (!checkAdminPermission()) return;
 
@@ -1410,27 +1144,15 @@
                 nameInput.value = '';
                 teamSelect.value = '';
             }
-        }
+        };
 
-        function removePlayer(index) {
+        window.removePlayer = function(index) {
             if (!checkAdminPermission()) return;
             players.splice(index, 1);
             renderPlayers();
-        }
+        };
 
-        function renderPublicPlayerTeams() {
-            const select = document.getElementById('public-player-team');
-            if (!select) return;
-            select.innerHTML = '<option value="">-- Select Team --</option>';
-            teams.forEach(t => {
-                const opt = document.createElement('option');
-                opt.value = t;
-                opt.textContent = t;
-                select.appendChild(opt);
-            });
-        }
-
-        function handlePublicPlayerRegistration(e) {
+        window.handlePublicPlayerRegistration = function(e) {
             e.preventDefault();
             const nameInput = document.getElementById('public-player-name');
             const teamSelect = document.getElementById('public-player-team');
@@ -1448,11 +1170,11 @@
                 nameInput.value = '';
                 teamSelect.value = '';
                 alert('Successfully registered! You can now be selected on match score sheets.');
-                showTab('fixtures');
+                window.showTab('fixtures');
             }
-        }
+        };
 
-        function archiveCurrentSeason() {
+        window.archiveCurrentSeason = function() {
             if (!checkAdminPermission()) return;
             const seasonName = document.getElementById('archive-season-name').value.trim();
             if (!seasonName) {
@@ -1477,12 +1199,12 @@
             };
 
             archivedSeasons.push(archiveRecord);
-            Storage.set('rugeley_archived_seasons', archivedSeasons);
-
             matchResults = {};
             generatedFixtures = null;
             shadowLeaguePlayers = [];
             shadowLeagueTeams = [];
+
+            Storage.set('rugeley_archived_seasons', archivedSeasons);
             Storage.set('rugeley_match_results', matchResults);
             Storage.set('rugeley_darts_fixtures', generatedFixtures);
             Storage.set('rugeley_shadow_players', shadowLeaguePlayers);
@@ -1494,43 +1216,19 @@
             renderFixtures();
 
             alert(`Successfully archived "${seasonName}"!`);
-            showTab('fixtures');
-        }
+            window.showTab('fixtures');
+        };
 
-        function renderArchivedSeasons() {
-            const container = document.getElementById('archived-seasons-container');
-            if (!container) return;
-
-            if (archivedSeasons.length === 0) {
-                container.innerHTML = '<p style="color: #64748b; font-style: italic;">No archived seasons found.</p>';
-                return;
-            }
-
-            container.innerHTML = '';
-            archivedSeasons.forEach((season, idx) => {
-                const card = document.createElement('div');
-                card.className = 'card';
-                card.style.border = '2px solid var(--shadow-league)';
-                card.innerHTML = `
-                    <h3 style="color: var(--shadow-league); margin-bottom: 0.5rem;">📁 Archive: ${escapeHtml(season.name)}</h3>
-                    <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 1rem;">Archived on: ${escapeHtml(season.dateArchived)}</p>
-                    <button type="button" class="btn btn-sm btn-shadow" onclick="viewArchiveModal(${idx})">View Final Standings</button>
-                    <button type="button" class="btn btn-sm btn-danger" onclick="deleteArchive(${idx})" style="margin-left: 8px;">Delete Archive</button>
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        function deleteArchive(index) {
+        window.deleteArchive = function(index) {
             if (!checkAdminPermission()) return;
             if (confirm('Permanently delete this archived season record?')) {
                 archivedSeasons.splice(index, 1);
                 Storage.set('rugeley_archived_seasons', archivedSeasons);
                 renderArchivedSeasons();
             }
-        }
+        };
 
-        function viewArchiveModal(index) {
+        window.viewArchiveModal = function(index) {
             const season = archivedSeasons[index];
             let summaryHTML = `<h2>Final Standings: ${escapeHtml(season.name)}</h2><table><thead><tr><th>Pos</th><th>Team</th><th>P</th><th>W</th><th>D</th><th>L</th><th>Pts</th></tr></thead><tbody>`;
             
@@ -1547,9 +1245,9 @@
             if (win) {
                 win.document.write(`<html><head><title>${escapeHtml(season.name)} Standings</title><style>body{font-family:sans-serif;padding:2rem;}table{width:100%;border-collapse:collapse;}th,td{padding:8px;border:1px solid #ccc;text-align:left;}th{background:#f1f5f9;}</style></head><body>${summaryHTML}</body></html>`);
             }
-        }
+        };
 
-        function generateNewSeason() {
+        window.generateNewSeason = function() {
             if (!checkAdminPermission()) return;
             if (teams.length < 2) {
                 alert('You need at least 2 teams to generate a season schedule.');
@@ -1591,84 +1289,10 @@
             renderFixtures();
             recalculateAllStats();
             alert('New Season Fixtures generated successfully!');
-            showTab('fixtures');
-        }
+            window.showTab('fixtures');
+        };
 
-        function applyVenuePairingConstraints(schedule, pairs) {
-            if (!pairs || pairs.length === 0) return schedule;
-            return schedule.map(roundMatches => {
-                let updatedRound = [...roundMatches];
-                pairs.forEach(pair => {
-                    const match2Idx = updatedRound.findIndex(m => m.home === pair.team2);
-                    if (match2Idx !== -1) {
-                        const m2 = updatedRound[match2Idx];
-                        updatedRound[match2Idx] = { home: m2.away, away: m2.home };
-                    }
-                });
-                return updatedRound;
-            });
-        }
-
-        function renderFixtures() {
-            const container = document.getElementById('fixtures-container');
-            if (!container) return;
-            container.innerHTML = '';
-
-            if (!generatedFixtures || generatedFixtures.length === 0) {
-                container.innerHTML = '<p style="color: #64748b;">No fixtures generated yet. Use Admin mode to generate a new season.</p>';
-                return;
-            }
-
-            const totalLeg1Weeks = generatedFixtures.length / 2;
-
-            generatedFixtures.forEach((roundMatches, rIdx) => {
-                const weekNum = rIdx + 1;
-                const isReturn = weekNum > totalLeg1Weeks;
-                
-                const weekDiv = document.createElement('div');
-                weekDiv.style.marginBottom = '1.5rem';
-                
-                let html = `<h3>Week ${weekNum} ${isReturn ? '(Return Leg)' : ''}</h3><table>`;
-                html += `<thead><tr><th style="width: 35%;">Home Team</th><th class="vs" style="width: 20%;">Score</th><th style="width: 35%;">Away Team</th><th style="width: 10%;">Action</th></tr></thead><tbody>`;
-
-                roundMatches.forEach((m, mIdx) => {
-                    const matchKey = `w${weekNum}_m${mIdx}`;
-                    const res = matchResults[matchKey];
-                    let scoreDisplay = `<span class="vs">VS</span>`;
-                    let buttonText = "Enter Scores";
-
-                    if (res) {
-                        scoreDisplay = `<span class="match-score-badge">${res.homeTotalLegs} - ${res.awayTotalLegs}</span>`;
-                        buttonText = "Edit / View";
-                    }
-
-                    let actionBtn = (m.home !== "BYE" && m.away !== "BYE") 
-                        ? `<button type="button" class="btn btn-sm btn-accent admin-only" onclick='openMatchModal("${matchKey}", ${JSON.stringify(m.home)}, ${JSON.stringify(m.away)})'>${buttonText}</button>`
-                        : '-';
-
-                    html += `<tr><td><strong>${escapeHtml(m.home)}</strong></td><td class="vs">${scoreDisplay}</td><td><strong>${escapeHtml(m.away)}</strong></td><td>${actionBtn}</td></tr>`;
-                });
-
-                html += `</tbody></table>`;
-                weekDiv.innerHTML = html;
-                container.appendChild(weekDiv);
-            });
-
-            updateAdminUIStateOnly();
-        }
-
-        function updateAdminUIStateOnly() {
-            const adminElements = document.querySelectorAll('.admin-only');
-            adminElements.forEach(el => {
-                if (isAdminLoggedIn) {
-                    el.classList.remove('admin-only');
-                } else {
-                    el.classList.add('admin-only');
-                }
-            });
-        }
-
-        function openMatchModal(matchKey, homeTeam, awayTeam) {
+        window.openMatchModal = function(matchKey, homeTeam, awayTeam) {
             document.getElementById('modal-match-key').value = matchKey;
             document.getElementById('modal-title').textContent = `${homeTeam} vs ${awayTeam}`;
 
@@ -1790,13 +1414,13 @@
             }
 
             document.getElementById('match-modal').style.display = 'flex';
-        }
+        };
 
-        function closeMatchModal() {
+        window.closeMatchModal = function() {
             document.getElementById('match-modal').style.display = 'none';
-        }
+        };
 
-        function handleSaveMatchScores(e) {
+        window.handleSaveMatchScores = function(e) {
             e.preventDefault();
             const matchKey = document.getElementById('modal-match-key').value;
 
@@ -1865,10 +1489,296 @@
             
             Storage.set('rugeley_match_results', matchResults);
 
-            closeMatchModal();
+            window.closeMatchModal();
             renderFixtures();
             recalculateAllStats();
             alert('Match Scoresheet Saved Successfully!');
+        };
+
+        window.generateShadowLeague = function() {
+            if (!checkAdminPermission()) return;
+            const sortedSingles = Object.keys(singlesStats).sort((a,b) => singlesStats[b].w - singlesStats[a].w);
+            if (sortedSingles.length < 2) {
+                alert('Not enough ranked players to generate a shadow league.');
+                return;
+            }
+            const midpoint = Math.ceil(sortedSingles.length / 2);
+            shadowLeaguePlayers = sortedSingles.slice(midpoint);
+            Storage.set('rugeley_shadow_players', shadowLeaguePlayers);
+            recalculateAllStats();
+            alert('Singles Shadow League generated!');
+        };
+
+        window.generateTeamShadowLeague = function() {
+            if (!checkAdminPermission()) return;
+            if (teams.length < 2) return;
+            const midpoint = Math.ceil(teams.length / 2);
+            shadowLeagueTeams = teams.slice(midpoint);
+            Storage.set('rugeley_shadow_teams', shadowLeagueTeams);
+            recalculateAllStats();
+            alert('Team Shadow League generated!');
+        };
+
+        // --- INTERNAL HELPERS ---
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function checkAdminPermission() {
+            if (!isAdminLoggedIn) {
+                alert('Permission Denied! You must be logged in as Admin (Gjelly) to perform this action.');
+                return false;
+            }
+            return true;
+        }
+
+        function initAdminSession() {
+            const loginForm = document.getElementById('admin-login-form');
+            const loggedInView = document.getElementById('admin-logged-in');
+
+            if (isAdminLoggedIn) {
+                if (loginForm) loginForm.style.display = 'none';
+                if (loggedInView) loggedInView.style.display = 'flex';
+                updateAdminUI();
+            }
+        }
+
+        function updateAdminUI() {
+            const adminElements = document.querySelectorAll('.admin-only');
+            adminElements.forEach(el => {
+                if (isAdminLoggedIn) {
+                    el.classList.remove('admin-only');
+                } else {
+                    el.classList.add('admin-only');
+                }
+            });
+
+            renderTeams();
+            renderPlayers();
+            renderEvents();
+            renderTeamPairs();
+            renderArchivedSeasons();
+            renderFixtures();
+        }
+
+        function renderTeams() {
+            const teamsList = document.getElementById('teams-list');
+            const playerTeamSelect = document.getElementById('player-team');
+            const pairTeam1Select = document.getElementById('pair-team-1');
+            const pairTeam2Select = document.getElementById('pair-team-2');
+
+            if (!teamsList) return;
+
+            teamsList.innerHTML = '';
+            if (playerTeamSelect) playerTeamSelect.innerHTML = '<option value="">-- Select Team --</option>';
+            if (pairTeam1Select) pairTeam1Select.innerHTML = '<option value="">-- Select Team 1 --</option>';
+            if (pairTeam2Select) pairTeam2Select.innerHTML = '<option value="">-- Select Team 2 --</option>';
+
+            teams.forEach((team, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><strong>${escapeHtml(team)}</strong></td>
+                    <td><button type="button" class="btn btn-danger" onclick="removeTeam(${index})">Remove</button></td>
+                `;
+                teamsList.appendChild(tr);
+
+                const option = document.createElement('option');
+                option.value = team;
+                option.textContent = team;
+                
+                if (playerTeamSelect) playerTeamSelect.appendChild(option.cloneNode(true));
+                if (pairTeam1Select) pairTeam1Select.appendChild(option.cloneNode(true));
+                if (pairTeam2Select) pairTeam2Select.appendChild(option.cloneNode(true));
+            });
+
+            renderPublicPlayerTeams();
+            recalculateAllStats(); 
+        }
+
+        function renderTeamPairs() {
+            const teamPairsList = document.getElementById('team-pairs-list');
+            if (!teamPairsList) return;
+            teamPairsList.innerHTML = '';
+
+            if (teamPairs.length === 0) {
+                teamPairsList.innerHTML = '<tr><td colspan="4" style="color: #64748b; font-style: italic;">No paired venue restrictions added.</td></tr>';
+                return;
+            }
+
+            teamPairs.forEach((pair, idx) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><strong>${escapeHtml(pair.team1)}</strong></td>
+                    <td><strong>${escapeHtml(pair.team2)}</strong></td>
+                    <td><span style="color: #16a34a; font-weight: bold;">🚫 Cannot play Home together</span></td>
+                    <td><button type="button" class="btn btn-danger btn-sm" onclick="removeTeamPair(${idx})">Unpair</button></td>
+                `;
+                teamPairsList.appendChild(tr);
+            });
+        }
+
+        function renderEvents() {
+            const container = document.getElementById('events-list-container');
+            if (!container) return;
+            container.innerHTML = '';
+
+            if (seasonEvents.length === 0) {
+                container.innerHTML = '<p style="color: #64748b; font-style: italic;">No post-season events currently scheduled.</p>';
+                return;
+            }
+
+            seasonEvents.forEach((evt, idx) => {
+                const card = document.createElement('div');
+                card.className = 'event-card-item';
+                card.innerHTML = `
+                    <div class="event-card-details">
+                        <h3>🏆 ${escapeHtml(evt.title)}</h3>
+                        <div class="event-meta">
+                            <span>📅 <strong>Date:</strong> ${escapeHtml(evt.date)}</span>
+                            <span>📍 <strong>Venue:</strong> ${escapeHtml(evt.venue)}</span>
+                        </div>
+                        ${evt.notes ? `<div class="event-notes">📝 <strong>Details:</strong> ${escapeHtml(evt.notes)}</div>` : ''}
+                    </div>
+                    <div>
+                        <button type="button" class="btn btn-danger btn-sm admin-only" onclick="removeEvent(${idx})">Delete</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function renderPlayers() {
+            const playersList = document.getElementById('players-list');
+            if (!playersList) return;
+            playersList.innerHTML = '';
+
+            players.forEach((player, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${escapeHtml(player.name)}</td>
+                    <td>${escapeHtml(player.team)}</td>
+                    <td><button type="button" class="btn btn-danger" onclick="removePlayer(${index})">Delete</button></td>
+                `;
+                playersList.appendChild(tr);
+            });
+            renderPublicPlayerTeams();
+            recalculateAllStats();
+        }
+
+        function renderPublicPlayerTeams() {
+            const select = document.getElementById('public-player-team');
+            if (!select) return;
+            select.innerHTML = '<option value="">-- Select Team --</option>';
+            teams.forEach(t => {
+                const opt = document.createElement('option');
+                opt.value = t;
+                opt.textContent = t;
+                select.appendChild(opt);
+            });
+        }
+
+        function renderArchivedSeasons() {
+            const container = document.getElementById('archived-seasons-container');
+            if (!container) return;
+
+            if (archivedSeasons.length === 0) {
+                container.innerHTML = '<p style="color: #64748b; font-style: italic;">No archived seasons found.</p>';
+                return;
+            }
+
+            container.innerHTML = '';
+            archivedSeasons.forEach((season, idx) => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.style.border = '2px solid var(--shadow-league)';
+                card.innerHTML = `
+                    <h3 style="color: var(--shadow-league); margin-bottom: 0.5rem;">📁 Archive: ${escapeHtml(season.name)}</h3>
+                    <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 1rem;">Archived on: ${escapeHtml(season.dateArchived)}</p>
+                    <button type="button" class="btn btn-sm btn-shadow" onclick="viewArchiveModal(${idx})">View Final Standings</button>
+                    <button type="button" class="btn btn-sm btn-danger" onclick="deleteArchive(${idx})" style="margin-left: 8px;">Delete Archive</button>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function applyVenuePairingConstraints(schedule, pairs) {
+            if (!pairs || pairs.length === 0) return schedule;
+            return schedule.map(roundMatches => {
+                let updatedRound = [...roundMatches];
+                pairs.forEach(pair => {
+                    const match2Idx = updatedRound.findIndex(m => m.home === pair.team2);
+                    if (match2Idx !== -1) {
+                        const m2 = updatedRound[match2Idx];
+                        updatedRound[match2Idx] = { home: m2.away, away: m2.home };
+                    }
+                });
+                return updatedRound;
+            });
+        }
+
+        function renderFixtures() {
+            const container = document.getElementById('fixtures-container');
+            if (!container) return;
+            container.innerHTML = '';
+
+            if (!generatedFixtures || generatedFixtures.length === 0) {
+                container.innerHTML = '<p style="color: #64748b;">No fixtures generated yet. Use Admin mode to generate a new season.</p>';
+                return;
+            }
+
+            const totalLeg1Weeks = generatedFixtures.length / 2;
+
+            generatedFixtures.forEach((roundMatches, rIdx) => {
+                const weekNum = rIdx + 1;
+                const isReturn = weekNum > totalLeg1Weeks;
+                
+                const weekDiv = document.createElement('div');
+                weekDiv.style.marginBottom = '1.5rem';
+                
+                let html = `<h3>Week ${weekNum} ${isReturn ? '(Return Leg)' : ''}</h3><table>`;
+                html += `<thead><tr><th style="width: 35%;">Home Team</th><th class="vs" style="width: 20%;">Score</th><th style="width: 35%;">Away Team</th><th style="width: 10%;">Action</th></tr></thead><tbody>`;
+
+                roundMatches.forEach((m, mIdx) => {
+                    const matchKey = `w${weekNum}_m${mIdx}`;
+                    const res = matchResults[matchKey];
+                    let scoreDisplay = `<span class="vs">VS</span>`;
+                    let buttonText = "Enter Scores";
+
+                    if (res) {
+                        scoreDisplay = `<span class="match-score-badge">${res.homeTotalLegs} - ${res.awayTotalLegs}</span>`;
+                        buttonText = "Edit / View";
+                    }
+
+                    let actionBtn = (m.home !== "BYE" && m.away !== "BYE") 
+                        ? `<button type="button" class="btn btn-sm btn-accent admin-only" onclick='openMatchModal("${matchKey}", ${JSON.stringify(m.home)}, ${JSON.stringify(m.away)})'>${buttonText}</button>`
+                        : '-';
+
+                    html += `<tr><td><strong>${escapeHtml(m.home)}</strong></td><td class="vs">${scoreDisplay}</td><td><strong>${escapeHtml(m.away)}</strong></td><td>${actionBtn}</td></tr>`;
+                });
+
+                html += `</tbody></table>`;
+                weekDiv.innerHTML = html;
+                container.appendChild(weekDiv);
+            });
+
+            updateAdminUIStateOnly();
+        }
+
+        function updateAdminUIStateOnly() {
+            const adminElements = document.querySelectorAll('.admin-only');
+            adminElements.forEach(el => {
+                if (isAdminLoggedIn) {
+                    el.classList.remove('admin-only');
+                } else {
+                    el.classList.add('admin-only');
+                }
+            });
         }
 
         function calculateStatsFromData(teamsList, playersList, fixturesList, resultsMap) {
@@ -2074,30 +1984,7 @@
             document.getElementById('ach-high-start-team').textContent = rec.highStart.team;
         }
 
-        function generateShadowLeague() {
-            if (!checkAdminPermission()) return;
-            const sortedSingles = Object.keys(singlesStats).sort((a,b) => singlesStats[b].w - singlesStats[a].w);
-            if (sortedSingles.length < 2) {
-                alert('Not enough ranked players to generate a shadow league.');
-                return;
-            }
-            const midpoint = Math.ceil(sortedSingles.length / 2);
-            shadowLeaguePlayers = sortedSingles.slice(midpoint);
-            Storage.set('rugeley_shadow_players', shadowLeaguePlayers);
-            recalculateAllStats();
-            alert('Singles Shadow League generated!');
-        }
-
-        function generateTeamShadowLeague() {
-            if (!checkAdminPermission()) return;
-            if (teams.length < 2) return;
-            const midpoint = Math.ceil(teams.length / 2);
-            shadowLeagueTeams = teams.slice(midpoint);
-            Storage.set('rugeley_shadow_teams', shadowLeagueTeams);
-            recalculateAllStats();
-            alert('Team Shadow League generated!');
-        }
-
+        // Initialize App on Load
         document.addEventListener('DOMContentLoaded', () => {
             initAdminSession();
             renderTeams();
@@ -2125,16 +2012,10 @@
                     pool.splice(1, 0, pool.pop());
                 }
                 generatedFixtures = schedule;
-                Storage.set('rugeley_darts_fixtures', generatedFixtures);
             }
 
             renderFixtures();
             recalculateAllStats();
-
-            // Perform automatic initial sync on startup
-            if (cloudConfig.url) {
-                manualCloudSync(true);
-            }
         });
     </script>
 </body>

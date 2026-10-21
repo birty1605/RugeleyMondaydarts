@@ -6,6 +6,8 @@
     <title>Rugeley Monday Night Darts League</title>
     <!-- Include Tesseract.js for browser-based OCR photo scanning -->
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    <!-- Include html2canvas for downloading the scorecard -->
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <style>
         :root {
             --primary: #1e3a8a;
@@ -523,7 +525,7 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>Pos</th><th>Team</th><th>P</th><th>W</th><th>D</th><th>L</th><th>F</th><th>A</th><th>+/-</th><th>180s</th><th>Pts</th>
+                            <th>Pos</th><th>Team</th><th>P</th><th>W</th><th>D</th><th>L</th><th>F</th><th>A</th><th>+/-</th><th>Pts</th>
                         </tr>
                     </thead>
                     <tbody id="overall-team-leaderboard"></tbody>
@@ -535,7 +537,7 @@
                 <table class="shadow-table">
                     <thead>
                         <tr>
-                            <th>Pos</th><th>Team</th><th>P</th><th>W</th><th>D</th><th>L</th><th>F</th><th>A</th><th>+/-</th><th>180s</th><th>Pts</th>
+                            <th>Pos</th><th>Team</th><th>P</th><th>W</th><th>D</th><th>L</th><th>F</th><th>A</th><th>+/-</th><th>Pts</th>
                         </tr>
                     </thead>
                     <tbody id="team-shadow-leaderboard"></tbody>
@@ -580,7 +582,7 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>Pos</th><th>Player</th><th>Team</th><th>P</th><th>W</th><th>L</th><th>F</th><th>A</th><th>+/-</th><th>180s</th>
+                            <th>Pos</th><th>Player</th><th>Team</th><th>P</th><th>W</th><th>L</th><th>F</th><th>A</th><th>+/-</th>
                         </tr>
                     </thead>
                     <tbody id="singles-leaderboard"></tbody>
@@ -592,7 +594,7 @@
                 <table class="shadow-table">
                     <thead>
                         <tr>
-                            <th>Pos</th><th>Player</th><th>Team</th><th>P</th><th>W</th><th>L</th><th>F</th><th>A</th><th>+/-</th><th>180s</th>
+                            <th>Pos</th><th>Player</th><th>Team</th><th>P</th><th>W</th><th>L</th><th>F</th><th>A</th><th>+/-</th>
                         </tr>
                     </thead>
                     <tbody id="shadow-leaderboard"></tbody>
@@ -616,7 +618,7 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>Pos</th><th>Captain</th><th>Team</th><th>P</th><th>W</th><th>L</th><th>F</th><th>A</th><th>+/-</th><th>180s</th>
+                            <th>Pos</th><th>Captain</th><th>Team</th><th>P</th><th>W</th><th>L</th><th>F</th><th>A</th><th>+/-</th>
                         </tr>
                     </thead>
                     <tbody id="captains-leaderboard"></tbody>
@@ -752,11 +754,12 @@
 
         <!-- SCORE SHEET TAB -->
         <div id="scoresheet" class="tab-content">
-            <div class="no-print" style="margin-bottom: 1rem;">
+            <div class="no-print" style="margin-bottom: 1rem; display: flex; gap: 10px;">
                 <button type="button" class="btn" onclick="window.print()">Print Score Sheet</button>
+                <button type="button" class="btn btn-accent" onclick="downloadScoreSheet()">Download Score Sheet (PNG)</button>
             </div>
             
-            <div class="printable-area card">
+            <div class="printable-area card" id="printable-scoresheet-area">
                 <div style="text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 15px;">
                     <h2>RUGELEY MONDAY NIGHT DARTS LEAGUE</h2>
                     <h3>Official Match Result Sheet</h3>
@@ -771,27 +774,26 @@
                 <table class="scoresheet-table">
                     <thead>
                         <tr>
-                            <th style="width: 5%;">Game</th>
-                            <th style="width: 35%;">Home Player(s)</th>
+                            <th style="width: 8%;">Game</th>
+                            <th style="width: 41%;">Home Player(s)</th>
                             <th style="width: 10%;">Legs</th>
                             <th style="width: 10%;">Legs</th>
-                            <th style="width: 35%;">Away Player(s)</th>
-                            <th style="width: 5%;">180s</th>
+                            <th style="width: 41%;">Away Player(s)</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr style="background-color: #f1f5f9;"><td colspan="6" style="text-align: center; font-weight: bold;">SINGLES MATCHES (1 v 1)</td></tr>
-                        <tr><td>1</td><td></td><td></td><td></td><td></td><td></td></tr>
-                        <tr><td>2</td><td></td><td></td><td></td><td></td><td></td></tr>
-                        <tr><td>3</td><td></td><td></td><td></td><td></td><td></td></tr>
-                        <tr><td>4</td><td></td><td></td><td></td><td></td><td></td></tr>
-                        <tr><td>5</td><td></td><td></td><td></td><td></td><td></td></tr>
-                        <tr><td>6</td><td></td><td></td><td></td><td></td><td></td></tr>
-                        <tr style="background-color: #f1f5f9;"><td colspan="6" style="text-align: center; font-weight: bold;">DOUBLES MATCHES (2 v 2)</td></tr>
-                        <tr><td>7</td><td>1.<br>2.</td><td></td><td></td><td>1.<br>2.</td><td></td></tr>
-                        <tr><td>8</td><td>1.<br>2.</td><td></td><td></td><td>1.<br>2.</td><td></td></tr>
-                        <tr style="background-color: #f1f5f9;"><td colspan="6" style="text-align: center; font-weight: bold;">CAPTAINS MATCH (1 v 1)</td></tr>
-                        <tr><td>9</td><td>Cap:</td><td></td><td></td><td>Cap:</td><td></td></tr>
+                        <tr style="background-color: #f1f5f9;"><td colspan="5" style="text-align: center; font-weight: bold;">SINGLES MATCHES (1 v 1)</td></tr>
+                        <tr><td>1</td><td></td><td></td><td></td><td></td></tr>
+                        <tr><td>2</td><td></td><td></td><td></td><td></td></tr>
+                        <tr><td>3</td><td></td><td></td><td></td><td></td></tr>
+                        <tr><td>4</td><td></td><td></td><td></td><td></td></tr>
+                        <tr><td>5</td><td></td><td></td><td></td><td></td></tr>
+                        <tr><td>6</td><td></td><td></td><td></td><td></td></tr>
+                        <tr style="background-color: #f1f5f9;"><td colspan="5" style="text-align: center; font-weight: bold;">DOUBLES MATCHES (2 v 2)</td></tr>
+                        <tr><td>7</td><td>1.<br>2.</td><td></td><td></td><td>1.<br>2.</td></tr>
+                        <tr><td>8</td><td>1.<br>2.</td><td></td><td></td><td>1.<br>2.</td></tr>
+                        <tr style="background-color: #f1f5f9;"><td colspan="5" style="text-align: center; font-weight: bold;">CAPTAINS MATCH (1 v 1)</td></tr>
+                        <tr><td>9</td><td>Cap:</td><td></td><td></td><td>Cap:</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -835,6 +837,11 @@
                             <label style="font-size: 0.85rem;">Highest Checkout (Finish):</label>
                             <input type="number" id="m_hi_finish" min="0" max="170" placeholder="e.g. 160">
                             <select id="m_hi_finish_player" style="margin-top: 4px; font-size: 0.85rem;"></select>
+                        </div>
+                        <div class="form-group" style="margin: 0;">
+                            <label style="font-size: 0.85rem;">Highest Score:</label>
+                            <input type="number" id="m_hi_score" min="0" max="180" placeholder="e.g. 180">
+                            <select id="m_hi_score_player" style="margin-top: 4px; font-size: 0.85rem;"></select>
                         </div>
                         <div class="form-group" style="margin: 0;">
                             <label style="font-size: 0.85rem;">Highest Start:</label>
@@ -1027,6 +1034,21 @@
             }
         };
 
+        // --- DOWNLOAD SCORE SHEET FEATURE ---
+        window.downloadScoreSheet = function() {
+            const area = document.getElementById('printable-scoresheet-area');
+            if (!area) return;
+            html2canvas(area, { scale: 2 }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'darts-scoresheet.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            }).catch(err => {
+                console.error("Failed to download scoresheet image:", err);
+                alert("Could not generate scoresheet download.");
+            });
+        };
+
         // --- AI SCANNER FEATURE ---
         window.handleScanMatchCard = async function(event) {
             const file = event.target.files[0];
@@ -1036,7 +1058,6 @@
             msgEl.textContent = "⏳ Scanning image and reading scores... Please wait.";
 
             try {
-                // Run Tesseract OCR on the uploaded image file
                 const { data: { text } } = await Tesseract.recognize(file, 'eng', {
                     logger: m => {
                         if (m.status === 'recognizing text') {
@@ -1045,10 +1066,8 @@
                     }
                 });
 
-                // Extract all numbers found in the scanned text to populate leg scores
                 const numbers = text.match(/\b\d\b/g)?.map(Number) || [];
                 
-                // Automatically fill singles leg input fields found on the form
                 let numIdx = 0;
                 for (let i = 1; i <= 6; i++) {
                     const hsInput = document.getElementById(`m_s_hs_${i}`);
@@ -1063,7 +1082,7 @@
                 console.error("OCR Scan failed:", err);
                 msgEl.textContent = "❌ Failed to read image. Please enter scores manually.";
             }
-            event.target.value = ''; // Reset file input
+            event.target.value = '';
         };
 
         // --- GLOBAL WINDOW HANDLERS ---
@@ -1368,7 +1387,7 @@
             const awayOpts = buildOptions(awayPlayers);
             const allOpts = buildOptions(allMatchPlayers);
 
-            ['m_hi_finish_player', 'm_hi_start_player', 'm_least_darts_player'].forEach(id => {
+            ['m_hi_finish_player', 'm_hi_score_player', 'm_hi_start_player', 'm_least_darts_player'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.innerHTML = allOpts;
             });
@@ -1383,7 +1402,6 @@
                         <span>-</span>
                         <input type="number" id="m_s_as_${i}" min="0" value="0" style="width: 50px; text-align: center;">
                         <select id="m_s_ap_${i}" style="flex: 2;">${awayOpts}</select>
-                        <input type="number" id="m_s_180_${i}" min="0" value="0" placeholder="180s" style="width: 60px;">
                     </div>
                 `;
             }
@@ -1405,7 +1423,6 @@
                             <select id="m_d_ap1_${i}">${awayOpts}</select>
                             <select id="m_d_ap2_${i}">${awayOpts}</select>
                         </div>
-                        <input type="number" id="m_d_180_${i}" min="0" value="0" placeholder="180s" style="width: 60px;">
                     </div>
                 `;
             }
@@ -1419,7 +1436,6 @@
                     <span>-</span>
                     <input type="number" id="m_c_as" min="0" value="0" style="width: 50px; text-align: center;">
                     <select id="m_c_ap" style="flex: 2;">${awayOpts}</select>
-                    <input type="number" id="m_c_180" min="0" value="0" placeholder="180s" style="width: 60px;">
                 </div>
             `;
             document.getElementById('modal-captain-row').innerHTML = captainHTML;
@@ -1434,7 +1450,6 @@
                             if (document.getElementById(`m_s_ap_${i}`)) document.getElementById(`m_s_ap_${i}`).value = s.ap || '';
                             if (document.getElementById(`m_s_hs_${i}`)) document.getElementById(`m_s_hs_${i}`).value = s.hs || 0;
                             if (document.getElementById(`m_s_as_${i}`)) document.getElementById(`m_s_as_${i}`).value = s.as || 0;
-                            if (document.getElementById(`m_s_180_${i}`)) document.getElementById(`m_s_180_${i}`).value = s.c180 || 0;
                         }
                     }
                 }
@@ -1448,7 +1463,6 @@
                             if (document.getElementById(`m_d_ap2_${i}`)) document.getElementById(`m_d_ap2_${i}`).value = d.ap2 || '';
                             if (document.getElementById(`m_d_hs_${i}`)) document.getElementById(`m_d_hs_${i}`).value = d.hs || 0;
                             if (document.getElementById(`m_d_as_${i}`)) document.getElementById(`m_d_as_${i}`).value = d.as || 0;
-                            if (document.getElementById(`m_d_180_${i}`)) document.getElementById(`m_d_180_${i}`).value = d.c180 || 0;
                         }
                     }
                 }
@@ -1458,12 +1472,13 @@
                     if (document.getElementById('m_c_ap')) document.getElementById('m_c_ap').value = c.ap || '';
                     if (document.getElementById('m_c_hs')) document.getElementById('m_c_hs').value = c.hs || 0;
                     if (document.getElementById('m_c_as')) document.getElementById('m_c_as').value = c.as || 0;
-                    if (document.getElementById('m_c_180')) document.getElementById('m_c_180').value = c.c180 || 0;
                 }
                 if (savedData.highlights) {
                     const h = savedData.highlights;
                     if (document.getElementById('m_hi_finish')) document.getElementById('m_hi_finish').value = h.highFinish || '';
                     if (document.getElementById('m_hi_finish_player')) document.getElementById('m_hi_finish_player').value = h.highFinishPlayer || '';
+                    if (document.getElementById('m_hi_score')) document.getElementById('m_hi_score').value = h.highScore || '';
+                    if (document.getElementById('m_hi_score_player')) document.getElementById('m_hi_score_player').value = h.highScorePlayer || '';
                     if (document.getElementById('m_hi_start')) document.getElementById('m_hi_start').value = h.highStart || '';
                     if (document.getElementById('m_hi_start_player')) document.getElementById('m_hi_start_player').value = h.highStartPlayer || '';
                     if (document.getElementById('m_least_darts')) document.getElementById('m_least_darts').value = h.leastDarts || '';
@@ -1485,16 +1500,14 @@
             let doublesData = [];
             let homeTotalLegs = 0;
             let awayTotalLegs = 0;
-            let total180s = 0;
 
             for (let i = 1; i <= 6; i++) {
                 const hp = document.getElementById(`m_s_hp_${i}`).value;
                 const ap = document.getElementById(`m_s_ap_${i}`).value;
                 const hs = parseInt(document.getElementById(`m_s_hs_${i}`).value) || 0;
                 const as = parseInt(document.getElementById(`m_s_as_${i}`).value) || 0;
-                const c180 = parseInt(document.getElementById(`m_s_180_${i}`).value) || 0;
-                homeTotalLegs += hs; awayTotalLegs += as; total180s += c180;
-                singlesData.push({ hp, ap, hs, as, c180 });
+                homeTotalLegs += hs; awayTotalLegs += as;
+                singlesData.push({ hp, ap, hs, as });
             }
 
             for (let i = 1; i <= 2; i++) {
@@ -1504,25 +1517,25 @@
                 const ap2 = document.getElementById(`m_d_ap2_${i}`).value;
                 const hs = parseInt(document.getElementById(`m_d_hs_${i}`).value) || 0;
                 const as = parseInt(document.getElementById(`m_d_as_${i}`).value) || 0;
-                const c180 = parseInt(document.getElementById(`m_d_180_${i}`).value) || 0;
-                homeTotalLegs += hs; awayTotalLegs += as; total180s += c180;
-                doublesData.push({ hp1, hp2, ap1, ap2, hs, as, c180 });
+                homeTotalLegs += hs; awayTotalLegs += as;
+                doublesData.push({ hp1, hp2, ap1, ap2, hs, as });
             }
 
             const c_hp = document.getElementById('m_c_hp').value;
             const c_ap = document.getElementById('m_c_ap').value;
             const c_hs = parseInt(document.getElementById('m_c_hs').value) || 0;
             const c_as = parseInt(document.getElementById('m_c_as').value) || 0;
-            const c_c180 = parseInt(document.getElementById('m_c_180').value) || 0;
-            homeTotalLegs += c_hs; awayTotalLegs += c_as; total180s += c_c180;
+            homeTotalLegs += c_hs; awayTotalLegs += c_as;
 
             matchResults[matchKey] = {
-                homeTotalLegs, awayTotalLegs, total180s,
+                homeTotalLegs, awayTotalLegs,
                 singles: singlesData, doubles: doublesData,
-                captains: { hp: c_hp, ap: c_ap, hs: c_hs, as: c_as, c180: c_c180 },
+                captains: { hp: c_hp, ap: c_ap, hs: c_hs, as: c_as },
                 highlights: {
                     highFinish: parseInt(document.getElementById('m_hi_finish').value) || null,
                     highFinishPlayer: document.getElementById('m_hi_finish_player').value || '',
+                    highScore: parseInt(document.getElementById('m_hi_score').value) || null,
+                    highScorePlayer: document.getElementById('m_hi_score_player').value || '',
                     highStart: parseInt(document.getElementById('m_hi_start').value) || null,
                     highStartPlayer: document.getElementById('m_hi_start_player').value || '',
                     leastDarts: parseInt(document.getElementById('m_least_darts').value) || null,
@@ -1559,7 +1572,6 @@
             alert('Team Shadow League generated!');
         };
 
-        // UI Rendering & Helpers
         function escapeHtml(str) {
             if (!str) return '';
             return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
@@ -1759,10 +1771,10 @@
             let doublesStats = {};
             let captainsStats = {};
 
-            teamsList.forEach(t => { teamStats[t] = { p: 0, w: 0, d: 0, l: 0, f: 0, a: 0, c180: 0, pts: 0 }; });
+            teamsList.forEach(t => { teamStats[t] = { p: 0, w: 0, d: 0, l: 0, f: 0, a: 0, pts: 0 }; });
             let bestRecords = {
                 leastDarts: { val: null, player: 'None', team: '' },
-                highScore: { val: 180, player: 'Multiple', team: 'League' },
+                highScore: { val: null, player: 'None', team: '' },
                 highFinish: { val: null, player: 'None', team: '' },
                 highStart: { val: null, player: 'None', team: '' }
             };
@@ -1775,13 +1787,12 @@
                         const res = resultsMap[matchKey];
                         if (res && m.home !== "BYE" && m.away !== "BYE") {
                             const hTeam = m.home; const aTeam = m.away;
-                            if (!teamStats[hTeam]) teamStats[hTeam] = { p: 0, w: 0, d: 0, l: 0, f: 0, a: 0, c180: 0, pts: 0 };
-                            if (!teamStats[aTeam]) teamStats[aTeam] = { p: 0, w: 0, d: 0, l: 0, f: 0, a: 0, c180: 0, pts: 0 };
+                            if (!teamStats[hTeam]) teamStats[hTeam] = { p: 0, w: 0, d: 0, l: 0, f: 0, a: 0, pts: 0 };
+                            if (!teamStats[aTeam]) teamStats[aTeam] = { p: 0, w: 0, d: 0, l: 0, f: 0, a: 0, pts: 0 };
 
                             teamStats[hTeam].p++; teamStats[aTeam].p++;
                             teamStats[hTeam].f += res.homeTotalLegs; teamStats[hTeam].a += res.awayTotalLegs;
                             teamStats[aTeam].f += res.awayTotalLegs; teamStats[aTeam].a += res.homeTotalLegs;
-                            teamStats[hTeam].c180 += res.total180s;
 
                             if (res.homeTotalLegs > res.awayTotalLegs) { teamStats[hTeam].w++; teamStats[hTeam].pts += 2; teamStats[aTeam].l++; }
                             else if (res.homeTotalLegs === res.awayTotalLegs) { teamStats[hTeam].d++; teamStats[hTeam].pts++; teamStats[aTeam].d++; teamStats[aTeam].pts++; }
@@ -1789,28 +1800,31 @@
 
                             if (res.singles) {
                                 res.singles.forEach(s => {
-                                    if (s.hp) updateIndivStats(singlesStats, s.hp, s.hs, s.as, s.c180);
-                                    if (s.ap) updateIndivStats(singlesStats, s.ap, s.as, s.hs, 0);
+                                    if (s.hp) updateIndivStats(singlesStats, s.hp, s.hs, s.as);
+                                    if (s.ap) updateIndivStats(singlesStats, s.ap, s.as, s.hs);
                                 });
                             }
                             if (res.doubles) {
                                 res.doubles.forEach(d => {
                                     let hPairKey = [d.hp1, d.hp2].filter(Boolean).sort().join(" & ");
                                     let aPairKey = [d.ap1, d.ap2].filter(Boolean).sort().join(" & ");
-                                    if (hPairKey) updateIndivStats(doublesStats, hPairKey, d.hs, d.as, d.c180);
-                                    if (aPairKey) updateIndivStats(doublesStats, aPairKey, d.as, d.hs, 0);
+                                    if (hPairKey) updateIndivStats(doublesStats, hPairKey, d.hs, d.as);
+                                    if (aPairKey) updateIndivStats(doublesStats, aPairKey, d.as, d.hs);
                                 });
                             }
                             if (res.captains) {
                                 let c = res.captains;
-                                if (c.hp) updateIndivStats(captainsStats, c.hp, c.hs, c.as, c.c180);
-                                if (c.ap) updateIndivStats(captainsStats, c.ap, c.as, c.hs, 0);
+                                if (c.hp) updateIndivStats(captainsStats, c.hp, c.hs, c.as);
+                                if (c.ap) updateIndivStats(captainsStats, c.ap, c.as, c.hs);
                             }
                             if (res.highlights) {
                                 const h = res.highlights;
                                 const findTeam = (pName) => { const pObj = playersList.find(p => p.name === pName); return pObj ? pObj.team : ''; };
                                 if (h.highFinish && (!bestRecords.highFinish.val || h.highFinish > bestRecords.highFinish.val)) {
                                     bestRecords.highFinish = { val: h.highFinish, player: h.highFinishPlayer || 'Unknown', team: findTeam(h.highFinishPlayer) };
+                                }
+                                if (h.highScore && (!bestRecords.highScore.val || h.highScore > bestRecords.highScore.val)) {
+                                    bestRecords.highScore = { val: h.highScore, player: h.highScorePlayer || 'Unknown', team: findTeam(h.highScorePlayer) };
                                 }
                                 if (h.highStart && (!bestRecords.highStart.val || h.highStart > bestRecords.highStart.val)) {
                                     bestRecords.highStart = { val: h.highStart, player: h.highStartPlayer || 'Unknown', team: findTeam(h.highStartPlayer) };
@@ -1826,12 +1840,12 @@
             return { teamStats, singlesStats, doublesStats, captainsStats, bestRecords };
         }
 
-        function updateIndivStats(statObj, playerName, scoreFor, scoreAgainst, num180s) {
+        function updateIndivStats(statObj, playerName, scoreFor, scoreAgainst) {
             if (!playerName) return;
-            if (!statObj[playerName]) statObj[playerName] = { p: 0, w: 0, l: 0, f: 0, a: 0, c180: 0 };
+            if (!statObj[playerName]) statObj[playerName] = { p: 0, w: 0, l: 0, f: 0, a: 0 };
             statObj[playerName].p++;
             if (scoreFor > scoreAgainst) statObj[playerName].w++; else statObj[playerName].l++;
-            statObj[playerName].f += scoreFor; statObj[playerName].a += scoreAgainst; statObj[playerName].c180 += num180s;
+            statObj[playerName].f += scoreFor; statObj[playerName].a += scoreAgainst;
         }
 
         function buildTeamTableHTML(teamStats, shadowFilter = null) {
@@ -1847,7 +1861,7 @@
                     <td><strong>${idx + 1}</strong></td><td><strong>${escapeHtml(t.team)}</strong></td>
                     <td>${t.p}</td><td>${t.w}</td><td>${t.d}</td><td>${t.l}</td>
                     <td>${t.f}</td><td>${t.a}</td><td>${t.diff > 0 ? '+' + t.diff : t.diff}</td>
-                    <td>${t.c180}</td><td><strong>${t.pts}</strong></td>
+                    <td><strong>${t.pts}</strong></td>
                 </tr>
             `).join('');
         }
@@ -1868,7 +1882,7 @@
                 if (isDoubles) {
                     return `<tr><td><strong>${idx + 1}</strong></td><td>${escapeHtml(s.name)}</td><td>${s.p}</td><td>${s.w}</td><td>${s.l}</td><td>${s.f}</td><td>${s.a}</td><td>${s.diff > 0 ? '+' + s.diff : s.diff}</td></tr>`;
                 } else {
-                    return `<tr><td><strong>${idx + 1}</strong></td><td>${escapeHtml(s.name)}</td><td>${escapeHtml(s.team)}</td><td>${s.p}</td><td>${s.w}</td><td>${s.l}</td><td>${s.f}</td><td>${s.a}</td><td>${s.diff > 0 ? '+' + s.diff : s.diff}</td><td>${s.c180}</td></tr>`;
+                    return `<tr><td><strong>${idx + 1}</strong></td><td>${escapeHtml(s.name)}</td><td>${escapeHtml(s.team)}</td><td>${s.p}</td><td>${s.w}</td><td>${s.l}</td><td>${s.f}</td><td>${s.a}</td><td>${s.diff > 0 ? '+' + s.diff : s.diff}</td></tr>`;
                 }
             }).join('');
         }
@@ -1901,9 +1915,9 @@
             document.getElementById('ach-least-darts-holder').textContent = rec.leastDarts.player;
             document.getElementById('ach-least-darts-team').textContent = rec.leastDarts.team;
 
-            document.getElementById('ach-high-score').textContent = '180';
-            document.getElementById('ach-high-score-holder').textContent = 'Multiple Players';
-            document.getElementById('ach-high-score-team').textContent = 'League Wide';
+            document.getElementById('ach-high-score').textContent = rec.highScore.val ? rec.highScore.val : '-';
+            document.getElementById('ach-high-score-holder').textContent = rec.highScore.player;
+            document.getElementById('ach-high-score-team').textContent = rec.highScore.team;
 
             document.getElementById('ach-high-finish').textContent = rec.highFinish.val ? rec.highFinish.val : '-';
             document.getElementById('ach-high-finish-holder').textContent = rec.highFinish.player;
@@ -1944,4 +1958,4 @@
         });
     </script>
 </body>
-</html>
+                            </html>

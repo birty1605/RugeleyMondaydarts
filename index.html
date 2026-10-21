@@ -328,6 +328,7 @@
             width: 130px;
         }
 
+        /* Standard Fixture Match Cards */
         .fixture-match-card {
             background: #0f172a;
             border: 1px solid var(--border);
@@ -379,19 +380,55 @@
             margin-top: 4px;
         }
 
+        /* Completed Results Section Format */
+        .results-summary-card {
+            background: #090d16;
+            border: 1px solid #1e293b;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 8px;
+            font-size: 0.88rem;
+        }
+
+        .results-summary-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px 0;
+        }
+
+        .results-team-name {
+            font-weight: 600;
+            color: #e2e8f0;
+        }
+
+        .results-score-badge {
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 4px;
+            background: #1e293b;
+            color: #94a3b8;
+        }
+
+        .results-score-badge.win {
+            background: #15803d;
+            color: #ffffff;
+        }
+
+        /* High-Visibility Match Entry Modal & Rows */
         .match-row-box {
             background: #0f172a;
             border: 1px solid #334155;
             border-radius: 10px;
-            padding: 12px;
+            padding: 14px;
             margin-bottom: 14px;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 12px;
         }
 
         .match-row-header {
-            font-size: 0.85rem;
+            font-size: 0.95rem;
             font-weight: 800;
             color: #38bdf8;
             text-transform: uppercase;
@@ -399,8 +436,11 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid #1e293b;
-            padding-bottom: 4px;
+            border-bottom: 2px solid #1e293b;
+            padding-bottom: 6px;
+            background-color: #1e293b;
+            padding: 8px 12px;
+            border-radius: 6px;
         }
 
         .match-player-picker {
@@ -411,12 +451,14 @@
         }
 
         .player-label {
-            font-size: 0.8rem;
-            font-weight: 700;
-            color: #94a3b8;
+            font-size: 0.85rem;
+            font-weight: 800;
+            color: #f8fafc;
             text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
+        /* High-Contrast Player Select Box */
         .player-select-custom {
             width: 100%;
             background-color: #1e293b !important;
@@ -426,7 +468,7 @@
             font-weight: 700 !important;
             padding: 0.85rem !important;
             border-radius: 8px !important;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.4);
         }
 
         .player-select-custom option {
@@ -436,26 +478,42 @@
             padding: 10px;
         }
 
+        /* Dual-Box Middle Score Input Display */
+        .match-score-dual-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 8px;
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 8px;
+        }
+
+        .score-box-single {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .score-box-label {
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: #94a3b8;
+            text-transform: uppercase;
+        }
+
         .score-input-custom {
-            width: 70px !important;
+            width: 65px !important;
             text-align: center;
             font-size: 1.3rem !important;
             font-weight: 800 !important;
-            background-color: #1e293b !important;
+            background-color: #0f172a !important;
             color: #f59e0b !important;
             border: 2px solid #f59e0b !important;
             padding: 0.6rem !important;
             border-radius: 8px !important;
-        }
-
-        .match-vs-divider {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
-            padding: 6px 0;
-            font-weight: 800;
-            color: #f59e0b;
         }
 
         .achievement-grid {
@@ -633,10 +691,17 @@
 
     <div class="container" id="main-container">
 
-        <!-- FIXTURES TAB -->
+        <!-- FIXTURES & RESULTS TAB -->
         <div id="fixtures" class="tab-content active">
+            <!-- Completed Results Summary Box -->
+            <div id="completed-results-wrapper" class="card" style="display: none; border-left: 5px solid var(--success);">
+                <h2>📋 Completed Week Results</h2>
+                <div id="completed-results-container"></div>
+            </div>
+
+            <!-- Active / Upcoming Fixtures Box -->
             <div class="card">
-                <h2>Season Fixtures & Match Scores</h2>
+                <h2>Upcoming Season Fixtures</h2>
                 <div id="fixtures-container"></div>
             </div>
 
@@ -689,7 +754,7 @@
                     <table>
                         <thead>
                             <tr>
-                                <th>Pos</th><th>Team</th><th>P</th><th>W</th><th>D</th><th>L</th><th>F</th><th>A</th><th>+/-</th><th>Pts</th>
+                                <th>Pos</th><th>Team</th><th>P</th><th>W</th><th>D</th><th>L</th><th>2-0 W</th><th>F</th><th>A</th><th>+/-</th><th>Pts</th>
                             </tr>
                         </thead>
                         <tbody id="overall-team-leaderboard"></tbody>
@@ -703,7 +768,7 @@
                     <table class="shadow-table">
                         <thead>
                             <tr>
-                                <th>Pos</th><th>Team</th><th>P</th><th>W</th><th>D</th><th>L</th><th>F</th><th>A</th><th>+/-</th><th>Pts</th>
+                                <th>Pos</th><th>Team</th><th>P</th><th>W</th><th>D</th><th>L</th><th>2-0 W</th><th>F</th><th>A</th><th>+/-</th><th>Pts</th>
                             </tr>
                         </thead>
                         <tbody id="team-shadow-leaderboard"></tbody>
@@ -750,7 +815,7 @@
                     <table>
                         <thead>
                             <tr>
-                                <th>Pos</th><th>Player</th><th>Team</th><th>P</th><th>W</th><th>L</th><th>F</th><th>A</th><th>+/-</th>
+                                <th>Pos</th><th>Player</th><th>Team</th><th>P</th><th>W</th><th>L</th><th>2-0 W</th><th>F</th><th>A</th><th>+/-</th>
                             </tr>
                         </thead>
                         <tbody id="singles-leaderboard"></tbody>
@@ -764,7 +829,7 @@
                     <table class="shadow-table">
                         <thead>
                             <tr>
-                                <th>Pos</th><th>Player</th><th>Team</th><th>P</th><th>W</th><th>L</th><th>F</th><th>A</th><th>+/-</th>
+                                <th>Pos</th><th>Player</th><th>Team</th><th>P</th><th>W</th><th>L</th><th>2-0 W</th><th>F</th><th>A</th><th>+/-</th>
                             </tr>
                         </thead>
                         <tbody id="shadow-leaderboard"></tbody>
@@ -778,7 +843,7 @@
                     <table>
                         <thead>
                             <tr>
-                                <th>Pos</th><th>Pair</th><th>P</th><th>W</th><th>L</th><th>F</th><th>A</th><th>+/-</th>
+                                <th>Pos</th><th>Pair</th><th>P</th><th>W</th><th>L</th><th>2-0 W</th><th>F</th><th>A</th><th>+/-</th>
                             </tr>
                         </thead>
                         <tbody id="doubles-leaderboard"></tbody>
@@ -792,7 +857,7 @@
                     <table>
                         <thead>
                             <tr>
-                                <th>Pos</th><th>Captain</th><th>Team</th><th>P</th><th>W</th><th>L</th><th>F</th><th>A</th><th>+/-</th>
+                                <th>Pos</th><th>Captain</th><th>Team</th><th>P</th><th>W</th><th>L</th><th>2-0 W</th><th>F</th><th>A</th><th>+/-</th>
                             </tr>
                         </thead>
                         <tbody id="captains-leaderboard"></tbody>
@@ -952,25 +1017,26 @@
                 <table class="scoresheet-table">
                     <thead>
                         <tr>
-                            <th style="width: 10%;">#</th>
-                            <th style="width: 40%;">Home Player</th>
-                            <th style="width: 10%;">Legs</th>
-                            <th style="width: 40%;">Away Player</th>
+                            <th style="width: 8%;">#</th>
+                            <th style="width: 37%;">Home Player</th>
+                            <th style="width: 9%; text-align: center;">Home Legs</th>
+                            <th style="width: 9%; text-align: center;">Away Legs</th>
+                            <th style="width: 37%;">Away Player</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr style="background-color: #e2e8f0;"><td colspan="4" style="text-align: center; font-weight: bold;">SINGLES (1 v 1)</td></tr>
-                        <tr><td>1</td><td></td><td></td><td></td></tr>
-                        <tr><td>2</td><td></td><td></td><td></td></tr>
-                        <tr><td>3</td><td></td><td></td><td></td></tr>
-                        <tr><td>4</td><td></td><td></td><td></td></tr>
-                        <tr><td>5</td><td></td><td></td><td></td></tr>
-                        <tr><td>6</td><td></td><td></td><td></td></tr>
-                        <tr style="background-color: #e2e8f0;"><td colspan="4" style="text-align: center; font-weight: bold;">DOUBLES (2 v 2)</td></tr>
-                        <tr><td>7</td><td>1.<br>2.</td><td></td><td>1.<br>2.</td></tr>
-                        <tr><td>8</td><td>1.<br>2.</td><td></td><td>1.<br>2.</td></tr>
-                        <tr style="background-color: #e2e8f0;"><td colspan="4" style="text-align: center; font-weight: bold;">CAPTAINS (1 v 1)</td></tr>
-                        <tr><td>9</td><td>Cap:</td><td></td><td>Cap:</td></tr>
+                        <tr style="background-color: #e2e8f0;"><td colspan="5" style="text-align: center; font-weight: bold;">SINGLES (1 v 1)</td></tr>
+                        <tr><td>1</td><td></td><td></td><td></td><td></td></tr>
+                        <tr><td>2</td><td></td><td></td><td></td><td></td></tr>
+                        <tr><td>3</td><td></td><td></td><td></td><td></td></tr>
+                        <tr><td>4</td><td></td><td></td><td></td><td></td></tr>
+                        <tr><td>5</td><td></td><td></td><td></td><td></td></tr>
+                        <tr><td>6</td><td></td><td></td><td></td><td></td></tr>
+                        <tr style="background-color: #e2e8f0;"><td colspan="5" style="text-align: center; font-weight: bold;">DOUBLES (2 v 2)</td></tr>
+                        <tr><td>7</td><td>1.<br>2.</td><td></td><td></td><td>1.<br>2.</td></tr>
+                        <tr><td>8</td><td>1.<br>2.</td><td></td><td></td><td>1.<br>2.</td></tr>
+                        <tr style="background-color: #e2e8f0;"><td colspan="5" style="text-align: center; font-weight: bold;">CAPTAINS (1 v 1)</td></tr>
+                        <tr><td>9</td><td>Cap:</td><td></td><td></td><td>Cap:</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -1078,7 +1144,7 @@
         let players = [];
         let generatedFixtures = null;
         let matchResults = {};
-        let weekDates = {}; // Stores manually inputted dates per week (e.g., { "1": "Mon 12th Oct" })
+        let weekDates = {};
         let seasonEvents = [];
         let shadowLeaguePlayers = [];
         let shadowLeagueTeams = [];
@@ -1562,6 +1628,7 @@
                 if (el) el.innerHTML = allOpts;
             });
 
+            /* Updated Dual-Box Middle Score Input Layout for High Visibility */
             let singlesHTML = '';
             for (let i = 1; i <= 6; i++) {
                 singlesHTML += `
@@ -1574,11 +1641,16 @@
                                 <span class="player-label">${escapeHtml(homeTeam)} Player:</span>
                                 <select id="m_s_hp_${i}" class="player-select-custom">${homeOpts}</select>
                             </div>
-                            <div class="match-vs-divider">
-                                <span>Legs:</span>
-                                <input type="number" id="m_s_hs_${i}" class="score-input-custom" min="0" value="0">
-                                <span>-</span>
-                                <input type="number" id="m_s_as_${i}" class="score-input-custom" min="0" value="0">
+                            <div class="match-score-dual-container">
+                                <div class="score-box-single">
+                                    <span class="score-box-label">Home Legs</span>
+                                    <input type="number" id="m_s_hs_${i}" class="score-input-custom" min="0" value="0">
+                                </div>
+                                <span style="font-size: 1.2rem; font-weight: 800; color: #94a3b8;">:</span>
+                                <div class="score-box-single">
+                                    <span class="score-box-label">Away Legs</span>
+                                    <input type="number" id="m_s_as_${i}" class="score-input-custom" min="0" value="0">
+                                </div>
                             </div>
                             <div class="match-player-picker">
                                 <span class="player-label">${escapeHtml(awayTeam)} Player:</span>
@@ -1603,11 +1675,16 @@
                                 <select id="m_d_hp1_${i}" class="player-select-custom" style="margin-bottom: 4px;">${homeOpts}</select>
                                 <select id="m_d_hp2_${i}" class="player-select-custom">${homeOpts}</select>
                             </div>
-                            <div class="match-vs-divider">
-                                <span>Legs:</span>
-                                <input type="number" id="m_d_hs_${i}" class="score-input-custom" min="0" value="0">
-                                <span>-</span>
-                                <input type="number" id="m_d_as_${i}" class="score-input-custom" min="0" value="0">
+                            <div class="match-score-dual-container">
+                                <div class="score-box-single">
+                                    <span class="score-box-label">Home Legs</span>
+                                    <input type="number" id="m_d_hs_${i}" class="score-input-custom" min="0" value="0">
+                                </div>
+                                <span style="font-size: 1.2rem; font-weight: 800; color: #94a3b8;">:</span>
+                                <div class="score-box-single">
+                                    <span class="score-box-label">Away Legs</span>
+                                    <input type="number" id="m_d_as_${i}" class="score-input-custom" min="0" value="0">
+                                </div>
                             </div>
                             <div class="match-player-picker">
                                 <span class="player-label">${escapeHtml(awayTeam)} Pair:</span>
@@ -1630,11 +1707,16 @@
                             <span class="player-label">${escapeHtml(homeTeam)} Captain:</span>
                             <select id="m_c_hp" class="player-select-custom">${homeOpts}</select>
                         </div>
-                        <div class="match-vs-divider">
-                            <span>Legs:</span>
-                            <input type="number" id="m_c_hs" class="score-input-custom" min="0" value="0">
-                            <span>-</span>
-                            <input type="number" id="m_c_as" class="score-input-custom" min="0" value="0">
+                        <div class="match-score-dual-container">
+                            <div class="score-box-single">
+                                <span class="score-box-label">Home Legs</span>
+                                <input type="number" id="m_c_hs" class="score-input-custom" min="0" value="0">
+                            </div>
+                            <span style="font-size: 1.2rem; font-weight: 800; color: #94a3b8;">:</span>
+                            <div class="score-box-single">
+                                <span class="score-box-label">Away Legs</span>
+                                <input type="number" id="m_c_as" class="score-input-custom" min="0" value="0">
+                            </div>
                         </div>
                         <div class="match-player-picker">
                             <span class="player-label">${escapeHtml(awayTeam)} Captain:</span>
@@ -1703,7 +1785,7 @@
 
             let singlesData = [];
             let doublesData = [];
-            let homeMatchWins = 0; // Calculated based on games won (singles + doubles)
+            let homeMatchWins = 0; // Games won count (singles + doubles)
             let awayMatchWins = 0;
 
             for (let i = 1; i <= 6; i++) {
@@ -1732,10 +1814,10 @@
             const c_ap = document.getElementById('m_c_ap').value;
             const c_hs = parseInt(document.getElementById('m_c_hs').value) || 0;
             const c_as = parseInt(document.getElementById('m_c_as').value) || 0;
-            // Captain match is strictly excluded from team score calculation!
+            // Captain match is strictly excluded from team score calculation
 
             matchResults[matchKey] = {
-                homeTotalLegs: homeMatchWins, // Stored as overall game wins for the team fixture score display
+                homeTotalLegs: homeMatchWins, // Games won for team score
                 awayTotalLegs: awayMatchWins,
                 singles: singlesData, doubles: doublesData,
                 captains: { hp: c_hp, ap: c_ap, hs: c_hs, as: c_as },
@@ -1918,72 +2000,129 @@
             });
         }
 
+        /* Render Fixtures & Fully Completed Results Section */
         function renderFixtures() {
             const container = document.getElementById('fixtures-container');
-            if (!container) return;
+            const completedWrapper = document.getElementById('completed-results-wrapper');
+            const completedContainer = document.getElementById('completed-results-container');
+            if (!container || !completedContainer) return;
+
             container.innerHTML = '';
+            completedContainer.innerHTML = '';
+            let hasAnyCompletedWeeks = false;
+
             if (!generatedFixtures || generatedFixtures.length === 0) {
                 container.innerHTML = '<p style="color: var(--text-muted);">No fixtures generated yet.</p>';
+                if (completedWrapper) completedWrapper.style.display = 'none';
                 return;
             }
 
             const totalLeg1Weeks = generatedFixtures.length / 2;
+
             generatedFixtures.forEach((roundMatches, rIdx) => {
                 const weekNum = rIdx + 1;
                 const isReturn = weekNum > totalLeg1Weeks;
-                const weekDiv = document.createElement('div');
-                weekDiv.style.marginBottom = '1.5rem';
-                
                 const currentWeekDate = weekDates[weekNum] || '';
 
-                let html = `
-                    <div class="week-header-container">
-                        <span class="week-title">Week ${weekNum} ${isReturn ? '(Return)' : ''}</span>
-                        <div class="admin-only week-date-editor">
-                            <span style="font-size: 0.8rem; color: var(--text-muted);">Date:</span>
-                            <input type="text" placeholder="e.g. 12th Oct" value="${escapeHtml(currentWeekDate)}" onchange="updateWeekDate(${weekNum}, this)">
-                        </div>
-                        ${!isAdminLoggedIn && currentWeekDate ? `<span class="week-date-badge">📅 ${escapeHtml(currentWeekDate)}</span>` : ''}
-                    </div>
-                `;
+                // Check if ALL matches in this week have inputted results
+                let playableMatches = roundMatches.filter(m => m.home !== "BYE" && m.away !== "BYE");
+                let allMatchesCompleted = playableMatches.length > 0 && playableMatches.every((m, mIdx) => {
+                    const origMatchIdx = roundMatches.indexOf(m);
+                    return !!matchResults[`w${weekNum}_m${origMatchIdx}`];
+                });
 
-                roundMatches.forEach((m, mIdx) => {
-                    const matchKey = `w${weekNum}_m${mIdx}`;
-                    const res = matchResults[matchKey];
-                    let homeScore = 0;
-                    let awayScore = 0;
-                    let hasScores = false;
-
-                    if (res) {
-                        homeScore = res.homeTotalLegs;
-                        awayScore = res.awayTotalLegs;
-                        hasScores = true;
-                    }
-
-                    const homeWinner = hasScores && homeScore > awayScore;
-                    const awayWinner = hasScores && awayScore > homeScore;
-
-                    let actionBtn = (m.home !== "BYE" && m.away !== "BYE") 
-                        ? `<button type="button" class="btn btn-sm btn-accent admin-only" onclick="openMatchModal('${matchKey}')">${hasScores ? 'Edit Scores' : 'Enter Scores'}</button>`
-                        : '';
-
-                    html += `
-                        <div class="fixture-match-card">
-                            <div class="match-card-team-row">
-                                <span class="match-card-team-name">${escapeHtml(m.home)}</span>
-                                <span class="match-card-score ${homeWinner ? 'winner' : ''}">${hasScores ? homeScore : '-'}</span>
+                if (allMatchesCompleted) {
+                    hasAnyCompletedWeeks = true;
+                    let summaryHTML = `
+                        <div style="margin-bottom: 1rem; border-bottom: 1px solid #334155; padding-bottom: 8px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                <strong style="color: var(--success); font-size: 0.95rem;">Week ${weekNum} ${isReturn ? '(Return)' : ''} Results</strong>
+                                ${currentWeekDate ? `<span style="font-size: 0.8rem; color: var(--text-muted);">📅 ${escapeHtml(currentWeekDate)}</span>` : ''}
                             </div>
-                            <div class="match-card-team-row">
-                                <span class="match-card-team-name">${escapeHtml(m.away)}</span>
-                                <span class="match-card-score ${awayWinner ? 'winner' : ''}">${hasScores ? awayScore : '-'}</span>
+                    `;
+
+                    roundMatches.forEach((m, mIdx) => {
+                        const matchKey = `w${weekNum}_m${mIdx}`;
+                        const res = matchResults[matchKey];
+                        if (res) {
+                            const homeWin = res.homeTotalLegs > res.awayTotalLegs;
+                            const awayWin = res.awayTotalLegs > res.homeTotalLegs;
+
+                            summaryHTML += `
+                                <div class="results-summary-card">
+                                    <div class="results-summary-row">
+                                        <span class="results-team-name">${escapeHtml(m.home)}</span>
+                                        <span class="results-score-badge ${homeWin ? 'win' : ''}">${res.homeTotalLegs}</span>
+                                    </div>
+                                    <div class="results-summary-row">
+                                        <span class="results-team-name">${escapeHtml(m.away)}</span>
+                                        <span class="results-score-badge ${awayWin ? 'win' : ''}">${res.awayTotalLegs}</span>
+                                    </div>
+                                    ${isAdminLoggedIn ? `<div style="text-align: right; margin-top: 4px;"><button type="button" class="btn btn-sm btn-accent admin-only" onclick="openMatchModal('${matchKey}')">Edit Result</button></div>` : ''}
+                                </div>
+                            `;
+                        }
+                    });
+                    summaryHTML += `</div>`;
+                    completedContainer.innerHTML += summaryHTML;
+                } else {
+                    // Render into active/upcoming fixtures
+                    const weekDiv = document.createElement('div');
+                    weekDiv.style.marginBottom = '1.5rem';
+
+                    let html = `
+                        <div class="week-header-container">
+                            <span class="week-title">Week ${weekNum} ${isReturn ? '(Return)' : ''}</span>
+                            <div class="admin-only week-date-editor">
+                                <span style="font-size: 0.8rem; color: var(--text-muted);">Date:</span>
+                                <input type="text" placeholder="e.g. 12th Oct" value="${escapeHtml(currentWeekDate)}" onchange="updateWeekDate(${weekNum}, this)">
                             </div>
-                            ${actionBtn ? `<div class="match-action-bar">${actionBtn}</div>` : ''}
+                            ${!isAdminLoggedIn && currentWeekDate ? `<span class="week-date-badge">📅 ${escapeHtml(currentWeekDate)}</span>` : ''}
                         </div>
                     `;
-                });
-                weekDiv.innerHTML = html;
-                container.appendChild(weekDiv);
+
+                    roundMatches.forEach((m, mIdx) => {
+                        const matchKey = `w${weekNum}_m${mIdx}`;
+                        const res = matchResults[matchKey];
+                        let homeScore = 0;
+                        let awayScore = 0;
+                        let hasScores = false;
+
+                        if (res) {
+                            homeScore = res.homeTotalLegs;
+                            awayScore = res.awayTotalLegs;
+                            hasScores = true;
+                        }
+
+                        const homeWinner = hasScores && homeScore > awayScore;
+                        const awayWinner = hasScores && awayScore > homeScore;
+
+                        let actionBtn = (m.home !== "BYE" && m.away !== "BYE") 
+                            ? `<button type="button" class="btn btn-sm btn-accent admin-only" onclick="openMatchModal('${matchKey}')">${hasScores ? 'Edit Scores' : 'Enter Scores'}</button>`
+                            : '';
+
+                        html += `
+                            <div class="fixture-match-card">
+                                <div class="match-card-team-row">
+                                    <span class="match-card-team-name">${escapeHtml(m.home)}</span>
+                                    <span class="match-card-score ${homeWinner ? 'winner' : ''}">${hasScores ? homeScore : '-'}</span>
+                                </div>
+                                <div class="match-card-team-row">
+                                    <span class="match-card-team-name">${escapeHtml(m.away)}</span>
+                                    <span class="match-card-score ${awayWinner ? 'winner' : ''}">${hasScores ? awayScore : '-'}</span>
+                                </div>
+                                ${actionBtn ? `<div class="match-action-bar">${actionBtn}</div>` : ''}
+                            </div>
+                        `;
+                    });
+                    weekDiv.innerHTML = html;
+                    container.appendChild(weekDiv);
+                }
             });
+
+            if (completedWrapper) {
+                completedWrapper.style.display = hasAnyCompletedWeeks ? 'block' : 'none';
+            }
             updateAdminUIStateOnly();
         }
 
@@ -1994,13 +2133,14 @@
             });
         }
 
+        /* Calculate Stats including 2-0 Victories for Leaderboards */
         function calculateStatsFromData(teamsList, playersList, fixturesList, resultsMap) {
             let teamStats = {};
             let singlesStats = {};
             let doublesStats = {};
             let captainsStats = {};
 
-            teamsList.forEach(t => { teamStats[t] = { p: 0, w: 0, d: 0, l: 0, f: 0, a: 0, pts: 0 }; });
+            teamsList.forEach(t => { teamStats[t] = { p: 0, w: 0, d: 0, l: 0, f: 0, a: 0, pts: 0, twoZeroWins: 0 }; });
             let bestRecords = {
                 leastDarts: { val: null, player: 'None', team: '' },
                 highScore: { val: null, player: 'None', team: '' },
@@ -2016,8 +2156,8 @@
                         const res = resultsMap[matchKey];
                         if (res && m.home !== "BYE" && m.away !== "BYE") {
                             const hTeam = m.home; const aTeam = m.away;
-                            if (!teamStats[hTeam]) teamStats[hTeam] = { p: 0, w: 0, d: 0, l: 0, f: 0, a: 0, pts: 0 };
-                            if (!teamStats[aTeam]) teamStats[aTeam] = { p: 0, w: 0, d: 0, l: 0, f: 0, a: 0, pts: 0 };
+                            if (!teamStats[hTeam]) teamStats[hTeam] = { p: 0, w: 0, d: 0, l: 0, f: 0, a: 0, pts: 0, twoZeroWins: 0 };
+                            if (!teamStats[aTeam]) teamStats[aTeam] = { p: 0, w: 0, d: 0, l: 0, f: 0, a: 0, pts: 0, twoZeroWins: 0 };
 
                             teamStats[hTeam].p++; teamStats[aTeam].p++;
                             teamStats[hTeam].f += res.homeTotalLegs; teamStats[hTeam].a += res.awayTotalLegs;
@@ -2031,6 +2171,8 @@
                                 res.singles.forEach(s => {
                                     if (s.hp) updateIndivStats(singlesStats, s.hp, s.hs, s.as);
                                     if (s.ap) updateIndivStats(singlesStats, s.ap, s.as, s.hs);
+                                    if (s.hs === 2 && s.as === 0) teamStats[hTeam].twoZeroWins++;
+                                    if (s.as === 2 && s.hs === 0) teamStats[aTeam].twoZeroWins++;
                                 });
                             }
                             if (res.doubles) {
@@ -2039,6 +2181,8 @@
                                     let aPairKey = [d.ap1, d.ap2].filter(Boolean).sort().join(" & ");
                                     if (hPairKey) updateIndivStats(doublesStats, hPairKey, d.hs, d.as);
                                     if (aPairKey) updateIndivStats(doublesStats, aPairKey, d.as, d.hs);
+                                    if (d.hs === 2 && d.as === 0) teamStats[hTeam].twoZeroWins++;
+                                    if (d.as === 2 && d.hs === 0) teamStats[aTeam].twoZeroWins++;
                                 });
                             }
                             if (res.captains) {
@@ -2071,9 +2215,14 @@
 
         function updateIndivStats(statObj, playerName, scoreFor, scoreAgainst) {
             if (!playerName) return;
-            if (!statObj[playerName]) statObj[playerName] = { p: 0, w: 0, l: 0, f: 0, a: 0 };
+            if (!statObj[playerName]) statObj[playerName] = { p: 0, w: 0, l: 0, f: 0, a: 0, twoZeroWins: 0 };
             statObj[playerName].p++;
-            if (scoreFor > scoreAgainst) statObj[playerName].w++; else statObj[playerName].l++;
+            if (scoreFor > scoreAgainst) {
+                statObj[playerName].w++;
+                if (scoreFor === 2 && scoreAgainst === 0) statObj[playerName].twoZeroWins++;
+            } else {
+                statObj[playerName].l++;
+            }
             statObj[playerName].f += scoreFor; statObj[playerName].a += scoreAgainst;
         }
 
@@ -2088,6 +2237,7 @@
                 <tr>
                     <td><strong>${idx + 1}</strong></td><td><strong>${escapeHtml(t.team)}</strong></td>
                     <td>${t.p}</td><td>${t.w}</td><td>${t.d}</td><td>${t.l}</td>
+                    <td style="color: var(--accent); font-weight: bold;">${t.twoZeroWins}</td>
                     <td>${t.f}</td><td>${t.a}</td><td>${t.diff > 0 ? '+' + t.diff : t.diff}</td>
                     <td><strong>${t.pts}</strong></td>
                 </tr>
@@ -2108,9 +2258,9 @@
 
             return rows.map((s, idx) => {
                 if (isDoubles) {
-                    return `<tr><td><strong>${idx + 1}</strong></td><td>${escapeHtml(s.name)}</td><td>${s.p}</td><td>${s.w}</td><td>${s.l}</td><td>${s.f}</td><td>${s.a}</td><td>${s.diff > 0 ? '+' + s.diff : s.diff}</td></tr>`;
+                    return `<tr><td><strong>${idx + 1}</strong></td><td>${escapeHtml(s.name)}</td><td>${s.p}</td><td>${s.w}</td><td>${s.l}</td><td style="color: var(--accent); font-weight: bold;">${s.twoZeroWins}</td><td>${s.f}</td><td>${s.a}</td><td>${s.diff > 0 ? '+' + s.diff : s.diff}</td></tr>`;
                 } else {
-                    return `<tr><td><strong>${idx + 1}</strong></td><td>${escapeHtml(s.name)}</td><td>${escapeHtml(s.team)}</td><td>${s.p}</td><td>${s.w}</td><td>${s.l}</td><td>${s.f}</td><td>${s.a}</td><td>${s.diff > 0 ? '+' + s.diff : s.diff}</td></tr>`;
+                    return `<tr><td><strong>${idx + 1}</strong></td><td>${escapeHtml(s.name)}</td><td>${escapeHtml(s.team)}</td><td>${s.p}</td><td>${s.w}</td><td>${s.l}</td><td style="color: var(--accent); font-weight: bold;">${s.twoZeroWins}</td><td>${s.f}</td><td>${s.a}</td><td>${s.diff > 0 ? '+' + s.diff : s.diff}</td></tr>`;
                 }
             }).join('');
         }

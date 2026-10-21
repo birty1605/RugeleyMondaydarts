@@ -957,11 +957,14 @@
         async function pushToFirestore() {
             isSaving = true;
             try {
-                await setDoc(docRef, {
+                // Ensure no undefined values crash the Firestore document write by sanitizing through JSON stringify/parse
+                const cleanPayload = JSON.parse(JSON.stringify({
                     teams, teamPairs, players, generatedFixtures, matchResults,
                     seasonEvents, shadowLeaguePlayers, shadowLeagueTeams, archivedSeasons,
                     updatedAt: new Date().toISOString()
-                });
+                }));
+
+                await setDoc(docRef, cleanPayload);
 
                 const statusEl = document.getElementById('sync-status');
                 if (statusEl) {
@@ -969,7 +972,8 @@
                     statusEl.style.color = 'var(--success)';
                 }
             } catch (err) {
-                console.error("Firestore write failed:", err);
+                console.error("Firestore write failed with error:", err);
+                alert("Save Failed: " + err.message);
                 const statusEl = document.getElementById('sync-status');
                 if (statusEl) {
                     statusEl.textContent = '⚡ Save Failed';

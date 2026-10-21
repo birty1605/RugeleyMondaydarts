@@ -448,7 +448,7 @@
             </div>
         </div>
         <div class="admin-bar-group">
-            <span id="sync-status" style="font-size: 0.85rem; color: var(--accent);">🔥 Connecting to Firestore...</span>
+            <span id="sync-status" style="font-size: 0.85rem; color: var(--accent);">🔥 Connecting to Firestore (RugeleyMondaydarts)...</span>
         </div>
     </div>
 
@@ -847,7 +847,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
-        import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyC6pS3Jk7GXrp4i3LSMnCf4UiqPugzDSFg",
@@ -895,8 +895,8 @@
 
         let isSaving = false;
         
-        // Firestore document reference for league data
-        const docRef = doc(db, 'leagues', 'monday_nightdarts_main');
+        // Firestore reference using collection 'RugeleyMondaydarts' and document 'main_league'
+        const docRef = doc(collection(db, "RugeleyMondaydarts"), "main_league");
 
         async function initCloudSync() {
             try {
@@ -916,7 +916,7 @@
                     archivedSeasons = data.archivedSeasons || archivedSeasons;
 
                     if (statusEl) {
-                        statusEl.textContent = '🔥 Firestore Connected';
+                        statusEl.textContent = '🔥 Firestore Connected (RugeleyMondaydarts)';
                         statusEl.style.color = 'var(--success)';
                     }
                 } else {
@@ -965,7 +965,7 @@
 
                 const statusEl = document.getElementById('sync-status');
                 if (statusEl) {
-                    statusEl.textContent = '🔥 Firestore Connected';
+                    statusEl.textContent = '🔥 Firestore Connected (RugeleyMondaydarts)';
                     statusEl.style.color = 'var(--success)';
                 }
             } catch (err) {
@@ -1873,4 +1873,4 @@
         });
     </script>
 </body>
-                            </html>
+</html>

@@ -895,8 +895,15 @@
 
         let isSaving = false;
         
-        // Corrected Firestore document reference
         const docRef = doc(db, "RugeleyMondaydarts", "main_league");
+
+        function parseJsonOrRaw(val) {
+            if (!val) return val;
+            if (typeof val === 'string') {
+                try { return JSON.parse(val); } catch (e) { return val; }
+            }
+            return val;
+        }
 
         async function initCloudSync() {
             try {
@@ -908,12 +915,12 @@
                     teams = data.teams || teams;
                     teamPairs = data.teamPairs || teamPairs;
                     players = data.players || players;
-                    generatedFixtures = data.generatedFixtures !== undefined ? data.generatedFixtures : generatedFixtures;
+                    generatedFixtures = data.generatedFixtures !== undefined ? parseJsonOrRaw(data.generatedFixtures) : generatedFixtures;
                     matchResults = data.matchResults || matchResults;
                     seasonEvents = data.seasonEvents || seasonEvents;
                     shadowLeaguePlayers = data.shadowLeaguePlayers || shadowLeaguePlayers;
                     shadowLeagueTeams = data.shadowLeagueTeams || shadowLeagueTeams;
-                    archivedSeasons = data.archivedSeasons || archivedSeasons;
+                    archivedSeasons = data.archivedSeasons !== undefined ? parseJsonOrRaw(data.archivedSeasons) : archivedSeasons;
 
                     if (statusEl) {
                         statusEl.textContent = '🔥 Firestore Connected (RugeleyMondaydarts)';
@@ -939,12 +946,12 @@
                         teams = data.teams || teams;
                         teamPairs = data.teamPairs || teamPairs;
                         players = data.players || players;
-                        generatedFixtures = data.generatedFixtures !== undefined ? data.generatedFixtures : generatedFixtures;
+                        generatedFixtures = data.generatedFixtures !== undefined ? parseJsonOrRaw(data.generatedFixtures) : generatedFixtures;
                         matchResults = data.matchResults || matchResults;
                         seasonEvents = data.seasonEvents || seasonEvents;
                         shadowLeaguePlayers = data.shadowLeaguePlayers || shadowLeaguePlayers;
                         shadowLeagueTeams = data.shadowLeagueTeams || shadowLeagueTeams;
-                        archivedSeasons = data.archivedSeasons || archivedSeasons;
+                        archivedSeasons = data.archivedSeasons !== undefined ? parseJsonOrRaw(data.archivedSeasons) : archivedSeasons;
 
                         if (document.getElementById('match-modal').style.display !== 'flex') {
                             renderAllUI();
@@ -957,10 +964,20 @@
         async function pushToFirestore() {
             isSaving = true;
             try {
-                // Ensure no undefined values crash the Firestore document write by sanitizing through JSON stringify/parse
+                // Convert arrays that contain nested arrays into JSON strings to prevent Firestore errors
+                const fixturesStr = generatedFixtures ? JSON.stringify(generatedFixtures) : null;
+                const archivedStr = archivedSeasons ? JSON.stringify(archivedSeasons) : null;
+
                 const cleanPayload = JSON.parse(JSON.stringify({
-                    teams, teamPairs, players, generatedFixtures, matchResults,
-                    seasonEvents, shadowLeaguePlayers, shadowLeagueTeams, archivedSeasons,
+                    teams, 
+                    teamPairs, 
+                    players, 
+                    generatedFixtures: fixturesStr, 
+                    matchResults,
+                    seasonEvents, 
+                    shadowLeaguePlayers, 
+                    shadowLeagueTeams, 
+                    archivedSeasons: archivedStr,
                     updatedAt: new Date().toISOString()
                 }));
 
@@ -1608,7 +1625,7 @@
         function renderArchivedSeasons() {
             const container = document.getElementById('archived-seasons-container');
             if (!container) return;
-            if (archivedSeasons.length === 0) {
+            if (!archivedSeasons || archivedSeasons.length === 0) {
                 container.innerHTML = '<p style="color: #64748b; font-style: italic;">No archived seasons found.</p>';
                 return;
             }

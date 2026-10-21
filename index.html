@@ -46,7 +46,6 @@
             align-items: center;
         }
 
-        /* Standardized Header spanning 100% width on all screens */
         header {
             background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%);
             color: white;
@@ -111,7 +110,6 @@
             gap: 10px;
         }
 
-        /* Navigation Bar aligned across all mobile & desktop viewports */
         nav {
             display: flex;
             justify-content: flex-start;
@@ -149,7 +147,6 @@
             background-color: rgba(56, 189, 248, 0.08);
         }
 
-        /* 100% Mobile Full-Width Responsive Container */
         .container {
             width: 100%;
             max-width: 1200px;
@@ -167,7 +164,6 @@
             display: block;
         }
 
-        /* Standard Card Layout */
         .card {
             background: var(--card-bg);
             border-radius: 12px;
@@ -263,24 +259,11 @@
             font-size: 0.85rem;
         }
 
-        .btn-danger {
-            background-color: var(--danger);
-        }
+        .btn-danger { background-color: var(--danger); }
+        .btn-accent { background-color: var(--accent); color: #000; }
+        .btn-success { background-color: var(--success); }
+        .btn-shadow { background-color: var(--shadow-league); }
 
-        .btn-accent {
-            background-color: var(--accent);
-            color: #000;
-        }
-
-        .btn-success {
-            background-color: var(--success);
-        }
-
-        .btn-shadow {
-            background-color: var(--shadow-league);
-        }
-
-        /* Mobile Responsive Tables */
         .table-responsive {
             width: 100%;
             overflow-x: auto;
@@ -306,7 +289,45 @@
             font-weight: 700;
         }
 
-        /* Highly Visual Match Card Component */
+        /* Fixture Week Header & Date Editor */
+        .week-header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .week-title {
+            font-size: 1.1rem;
+            color: #38bdf8;
+            font-weight: 700;
+        }
+
+        .week-date-badge {
+            background: #1e293b;
+            color: var(--accent);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            border: 1px solid var(--border);
+            font-weight: 600;
+        }
+
+        .week-date-editor {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .week-date-editor input {
+            padding: 4px 8px;
+            height: 32px;
+            font-size: 0.85rem;
+            width: 130px;
+        }
+
         .fixture-match-card {
             background: #0f172a;
             border: 1px solid var(--border);
@@ -358,7 +379,6 @@
             margin-top: 4px;
         }
 
-        /* Enhanced High-Contrast Player Selection Rows */
         .match-row-box {
             background: #0f172a;
             border: 1px solid #334155;
@@ -397,7 +417,6 @@
             text-transform: uppercase;
         }
 
-        /* Large Prominent Player Dropdowns */
         .player-select-custom {
             width: 100%;
             background-color: #1e293b !important;
@@ -439,7 +458,6 @@
             color: #f59e0b;
         }
 
-        /* Achievements Grid */
         .achievement-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -479,7 +497,6 @@
             color: var(--text-muted);
         }
 
-        /* Full Screen Mobile Modal Overlay */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -986,7 +1003,7 @@
                 <h3 style="color: #38bdf8; margin-top: 1.2rem; margin-bottom: 0.6rem; font-size: 1.05rem;">Doubles Matches (2 v 2)</h3>
                 <div id="modal-doubles-rows"></div>
 
-                <h3 style="color: #38bdf8; margin-top: 1.2rem; margin-bottom: 0.6rem; font-size: 1.05rem;">Captains Match (1 v 1)</h3>
+                <h3 style="color: #38bdf8; margin-top: 1.2rem; margin-bottom: 0.6rem; font-size: 1.05rem;">Captains Match (1 v 1 - Excluded from Team Score)</h3>
                 <div id="modal-captain-row"></div>
 
                 <!-- HIGHLIGHTS & ACHIEVEMENTS SECTION -->
@@ -1061,6 +1078,7 @@
         let players = [];
         let generatedFixtures = null;
         let matchResults = {};
+        let weekDates = {}; // Stores manually inputted dates per week (e.g., { "1": "Mon 12th Oct" })
         let seasonEvents = [];
         let shadowLeaguePlayers = [];
         let shadowLeagueTeams = [];
@@ -1091,6 +1109,7 @@
                     players = data.players || players;
                     generatedFixtures = data.generatedFixtures !== undefined ? parseJsonOrRaw(data.generatedFixtures) : generatedFixtures;
                     matchResults = data.matchResults || matchResults;
+                    weekDates = data.weekDates || weekDates;
                     seasonEvents = data.seasonEvents || seasonEvents;
                     shadowLeaguePlayers = data.shadowLeaguePlayers || shadowLeaguePlayers;
                     shadowLeagueTeams = data.shadowLeagueTeams || shadowLeagueTeams;
@@ -1122,6 +1141,7 @@
                         players = data.players || players;
                         generatedFixtures = data.generatedFixtures !== undefined ? parseJsonOrRaw(data.generatedFixtures) : generatedFixtures;
                         matchResults = data.matchResults || matchResults;
+                        weekDates = data.weekDates || weekDates;
                         seasonEvents = data.seasonEvents || seasonEvents;
                         shadowLeaguePlayers = data.shadowLeaguePlayers || shadowLeaguePlayers;
                         shadowLeagueTeams = data.shadowLeagueTeams || shadowLeagueTeams;
@@ -1147,6 +1167,7 @@
                     players, 
                     generatedFixtures: fixturesStr, 
                     matchResults,
+                    weekDates,
                     seasonEvents, 
                     shadowLeaguePlayers, 
                     shadowLeagueTeams, 
@@ -1180,6 +1201,7 @@
                 if (key === 'rugeley_darts_players') players = value;
                 if (key === 'rugeley_darts_fixtures') generatedFixtures = value;
                 if (key === 'rugeley_match_results') matchResults = value;
+                if (key === 'rugeley_week_dates') weekDates = value;
                 if (key === 'rugeley_season_events') seasonEvents = value;
                 if (key === 'rugeley_shadow_players') shadowLeaguePlayers = value;
                 if (key === 'rugeley_shadow_teams') shadowLeagueTeams = value;
@@ -1189,7 +1211,13 @@
             }
         };
 
-        // --- DOWNLOAD SCORE SHEET FEATURE ---
+        window.updateWeekDate = function(weekNum, inputEl) {
+            if (!checkAdminPermission()) return;
+            const val = inputEl.value.trim();
+            weekDates[weekNum] = val;
+            Storage.set('rugeley_week_dates', weekDates);
+        };
+
         window.downloadScoreSheet = function() {
             const area = document.getElementById('printable-scoresheet-area');
             if (!area) return;
@@ -1204,7 +1232,6 @@
             });
         };
 
-        // --- AI SCANNER FEATURE ---
         window.handleScanMatchCard = async function(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -1240,7 +1267,6 @@
             event.target.value = '';
         };
 
-        // --- GLOBAL WINDOW HANDLERS ---
         window.adminLogin = function(e) {
             if (e) e.preventDefault();
             const user = document.getElementById('admin-user').value.trim();
@@ -1430,12 +1456,14 @@
 
             matchResults = {};
             generatedFixtures = null;
+            weekDates = {};
             shadowLeaguePlayers = [];
             shadowLeagueTeams = [];
 
             Storage.set('rugeley_archived_seasons', archivedSeasons);
             Storage.set('rugeley_match_results', matchResults);
             Storage.set('rugeley_darts_fixtures', generatedFixtures);
+            Storage.set('rugeley_week_dates', weekDates);
             Storage.set('rugeley_shadow_players', shadowLeaguePlayers);
             Storage.set('rugeley_shadow_teams', shadowLeagueTeams);
 
@@ -1534,13 +1562,12 @@
                 if (el) el.innerHTML = allOpts;
             });
 
-            /* Visually enhanced player selection modal fields */
             let singlesHTML = '';
             for (let i = 1; i <= 6; i++) {
                 singlesHTML += `
                     <div class="match-row-box">
                         <div class="match-row-header">
-                            <span>Singles Leg #${i}</span>
+                            <span>Singles Leg #${i} (Counts toward team score)</span>
                         </div>
                         <div style="display: flex; flex-direction: column; gap: 8px;">
                             <div class="match-player-picker">
@@ -1568,7 +1595,7 @@
                 doublesHTML += `
                     <div class="match-row-box">
                         <div class="match-row-header">
-                            <span>Doubles Match #${i}</span>
+                            <span>Doubles Match #${i} (Counts toward team score)</span>
                         </div>
                         <div style="display: flex; flex-direction: column; gap: 8px;">
                             <div class="match-player-picker">
@@ -1594,9 +1621,9 @@
             document.getElementById('modal-doubles-rows').innerHTML = doublesHTML;
 
             let captainHTML = `
-                <div class="match-row-box">
-                    <div class="match-row-header">
-                        <span>Captain's Match</span>
+                <div class="match-row-box" style="border-color: var(--accent);">
+                    <div class="match-row-header" style="color: var(--accent);">
+                        <span>Captain's Match (Excluded from overall team score)</span>
                     </div>
                     <div style="display: flex; flex-direction: column; gap: 8px;">
                         <div class="match-player-picker">
@@ -1676,15 +1703,16 @@
 
             let singlesData = [];
             let doublesData = [];
-            let homeTotalLegs = 0;
-            let awayTotalLegs = 0;
+            let homeMatchWins = 0; // Calculated based on games won (singles + doubles)
+            let awayMatchWins = 0;
 
             for (let i = 1; i <= 6; i++) {
                 const hp = document.getElementById(`m_s_hp_${i}`).value;
                 const ap = document.getElementById(`m_s_ap_${i}`).value;
                 const hs = parseInt(document.getElementById(`m_s_hs_${i}`).value) || 0;
                 const as = parseInt(document.getElementById(`m_s_as_${i}`).value) || 0;
-                homeTotalLegs += hs; awayTotalLegs += as;
+                if (hs > as) homeMatchWins++;
+                else if (as > hs) awayMatchWins++;
                 singlesData.push({ hp, ap, hs, as });
             }
 
@@ -1695,7 +1723,8 @@
                 const ap2 = document.getElementById(`m_d_ap2_${i}`).value;
                 const hs = parseInt(document.getElementById(`m_d_hs_${i}`).value) || 0;
                 const as = parseInt(document.getElementById(`m_d_as_${i}`).value) || 0;
-                homeTotalLegs += hs; awayTotalLegs += as;
+                if (hs > as) homeMatchWins++;
+                else if (as > hs) awayMatchWins++;
                 doublesData.push({ hp1, hp2, ap1, ap2, hs, as });
             }
 
@@ -1703,10 +1732,11 @@
             const c_ap = document.getElementById('m_c_ap').value;
             const c_hs = parseInt(document.getElementById('m_c_hs').value) || 0;
             const c_as = parseInt(document.getElementById('m_c_as').value) || 0;
-            homeTotalLegs += c_hs; awayTotalLegs += c_as;
+            // Captain match is strictly excluded from team score calculation!
 
             matchResults[matchKey] = {
-                homeTotalLegs, awayTotalLegs,
+                homeTotalLegs: homeMatchWins, // Stored as overall game wins for the team fixture score display
+                awayTotalLegs: awayMatchWins,
                 singles: singlesData, doubles: doublesData,
                 captains: { hp: c_hp, ap: c_ap, hs: c_hs, as: c_as },
                 highlights: {
@@ -1888,7 +1918,6 @@
             });
         }
 
-        /* Highly visual, mobile-first Fixture List rendering */
         function renderFixtures() {
             const container = document.getElementById('fixtures-container');
             if (!container) return;
@@ -1905,7 +1934,18 @@
                 const weekDiv = document.createElement('div');
                 weekDiv.style.marginBottom = '1.5rem';
                 
-                let html = `<h3 style="font-size: 1.1rem; color: #38bdf8; margin-bottom: 10px;">Week ${weekNum} ${isReturn ? '(Return)' : ''}</h3>`;
+                const currentWeekDate = weekDates[weekNum] || '';
+
+                let html = `
+                    <div class="week-header-container">
+                        <span class="week-title">Week ${weekNum} ${isReturn ? '(Return)' : ''}</span>
+                        <div class="admin-only week-date-editor">
+                            <span style="font-size: 0.8rem; color: var(--text-muted);">Date:</span>
+                            <input type="text" placeholder="e.g. 12th Oct" value="${escapeHtml(currentWeekDate)}" onchange="updateWeekDate(${weekNum}, this)">
+                        </div>
+                        ${!isAdminLoggedIn && currentWeekDate ? `<span class="week-date-badge">📅 ${escapeHtml(currentWeekDate)}</span>` : ''}
+                    </div>
+                `;
 
                 roundMatches.forEach((m, mIdx) => {
                     const matchKey = `w${weekNum}_m${mIdx}`;

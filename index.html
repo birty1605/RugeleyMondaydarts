@@ -328,59 +328,7 @@
             width: 130px;
         }
 
-        /* Standard Fixture Match Cards */
-        .fixture-match-card {
-            background: #0f172a;
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 12px;
-            margin-bottom: 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-        }
-
-        .match-card-team-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: #1e293b;
-            padding: 10px 12px;
-            border-radius: 8px;
-            border: 1px solid #334155;
-        }
-
-        .match-card-team-name {
-            font-weight: 700;
-            font-size: 1rem;
-            color: #f8fafc;
-        }
-
-        .match-card-score {
-            font-size: 1.2rem;
-            font-weight: 800;
-            background: #334155;
-            color: #ffffff;
-            padding: 4px 12px;
-            border-radius: 6px;
-            min-width: 40px;
-            text-align: center;
-        }
-
-        .match-card-score.winner {
-            background: #16a34a;
-            color: #ffffff;
-            box-shadow: 0 0 8px rgba(22, 163, 74, 0.4);
-        }
-
-        .match-action-bar {
-            display: flex;
-            justify-content: flex-end;
-            margin-top: 4px;
-        }
-
-        /* Completed Results Section Format */
+        /* Unified Match Summary Cards (Fixtures & Results) */
         .results-summary-card {
             background: #090d16;
             border: 1px solid #1e293b;
@@ -415,105 +363,101 @@
             color: #ffffff;
         }
 
-        /* High-Visibility Match Entry Modal & Rows */
-        .match-row-box {
-            background: #0f172a;
-            border: 1px solid #334155;
-            border-radius: 10px;
-            padding: 14px;
-            margin-bottom: 14px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
+        /* WHITE SCORECARD POPUP MODAL STYLES */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 1000;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 0;
+            overflow-y: auto;
         }
 
-        .match-row-header {
-            font-size: 0.95rem;
-            font-weight: 800;
-            color: #38bdf8;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 2px solid #1e293b;
-            padding-bottom: 6px;
-            background-color: #1e293b;
-            padding: 8px 12px;
-            border-radius: 6px;
-        }
-
-        .match-player-picker {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
+        .modal-card {
+            background: #ffffff !important;
+            color: #0f172a !important;
+            border-radius: 0;
             width: 100%;
+            min-height: 100vh;
+            padding: 1.25rem 1rem;
+            box-shadow: none;
         }
 
-        .player-label {
+        .modal-card h2, .modal-card h3 {
+            color: #0f172a !important;
+            border-color: #cbd5e1 !important;
+            font-weight: 800;
+        }
+
+        /* Horizontal Single-Line Match Score Entry Rows */
+        .match-row-line {
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .match-row-line-header {
             font-size: 0.85rem;
             font-weight: 800;
-            color: #f8fafc;
+            color: #1e3a8a;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
 
-        /* High-Contrast Player Select Box */
-        .player-select-custom {
-            width: 100%;
-            background-color: #1e293b !important;
-            color: #ffffff !important;
-            border: 2px solid #38bdf8 !important;
-            font-size: 1.05rem !important;
-            font-weight: 700 !important;
-            padding: 0.85rem !important;
-            border-radius: 8px !important;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.4);
-        }
-
-        .player-select-custom option {
-            background-color: #0f172a;
-            color: #ffffff;
-            font-size: 1rem;
-            padding: 10px;
-        }
-
-        /* Dual-Box Middle Score Input Display */
-        .match-score-dual-container {
+        .match-row-line-body {
             display: flex;
+            flex-direction: row;
             align-items: center;
-            justify-content: center;
-            gap: 12px;
-            padding: 8px;
-            background: #1e293b;
-            border: 1px solid #334155;
-            border-radius: 8px;
+            justify-content: space-between;
+            gap: 8px;
+            width: 100%;
         }
 
-        .score-box-single {
+        .player-col {
+            flex: 1;
             display: flex;
             flex-direction: column;
-            align-items: center;
             gap: 4px;
         }
 
-        .score-box-label {
-            font-size: 0.75rem;
-            font-weight: 800;
-            color: #94a3b8;
-            text-transform: uppercase;
+        .player-select-custom {
+            width: 100%;
+            background-color: #ffffff !important;
+            color: #0f172a !important;
+            border: 2px solid #3b82f6 !important;
+            font-size: 0.95rem !important;
+            font-weight: 700 !important;
+            padding: 0.6rem !important;
+            border-radius: 6px !important;
+        }
+
+        .score-col-dual {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background: #e2e8f0;
+            padding: 4px 8px;
+            border-radius: 6px;
+            border: 1px solid #cbd5e1;
         }
 
         .score-input-custom {
-            width: 65px !important;
+            width: 48px !important;
             text-align: center;
-            font-size: 1.3rem !important;
+            font-size: 1.1rem !important;
             font-weight: 800 !important;
-            background-color: #0f172a !important;
-            color: #f59e0b !important;
-            border: 2px solid #f59e0b !important;
-            padding: 0.6rem !important;
-            border-radius: 8px !important;
+            background-color: #ffffff !important;
+            color: #1e3a8a !important;
+            border: 2px solid #1e3a8a !important;
+            padding: 0.4rem !important;
+            border-radius: 6px !important;
         }
 
         .achievement-grid {
@@ -555,27 +499,6 @@
             color: var(--text-muted);
         }
 
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100vw; height: 100vh;
-            background: rgba(0, 0, 0, 0.85);
-            z-index: 1000;
-            justify-content: center;
-            align-items: flex-start;
-            padding: 0;
-            overflow-y: auto;
-        }
-
-        .modal-card {
-            background: #1e293b;
-            border-radius: 0;
-            width: 100%;
-            min-height: 100vh;
-            padding: 1.25rem 1rem;
-            box-shadow: none;
-        }
-
         @media (min-width: 768px) {
             header h1 { font-size: 2.2rem; }
             .container { padding: 1.5rem 1rem; }
@@ -583,8 +506,6 @@
             .modal-overlay { padding: 1.5rem; align-items: center; }
             .modal-card { border-radius: 12px; max-width: 900px; min-height: auto; max-height: 90vh; }
             .admin-bar-group { width: auto; }
-            .match-row-box { flex-direction: row; align-items: center; justify-content: space-between; }
-            .match-player-picker { flex-direction: row; align-items: center; }
         }
 
         .scoresheet-table {
@@ -639,8 +560,8 @@
         }
 
         .match-highlights-box {
-            background: #0f172a;
-            border: 1px solid var(--accent);
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
             padding: 1rem;
             border-radius: 8px;
             margin-top: 1.5rem;
@@ -1043,57 +964,57 @@
         </div>
     </div>
 
-    <!-- HIGH-VISIBILITY MATCH SCORESHEET POPUP MODAL -->
+    <!-- ALL-WHITE HIGH-CONTRAST POPUP MODAL -->
     <div id="match-modal" class="modal-overlay">
         <div class="modal-card">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem;">
-                <h2 id="modal-title" style="margin: 0; border: none; font-size: 1.2rem;">Match Scoresheet</h2>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 2px solid #cbd5e1; padding-bottom: 0.5rem;">
+                <h2 id="modal-title" style="margin: 0; border: none; font-size: 1.2rem; color: #0f172a;">Match Scoresheet</h2>
                 <button type="button" class="btn btn-danger btn-sm" onclick="closeMatchModal()">Close &times;</button>
             </div>
 
             <!-- AI CARD SCANNER BUTTON -->
-            <div style="background: #0f172a; border: 2px dashed #3b82f6; padding: 0.85rem; border-radius: 8px; margin-bottom: 1.2rem; text-align: center;">
-                <h3 style="font-size: 0.95rem; color: #38bdf8; margin-bottom: 0.3rem;">📸 AI Match Card Scanner</h3>
-                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.6rem;">Upload score card photo to scan scores automatically.</p>
+            <div style="background: #f1f5f9; border: 2px dashed #2563eb; padding: 0.85rem; border-radius: 8px; margin-bottom: 1.2rem; text-align: center;">
+                <h3 style="font-size: 0.95rem; color: #1e3a8a; margin-bottom: 0.3rem;">📸 AI Match Card Scanner</h3>
+                <p style="font-size: 0.8rem; color: #475569; margin-bottom: 0.6rem;">Upload score card photo to scan scores automatically.</p>
                 <input type="file" id="card-scanner-input" accept="image/*" style="display: none;" onchange="handleScanMatchCard(event)">
                 <button type="button" class="btn btn-sm btn-accent" onclick="document.getElementById('card-scanner-input').click()">Upload / Scan Photo</button>
-                <div id="scan-status-msg" style="font-size: 0.8rem; color: #f59e0b; margin-top: 6px; font-weight: bold;"></div>
+                <div id="scan-status-msg" style="font-size: 0.8rem; color: #d97706; margin-top: 6px; font-weight: bold;"></div>
             </div>
             
             <form id="modal-match-form" onsubmit="handleSaveMatchScores(event)">
                 <input type="hidden" id="modal-match-key">
 
-                <h3 style="color: #38bdf8; margin-top: 0.5rem; margin-bottom: 0.6rem; font-size: 1.05rem;">Singles Matches (1 v 1)</h3>
+                <h3 style="color: #1e3a8a; margin-top: 0.5rem; margin-bottom: 0.6rem; font-size: 1.05rem;">Singles Matches (1 v 1)</h3>
                 <div id="modal-singles-rows"></div>
 
-                <h3 style="color: #38bdf8; margin-top: 1.2rem; margin-bottom: 0.6rem; font-size: 1.05rem;">Doubles Matches (2 v 2)</h3>
+                <h3 style="color: #1e3a8a; margin-top: 1.2rem; margin-bottom: 0.6rem; font-size: 1.05rem;">Doubles Matches (2 v 2)</h3>
                 <div id="modal-doubles-rows"></div>
 
-                <h3 style="color: #38bdf8; margin-top: 1.2rem; margin-bottom: 0.6rem; font-size: 1.05rem;">Captains Match (1 v 1 - Excluded from Team Score)</h3>
+                <h3 style="color: #1e3a8a; margin-top: 1.2rem; margin-bottom: 0.6rem; font-size: 1.05rem;">Captains Match (1 v 1 - Excluded from Team Score)</h3>
                 <div id="modal-captain-row"></div>
 
                 <!-- HIGHLIGHTS & ACHIEVEMENTS SECTION -->
                 <div class="match-highlights-box">
-                    <h3 style="color: #f59e0b; margin-bottom: 0.8rem; font-size: 1rem;">🌟 Match Achievements</h3>
+                    <h3 style="color: #b45309; margin-bottom: 0.8rem; font-size: 1rem;">🌟 Match Achievements</h3>
                     <div style="display: flex; flex-direction: column; gap: 10px;">
                         <div class="form-group" style="margin: 0;">
-                            <label style="font-size: 0.85rem;">Highest Checkout (Finish):</label>
-                            <input type="number" id="m_hi_finish" min="0" max="170" placeholder="e.g. 160">
+                            <label style="font-size: 0.85rem; color: #0f172a;">Highest Checkout (Finish):</label>
+                            <input type="number" id="m_hi_finish" min="0" max="170" placeholder="e.g. 160" style="background:#fff; color:#0f172a; border:1px solid #cbd5e1;">
                             <select id="m_hi_finish_player" class="player-select-custom" style="margin-top: 4px;"></select>
                         </div>
                         <div class="form-group" style="margin: 0;">
-                            <label style="font-size: 0.85rem;">Highest Score:</label>
-                            <input type="number" id="m_hi_score" min="0" max="180" placeholder="e.g. 180">
+                            <label style="font-size: 0.85rem; color: #0f172a;">Highest Score:</label>
+                            <input type="number" id="m_hi_score" min="0" max="180" placeholder="e.g. 180" style="background:#fff; color:#0f172a; border:1px solid #cbd5e1;">
                             <select id="m_hi_score_player" class="player-select-custom" style="margin-top: 4px;"></select>
                         </div>
                         <div class="form-group" style="margin: 0;">
-                            <label style="font-size: 0.85rem;">Highest Start:</label>
-                            <input type="number" id="m_hi_start" min="0" max="180" placeholder="e.g. 160">
+                            <label style="font-size: 0.85rem; color: #0f172a;">Highest Start:</label>
+                            <input type="number" id="m_hi_start" min="0" max="180" placeholder="e.g. 160" style="background:#fff; color:#0f172a; border:1px solid #cbd5e1;">
                             <select id="m_hi_start_player" class="player-select-custom" style="margin-top: 4px;"></select>
                         </div>
                         <div class="form-group" style="margin: 0;">
-                            <label style="font-size: 0.85rem;">Least Darts Leg:</label>
-                            <input type="number" id="m_least_darts" min="9" max="60" placeholder="e.g. 12">
+                            <label style="font-size: 0.85rem; color: #0f172a;">Least Darts Leg:</label>
+                            <input type="number" id="m_least_darts" min="9" max="60" placeholder="e.g. 12" style="background:#fff; color:#0f172a; border:1px solid #cbd5e1;">
                             <select id="m_least_darts_player" class="player-select-custom" style="margin-top: 4px;"></select>
                         </div>
                     </div>
@@ -1590,6 +1511,7 @@
             window.showTab('fixtures');
         };
 
+        /* Single Horizontal Line Entry for Scorecard Input */
         window.openMatchModal = function(matchKey) {
             let homeTeam = '', awayTeam = '';
             if (generatedFixtures) {
@@ -1613,47 +1535,37 @@
             const awayPlayers = players.filter(p => p.team === awayTeam);
             const allMatchPlayers = [...homePlayers, ...awayPlayers];
 
-            const buildOptions = (arr) => {
-                let opt = '<option value="">-- Select Player Name --</option>';
+            const buildOptions = (arr, labelText) => {
+                let opt = `<option value="">-- ${labelText} --</option>`;
                 arr.forEach(p => opt += `<option value="${escapeHtml(p.name)}">${escapeHtml(p.name)}</option>`);
                 return opt;
             };
 
-            const homeOpts = buildOptions(homePlayers);
-            const awayOpts = buildOptions(awayPlayers);
-            const allOpts = buildOptions(allMatchPlayers);
+            const homeOpts = buildOptions(homePlayers, 'Home Player');
+            const awayOpts = buildOptions(awayPlayers, 'Away Player');
+            const allOpts = buildOptions(allMatchPlayers, 'Select Player');
 
             ['m_hi_finish_player', 'm_hi_score_player', 'm_hi_start_player', 'm_least_darts_player'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.innerHTML = allOpts;
             });
 
-            /* Updated Dual-Box Middle Score Input Layout for High Visibility */
+            // Single Row Format for Singles Legs 1 through 6
             let singlesHTML = '';
             for (let i = 1; i <= 6; i++) {
                 singlesHTML += `
-                    <div class="match-row-box">
-                        <div class="match-row-header">
-                            <span>Singles Leg #${i} (Counts toward team score)</span>
-                        </div>
-                        <div style="display: flex; flex-direction: column; gap: 8px;">
-                            <div class="match-player-picker">
-                                <span class="player-label">${escapeHtml(homeTeam)} Player:</span>
+                    <div class="match-row-line">
+                        <div class="match-row-line-header">Singles #${i}</div>
+                        <div class="match-row-line-body">
+                            <div class="player-col">
                                 <select id="m_s_hp_${i}" class="player-select-custom">${homeOpts}</select>
                             </div>
-                            <div class="match-score-dual-container">
-                                <div class="score-box-single">
-                                    <span class="score-box-label">Home Legs</span>
-                                    <input type="number" id="m_s_hs_${i}" class="score-input-custom" min="0" value="0">
-                                </div>
-                                <span style="font-size: 1.2rem; font-weight: 800; color: #94a3b8;">:</span>
-                                <div class="score-box-single">
-                                    <span class="score-box-label">Away Legs</span>
-                                    <input type="number" id="m_s_as_${i}" class="score-input-custom" min="0" value="0">
-                                </div>
+                            <div class="score-col-dual">
+                                <input type="number" id="m_s_hs_${i}" class="score-input-custom" min="0" value="0">
+                                <span style="font-weight:800; color:#0f172a;">:</span>
+                                <input type="number" id="m_s_as_${i}" class="score-input-custom" min="0" value="0">
                             </div>
-                            <div class="match-player-picker">
-                                <span class="player-label">${escapeHtml(awayTeam)} Player:</span>
+                            <div class="player-col">
                                 <select id="m_s_ap_${i}" class="player-select-custom">${awayOpts}</select>
                             </div>
                         </div>
@@ -1662,33 +1574,24 @@
             }
             document.getElementById('modal-singles-rows').innerHTML = singlesHTML;
 
+            // Single Row Format for Doubles Matches 1 and 2
             let doublesHTML = '';
             for (let i = 1; i <= 2; i++) {
                 doublesHTML += `
-                    <div class="match-row-box">
-                        <div class="match-row-header">
-                            <span>Doubles Match #${i} (Counts toward team score)</span>
-                        </div>
-                        <div style="display: flex; flex-direction: column; gap: 8px;">
-                            <div class="match-player-picker">
-                                <span class="player-label">${escapeHtml(homeTeam)} Pair:</span>
-                                <select id="m_d_hp1_${i}" class="player-select-custom" style="margin-bottom: 4px;">${homeOpts}</select>
+                    <div class="match-row-line">
+                        <div class="match-row-line-header">Doubles #${i}</div>
+                        <div class="match-row-line-body">
+                            <div class="player-col">
+                                <select id="m_d_hp1_${i}" class="player-select-custom" style="margin-bottom:2px;">${homeOpts}</select>
                                 <select id="m_d_hp2_${i}" class="player-select-custom">${homeOpts}</select>
                             </div>
-                            <div class="match-score-dual-container">
-                                <div class="score-box-single">
-                                    <span class="score-box-label">Home Legs</span>
-                                    <input type="number" id="m_d_hs_${i}" class="score-input-custom" min="0" value="0">
-                                </div>
-                                <span style="font-size: 1.2rem; font-weight: 800; color: #94a3b8;">:</span>
-                                <div class="score-box-single">
-                                    <span class="score-box-label">Away Legs</span>
-                                    <input type="number" id="m_d_as_${i}" class="score-input-custom" min="0" value="0">
-                                </div>
+                            <div class="score-col-dual">
+                                <input type="number" id="m_d_hs_${i}" class="score-input-custom" min="0" value="0">
+                                <span style="font-weight:800; color:#0f172a;">:</span>
+                                <input type="number" id="m_d_as_${i}" class="score-input-custom" min="0" value="0">
                             </div>
-                            <div class="match-player-picker">
-                                <span class="player-label">${escapeHtml(awayTeam)} Pair:</span>
-                                <select id="m_d_ap1_${i}" class="player-select-custom" style="margin-bottom: 4px;">${awayOpts}</select>
+                            <div class="player-col">
+                                <select id="m_d_ap1_${i}" class="player-select-custom" style="margin-bottom:2px;">${awayOpts}</select>
                                 <select id="m_d_ap2_${i}" class="player-select-custom">${awayOpts}</select>
                             </div>
                         </div>
@@ -1697,29 +1600,20 @@
             }
             document.getElementById('modal-doubles-rows').innerHTML = doublesHTML;
 
+            // Single Row Format for Captains Match
             let captainHTML = `
-                <div class="match-row-box" style="border-color: var(--accent);">
-                    <div class="match-row-header" style="color: var(--accent);">
-                        <span>Captain's Match (Excluded from overall team score)</span>
-                    </div>
-                    <div style="display: flex; flex-direction: column; gap: 8px;">
-                        <div class="match-player-picker">
-                            <span class="player-label">${escapeHtml(homeTeam)} Captain:</span>
+                <div class="match-row-line" style="border: 2px solid #f59e0b;">
+                    <div class="match-row-line-header" style="color:#b45309;">Captains Leg (Excluded from team score)</div>
+                    <div class="match-row-line-body">
+                        <div class="player-col">
                             <select id="m_c_hp" class="player-select-custom">${homeOpts}</select>
                         </div>
-                        <div class="match-score-dual-container">
-                            <div class="score-box-single">
-                                <span class="score-box-label">Home Legs</span>
-                                <input type="number" id="m_c_hs" class="score-input-custom" min="0" value="0">
-                            </div>
-                            <span style="font-size: 1.2rem; font-weight: 800; color: #94a3b8;">:</span>
-                            <div class="score-box-single">
-                                <span class="score-box-label">Away Legs</span>
-                                <input type="number" id="m_c_as" class="score-input-custom" min="0" value="0">
-                            </div>
+                        <div class="score-col-dual">
+                            <input type="number" id="m_c_hs" class="score-input-custom" min="0" value="0">
+                            <span style="font-weight:800; color:#0f172a;">:</span>
+                            <input type="number" id="m_c_as" class="score-input-custom" min="0" value="0">
                         </div>
-                        <div class="match-player-picker">
-                            <span class="player-label">${escapeHtml(awayTeam)} Captain:</span>
+                        <div class="player-col">
                             <select id="m_c_ap" class="player-select-custom">${awayOpts}</select>
                         </div>
                     </div>
@@ -1785,7 +1679,7 @@
 
             let singlesData = [];
             let doublesData = [];
-            let homeMatchWins = 0; // Games won count (singles + doubles)
+            let homeMatchWins = 0;
             let awayMatchWins = 0;
 
             for (let i = 1; i <= 6; i++) {
@@ -1814,10 +1708,9 @@
             const c_ap = document.getElementById('m_c_ap').value;
             const c_hs = parseInt(document.getElementById('m_c_hs').value) || 0;
             const c_as = parseInt(document.getElementById('m_c_as').value) || 0;
-            // Captain match is strictly excluded from team score calculation
 
             matchResults[matchKey] = {
-                homeTotalLegs: homeMatchWins, // Games won for team score
+                homeTotalLegs: homeMatchWins,
                 awayTotalLegs: awayMatchWins,
                 singles: singlesData, doubles: doublesData,
                 captains: { hp: c_hp, ap: c_ap, hs: c_hs, as: c_as },
@@ -2000,7 +1893,7 @@
             });
         }
 
-        /* Render Fixtures & Fully Completed Results Section */
+        /* Render Fixtures View matching Results Layout */
         function renderFixtures() {
             const container = document.getElementById('fixtures-container');
             const completedWrapper = document.getElementById('completed-results-wrapper');
@@ -2024,7 +1917,6 @@
                 const isReturn = weekNum > totalLeg1Weeks;
                 const currentWeekDate = weekDates[weekNum] || '';
 
-                // Check if ALL matches in this week have inputted results
                 let playableMatches = roundMatches.filter(m => m.home !== "BYE" && m.away !== "BYE");
                 let allMatchesCompleted = playableMatches.length > 0 && playableMatches.every((m, mIdx) => {
                     const origMatchIdx = roundMatches.indexOf(m);
@@ -2066,7 +1958,7 @@
                     summaryHTML += `</div>`;
                     completedContainer.innerHTML += summaryHTML;
                 } else {
-                    // Render into active/upcoming fixtures
+                    // Render Fixture Cards in identical format to Results
                     const weekDiv = document.createElement('div');
                     weekDiv.style.marginBottom = '1.5rem';
 
@@ -2094,24 +1986,20 @@
                             hasScores = true;
                         }
 
-                        const homeWinner = hasScores && homeScore > awayScore;
-                        const awayWinner = hasScores && awayScore > homeScore;
-
-                        let actionBtn = (m.home !== "BYE" && m.away !== "BYE") 
-                            ? `<button type="button" class="btn btn-sm btn-accent admin-only" onclick="openMatchModal('${matchKey}')">${hasScores ? 'Edit Scores' : 'Enter Scores'}</button>`
-                            : '';
+                        const homeWin = hasScores && homeScore > awayScore;
+                        const awayWin = hasScores && awayScore > homeScore;
 
                         html += `
-                            <div class="fixture-match-card">
-                                <div class="match-card-team-row">
-                                    <span class="match-card-team-name">${escapeHtml(m.home)}</span>
-                                    <span class="match-card-score ${homeWinner ? 'winner' : ''}">${hasScores ? homeScore : '-'}</span>
+                            <div class="results-summary-card">
+                                <div class="results-summary-row">
+                                    <span class="results-team-name">${escapeHtml(m.home)}</span>
+                                    <span class="results-score-badge ${homeWin ? 'win' : ''}">${hasScores ? homeScore : '-'}</span>
                                 </div>
-                                <div class="match-card-team-row">
-                                    <span class="match-card-team-name">${escapeHtml(m.away)}</span>
-                                    <span class="match-card-score ${awayWinner ? 'winner' : ''}">${hasScores ? awayScore : '-'}</span>
+                                <div class="results-summary-row">
+                                    <span class="results-team-name">${escapeHtml(m.away)}</span>
+                                    <span class="results-score-badge ${awayWin ? 'win' : ''}">${hasScores ? awayScore : '-'}</span>
                                 </div>
-                                ${actionBtn ? `<div class="match-action-bar">${actionBtn}</div>` : ''}
+                                ${(m.home !== "BYE" && m.away !== "BYE") ? `<div style="text-align: right; margin-top: 4px;"><button type="button" class="btn btn-sm btn-accent admin-only" onclick="openMatchModal('${matchKey}')">${hasScores ? 'Edit Scores' : 'Enter Scores'}</button></div>` : ''}
                             </div>
                         `;
                     });
@@ -2133,7 +2021,6 @@
             });
         }
 
-        /* Calculate Stats including 2-0 Victories for Leaderboards */
         function calculateStatsFromData(teamsList, playersList, fixturesList, resultsMap) {
             let teamStats = {};
             let singlesStats = {};

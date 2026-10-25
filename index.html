@@ -511,6 +511,8 @@
         .scoresheet-table {
             border: 2px solid #000;
             margin-top: 1rem;
+            width: 100%;
+            border-collapse: collapse;
         }
 
         .scoresheet-table th, .scoresheet-table td {
@@ -925,7 +927,7 @@
             
             <div class="printable-area card" id="printable-scoresheet-area">
                 <div style="text-align: center; border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 12px;">
-                    <h2 style="color: #000; font-size: 1.05rem; margin-bottom: 2px;">MONDAY NIGHT RUGELEY & DISTRICT DARTS LEAGUE</h2>
+                    <h2 style="color: #000; font-size: 1.05rem; margin: 0; font-weight: bold;">MONDAY NIGHT RUGELEY & DISTRICT DARTS LEAGUE</h2>
                 </div>
 
                 <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: bold; margin-bottom: 8px; color: #000;">
@@ -937,32 +939,114 @@
 
                 <table class="scoresheet-table">
                     <thead>
-                        <tr>
-                            <th style="width: 42%; text-align: center; background: #e2e8f0; color: #000;">HOME TEAM</th>
-                            <th style="width: 8%; text-align: center; background: #cbd5e1; color: #000;"></th>
-                            <th style="width: 50%; text-align: center; background: #e2e8f0; color: #000;">AWAY TEAM</th>
+                        <tr style="background: #e2e8f0;">
+                            <th style="width: 42%; text-align: center; color: #000; border: 1px solid #000;">HOME TEAM</th>
+                            <th style="width: 8%; text-align: center; color: #000; border: 1px solid #000;"></th>
+                            <th style="width: 42%; text-align: center; color: #000; border: 1px solid #000;">AWAY TEAM</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr><td></td><td style="text-align:center; font-weight:bold;">1</td><td></td></tr>
-                        <tr><td></td><td style="text-align:center; font-weight:bold;">2</td><td></td></tr>
-                        <tr><td></td><td style="text-align:center; font-weight:bold;">3</td><td></td></tr>
-                        <tr><td></td><td style="text-align:center; font-weight:bold;">4</td><td></td></tr>
-                        <tr><td></td><td style="text-align:center; font-weight:bold;">5</td><td></td></tr>
-                        <tr><td></td><td style="text-align:center; font-weight:bold;">6</td><td></td></tr>
-                        <tr><td>1.<br>2.</td><td style="text-align:center; font-weight:bold;">7</td><td>1.<br>2.</td></tr>
-                        <tr><td>1.<br>2.</td><td style="text-align:center; font-weight:bold;">8</td><td>1.<br>2.</td></tr>
-                        <tr><td style="text-align: center; font-weight: bold; background:#f1f5f9;">RESULT: _______</td><td style="background:#f1f5f9;"></td><td style="text-align: center; font-weight: bold; background:#f1f5f9;">RESULT: _______</td></tr>
-                        <tr><td colspan="3" style="text-align: center; font-weight: bold; background: #cbd5e1; color: #000;">CAPTAINS CUP</td></tr>
-                        <tr><td>Cap:</td><td style="text-align:center; font-weight:bold;"></td><td>Cap:</td></tr>
+                        <tr>
+                            <td style="border: 1px solid #000; height: 35px; position: relative;">
+                                <div style="position: absolute; right: 4px; top: 2px; bottom: 2px; width: 30px; border: 1px solid #000;"></div>
+                            </td>
+                            <td style="border: 1px solid #000; text-align: center; font-weight: bold;">1</td>
+                            <td style="border: 1px solid #000; height: 35px; position: relative;">
+                                <div style="position: absolute; left: 4px; top: 2px; bottom: 2px; width: 30px; border: 1px solid #000;"></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #000; height: 35px; position: relative;">
+                                <div style="position: absolute; right: 4px; top: 2px; bottom: 2px; width: 30px; border: 1px solid #000;"></div>
+                            </td>
+                            <td style="border: 1px solid #000; text-align: center; font-weight: bold;">2</td>
+                            <td style="border: 1px solid #000; height: 35px; position: relative;">
+                                <div style="position: absolute; left: 4px; top: 2px; bottom: 2px; width: 30px; border: 1px solid #000;"></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #000; height: 35px; position: relative;">
+                                <div style="position: absolute; right: 4px; top: 2px; bottom: 2px; width: 30px; border: 1px solid #000;"></div>
+                            </td>
+                            <td style="border: 1px solid #000; text-align: center; font-weight: bold;">3</td>
+                            <td style="border: 1px solid #000; height: 35px; position: relative;">
+                                <div style="position: absolute; left: 4px; top: 2px; bottom: 2px; width: 30px; border: 1px solid #000;"></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #000; height: 35px; position: relative;">
+                                <div style="position: absolute; right: 4px; top: 2px; bottom: 2px; width: 30px; border: 1px solid #000;"></div>
+                            </td>
+                            <td style="border: 1px solid #000; text-align: center; font-weight: bold;">4</td>
+                            <td style="border: 1px solid #000; height: 35px; position: relative;">
+                                <div style="position: absolute; left: 4px; top: 2px; bottom: 2px; width: 30px; border: 1px solid #000;"></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #000; height: 35px; position: relative;">
+                                <div style="position: absolute; right: 4px; top: 2px; bottom: 2px; width: 30px; border: 1px solid #000;"></div>
+                            </td>
+                            <td style="border: 1px solid #000; text-align: center; font-weight: bold;">5</td>
+                            <td style="border: 1px solid #000; height: 35px; position: relative;">
+                                <div style="position: absolute; left: 4px; top: 2px; bottom: 2px; width: 30px; border: 1px solid #000;"></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #000; height: 35px; position: relative;">
+                                <div style="position: absolute; right: 4px; top: 2px; bottom: 2px; width: 30px; border: 1px solid #000;"></div>
+                            </td>
+                            <td style="border: 1px solid #000; text-align: center; font-weight: bold;">6</td>
+                            <td style="border: 1px solid #000; height: 35px; position: relative;">
+                                <div style="position: absolute; left: 4px; top: 2px; bottom: 2px; width: 30px; border: 1px solid #000;"></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #000; height: 50px; position: relative; font-size: 0.8rem;">
+                                1.<br>2.
+                                <div style="position: absolute; right: 4px; top: 2px; bottom: 2px; width: 30px; border: 1px solid #000;"></div>
+                            </td>
+                            <td style="border: 1px solid #000; text-align: center; font-weight: bold;">7</td>
+                            <td style="border: 1px solid #000; height: 50px; position: relative; font-size: 0.8rem;">
+                                1.<br>2.
+                                <div style="position: absolute; left: 4px; top: 2px; bottom: 2px; width: 30px; border: 1px solid #000;"></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #000; height: 50px; position: relative; font-size: 0.8rem;">
+                                1.<br>2.
+                                <div style="position: absolute; right: 4px; top: 2px; bottom: 2px; width: 30px; border: 1px solid #000;"></div>
+                            </td>
+                            <td style="border: 1px solid #000; text-align: center; font-weight: bold;">8</td>
+                            <td style="border: 1px solid #000; height: 50px; position: relative; font-size: 0.8rem;">
+                                1.<br>2.
+                                <div style="position: absolute; left: 4px; top: 2px; bottom: 2px; width: 30px; border: 1px solid #000;"></div>
+                            </td>
+                        </tr>
+                        <tr style="background-color: #f1f5f9;">
+                            <td style="border: 1px solid #000; text-align: center; font-weight: bold; padding: 6px;">RESULT: ________</td>
+                            <td style="border: 1px solid #000;"></td>
+                            <td style="border: 1px solid #000; text-align: center; font-weight: bold; padding: 6px;">RESULT: ________</td>
+                        </tr>
+                        <tr><td colspan="3" style="text-align: center; font-weight: bold; background: #cbd5e1; color: #000; border: 1px solid #000;">CAPTAINS CUP</td></tr>
+                        <tr>
+                            <td style="border: 1px solid #000; height: 35px; position: relative;">
+                                Cap:
+                                <div style="position: absolute; right: 4px; top: 2px; bottom: 2px; width: 30px; border: 1px solid #000;"></div>
+                            </td>
+                            <td style="border: 1px solid #000;"></td>
+                            <td style="border: 1px solid #000; height: 35px; position: relative;">
+                                Cap:
+                                <div style="position: absolute; left: 4px; top: 2px; bottom: 2px; width: 30px; border: 1px solid #000;"></div>
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
 
-                <div style="display: flex; justify-content: space-between; margin-top: 25px; font-size: 0.8rem; font-weight: bold; color: #000;">
+                <div style="display: flex; justify-content: space-between; margin-top: 20px; font-size: 0.8rem; font-weight: bold; color: #000;">
                     <div>Home Captain ______________________</div>
                     <div>Away Captain ______________________</div>
                 </div>
-                <div style="text-align: center; font-size: 0.75rem; margin-top: 15px; font-style: italic; color: #000;">
+                <div style="text-align: center; font-size: 0.75rem; margin-top: 12px; font-style: italic; color: #000;">
                     Please return match cards to the Miners Arms by Wednesday
                 </div>
             </div>
@@ -977,10 +1061,10 @@
                 <button type="button" class="btn btn-danger btn-sm" onclick="closeMatchModal()">Close &times;</button>
             </div>
 
-            <!-- AI CARD SCANNER BUTTON -->
+            <!-- SPATIAL OCR SCANNER -->
             <div style="background: #f1f5f9; border: 2px dashed #2563eb; padding: 0.85rem; border-radius: 8px; margin-bottom: 1.2rem; text-align: center;">
                 <h3 style="font-size: 0.95rem; color: #1e3a8a; margin-bottom: 0.3rem;">📸 AI Match Card Scanner</h3>
-                <p style="font-size: 0.8rem; color: #475569; margin-bottom: 0.6rem;">Upload physical match card photo to automatically extract player names and scores (0, 1, 2) for games 1-8 and Captains Cup.</p>
+                <p style="font-size: 0.8rem; color: #475569; margin-bottom: 0.6rem;">Upload physical match card photo. Spatial column scanner automatically maps players, doubles (7 & 8), Captains Cup, and scores (0, 1, 2).</p>
                 <input type="file" id="card-scanner-input" accept="image/*" style="display: none;" onchange="handleScanMatchCard(event)">
                 <button type="button" class="btn btn-sm btn-accent" onclick="document.getElementById('card-scanner-input').click()">Upload / Scan Photo</button>
                 <div id="scan-status-msg" style="font-size: 0.8rem; color: #d97706; margin-top: 6px; font-weight: bold;"></div>
@@ -1224,16 +1308,16 @@
             });
         };
 
-        /* STREAMLINED PHYSICAL MATCH CARD SCANNER (GAMES 1-8, CAPTAINS CUP, SCORES 0,1,2) */
+        /* ROBUST SPATIAL COORDINATE OCR SCANNER FOR PHYSICAL MATCH CARDS */
         window.handleScanMatchCard = async function(event) {
             const file = event.target.files[0];
             if (!file) return;
 
             const msgEl = document.getElementById('scan-status-msg');
-            msgEl.textContent = "⏳ Scanning physical match card and mapping games 1-8 & Captains Cup...";
+            msgEl.textContent = "⏳ Running spatial coordinate OCR on physical match card...";
 
             try {
-                const { data: { text } } = await Tesseract.recognize(file, 'eng', {
+                const { data: { words } } = await Tesseract.recognize(file, 'eng', {
                     logger: m => {
                         if (m.status === 'recognizing text') {
                             msgEl.textContent = `⏳ OCR scanning: ${Math.round(m.progress * 100)}%`;
@@ -1241,7 +1325,37 @@
                     }
                 });
 
-                const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+                if (!words || words.length === 0) {
+                    msgEl.textContent = "❌ No text detected on image.";
+                    return;
+                }
+
+                const maxW = Math.max(...words.map(w => w.bbox.x1));
+                const maxH = Math.max(...words.map(w => w.bbox.y1));
+
+                // Group words into horizontal rows (within 22px vertical distance)
+                let rows = [];
+                const sortedWords = [...words].sort((a, b) => a.bbox.y0 - b.bbox.y0);
+                
+                sortedWords.forEach(word => {
+                    let placed = false;
+                    for (let r of rows) {
+                        if (Math.abs(r.yAvg - ((word.bbox.y0 + word.bbox.y1) / 2)) < 22) {
+                            r.words.push(word);
+                            r.yAvg = r.words.reduce((sum, w) => sum + (w.bbox.y0 + w.bbox.y1) / 2, 0) / r.words.length;
+                            placed = true;
+                            break;
+                        }
+                    }
+                    if (!placed) {
+                        rows.push({
+                            yAvg: (word.bbox.y0 + word.bbox.y1) / 2,
+                            words: [word]
+                        });
+                    }
+                });
+
+                rows.sort((a, b) => a.yAvg - b.yAvg);
 
                 const matchKey = document.getElementById('modal-match-key').value;
                 let homeTeam = '', awayTeam = '';
@@ -1261,12 +1375,12 @@
                 const homePlayers = players.filter(p => p.team === homeTeam);
                 const awayPlayers = players.filter(p => p.team === awayTeam);
 
-                const findMatchingPlayer = (list, textLine) => {
-                    const cleanText = textLine.toLowerCase().replace(/[^a-z]/g, '');
-                    if (!cleanText) return '';
+                const findMatchingPlayer = (list, textStr) => {
+                    const clean = textStr.toLowerCase().replace(/[^a-z]/g, '');
+                    if (!clean) return '';
                     for (let p of list) {
-                        const cleanName = p.name.toLowerCase().replace(/[^a-z]/g, '');
-                        if (cleanText.includes(cleanName) || cleanName.includes(cleanText) || cleanText.substring(0, 3) === cleanName.substring(0, 3)) {
+                        const pClean = p.name.toLowerCase().replace(/[^a-z]/g, '');
+                        if (clean.includes(pClean) || pClean.includes(clean) || (clean.length >= 3 && pClean.startsWith(clean.substring(0, 3)))) {
                             return p.name;
                         }
                     }
@@ -1276,118 +1390,153 @@
                 let activeGameNum = null;
                 let isCaptainsCupSection = false;
 
-                lines.forEach(line => {
-                    const lower = line.toLowerCase();
-                    if (lower.includes('captains cup') || lower.includes('captain')) {
+                // Track accumulated players per game index
+                let gameHomePlayers = {};
+                let gameAwayPlayers = {};
+                let gameHomeScores = {};
+                let gameAwayScores = {};
+
+                rows.forEach(row => {
+                    let leftWords = [];
+                    let midWords = [];
+                    let rightWords = [];
+
+                    row.words.forEach(w => {
+                        const cx = (w.bbox.x0 + w.bbox.x1) / 2;
+                        if (cx < maxW * 0.40) leftWords.push(w);
+                        else if (cx >= maxW * 0.40 && cx <= maxW * 0.62) midWords.push(w);
+                        else rightWords.push(w);
+                    });
+
+                    const midText = midWords.map(w => w.text).join(' ').trim().toLowerCase();
+                    const leftText = leftWords.map(w => w.text).join(' ').trim();
+                    const rightText = rightWords.map(w => w.text).join(' ').trim();
+
+                    if (midText.includes('captain') || leftText.toLowerCase().includes('captain') || rightText.toLowerCase().includes('captain')) {
                         isCaptainsCupSection = true;
                         activeGameNum = null;
                         return;
                     }
 
-                    // Look for isolated game numbers 1 through 8 in the middle column
+                    // Check if middle column has game number 1 to 8
                     for (let n = 1; n <= 8; n++) {
-                        if (new RegExp(`(^|\\D)${n}(\\D|$)`).test(line) && !lower.includes('result')) {
+                        if (midText === String(n) || new RegExp(`\\b${n}\\b`).test(midText)) {
                             activeGameNum = n;
                             isCaptainsCupSection = false;
                             break;
                         }
                     }
 
-                    // Extract valid score digits (0, 1, or 2)
-                    const validScores = line.match(/\b[0-2]\b/g)?.map(Number) || [];
+                    // Extract score digits (0, 1, 2)
+                    let leftScore = null;
+                    let rightScore = null;
 
-                    if (activeGameNum !== null && validScores.length > 0) {
+                    leftWords.forEach(w => {
+                        if (/^[0-2]$/.test(w.text.trim())) leftScore = parseInt(w.text.trim());
+                    });
+                    rightWords.forEach(w => {
+                        if (/^[0-2]$/.test(w.text.trim())) rightScore = parseInt(w.text.trim());
+                    });
+
+                    const cleanLeftName = leftWords.filter(w => !/^[0-2]$/.test(w.text.trim())).map(w => w.text).join(' ').trim();
+                    const cleanRightName = rightWords.filter(w => !/^[0-2]$/.test(w.text.trim())).map(w => w.text).join(' ').trim();
+
+                    if (activeGameNum !== null) {
                         if (activeGameNum >= 1 && activeGameNum <= 6) {
-                            // Singles Games 1-6
-                            const idx = activeGameNum;
-                            const hs = document.getElementById(`m_s_hs_${idx}`);
-                            const as = document.getElementById(`m_s_as_${idx}`);
-                            const hp = document.getElementById(`m_s_hp_${idx}`);
-                            const ap = document.getElementById(`m_s_ap_${idx}`);
-
-                            if (validScores.length >= 2) {
-                                if (hs) hs.value = validScores[0];
-                                if (as) as.value = validScores[1];
-                            } else if (validScores.length === 1) {
-                                if (hs && hs.value == 0) hs.value = validScores[0];
-                                else if (as && as.value == 0) as.value = validScores[0];
+                            if (cleanLeftName) {
+                                const matched = findMatchingPlayer(homePlayers, cleanLeftName);
+                                if (matched) gameHomePlayers[activeGameNum] = matched;
+                                else if (!gameHomePlayers[activeGameNum] && cleanLeftName.length > 2) gameHomePlayers[activeGameNum] = cleanLeftName;
                             }
-
-                            if (hp && !hp.value) {
-                                const matched = findMatchingPlayer(homePlayers, line);
-                                if (matched) hp.value = matched;
+                            if (cleanRightName) {
+                                const matched = findMatchingPlayer(awayPlayers, cleanRightName);
+                                if (matched) gameAwayPlayers[activeGameNum] = matched;
+                                else if (!gameAwayPlayers[activeGameNum] && cleanRightName.length > 2) gameAwayPlayers[activeGameNum] = cleanRightName;
                             }
-                            if (ap && !ap.value) {
-                                const matched = findMatchingPlayer(awayPlayers, line);
-                                if (matched) ap.value = matched;
-                            }
+                            if (leftScore !== null) gameHomeScores[activeGameNum] = leftScore;
+                            if (rightScore !== null) gameAwayScores[activeGameNum] = rightScore;
                         } else if (activeGameNum === 7 || activeGameNum === 8) {
-                            // Doubles Games 7 & 8
-                            const idx = activeGameNum - 6;
-                            const hs = document.getElementById(`m_d_hs_${idx}`);
-                            const as = document.getElementById(`m_d_as_${idx}`);
-                            const hp1 = document.getElementById(`m_d_hp1_${idx}`);
-                            const hp2 = document.getElementById(`m_d_hp2_${idx}`);
-                            const ap1 = document.getElementById(`m_d_ap1_${idx}`);
-                            const ap2 = document.getElementById(`m_d_ap2_${idx}`);
-
-                            if (validScores.length >= 2) {
-                                if (hs) hs.value = validScores[0];
-                                if (as) as.value = validScores[1];
+                            // Doubles (games 7 & 8) have 2 players listed vertically
+                            if (cleanLeftName) {
+                                const matched = findMatchingPlayer(homePlayers, cleanLeftName);
+                                const nameVal = matched || cleanLeftName;
+                                if (!gameHomePlayers[activeGameNum]) gameHomePlayers[activeGameNum] = [nameVal];
+                                else if (!gameHomePlayers[activeGameNum].includes(nameVal)) gameHomePlayers[activeGameNum].push(nameVal);
                             }
-
-                            if (hp1 && !hp1.value) {
-                                const matched = findMatchingPlayer(homePlayers, line);
-                                if (matched) hp1.value = matched;
-                            } else if (hp2 && !hp2.value) {
-                                const matched = findMatchingPlayer(homePlayers, line);
-                                if (matched) hp2.value = matched;
+                            if (cleanRightName) {
+                                const matched = findMatchingPlayer(awayPlayers, cleanRightName);
+                                const nameVal = matched || cleanRightName;
+                                if (!gameAwayPlayers[activeGameNum]) gameAwayPlayers[activeGameNum] = [nameVal];
+                                else if (!gameAwayPlayers[activeGameNum].includes(nameVal)) gameAwayPlayers[activeGameNum].push(nameVal);
                             }
-
-                            if (ap1 && !ap1.value) {
-                                const matched = findMatchingPlayer(awayPlayers, line);
-                                if (matched) ap1.value = matched;
-                            } else if (ap2 && !ap2.value) {
-                                const matched = findMatchingPlayer(awayPlayers, line);
-                                if (matched) ap2.value = matched;
-                            }
+                            if (leftScore !== null) gameHomeScores[activeGameNum] = leftScore;
+                            if (rightScore !== null) gameAwayScores[activeGameNum] = rightScore;
                         }
-                    } else if (isCaptainsCupSection && validScores.length > 0) {
-                        // Captains Cup Match
-                        const cHS = document.getElementById('m_c_hs');
-                        const cAS = document.getElementById('m_c_as');
-                        const cHP = document.getElementById('m_c_hp');
-                        const cAP = document.getElementById('m_c_ap');
-
-                        if (validScores.length >= 2) {
-                            if (cHS) cHS.value = validScores[0];
-                            if (cAS) cAS.value = validScores[1];
+                    } else if (isCaptainsCupSection) {
+                        if (cleanLeftName && !cleanLeftName.toLowerCase().includes('captain')) {
+                            const matched = findMatchingPlayer(homePlayers, cleanLeftName);
+                            document.getElementById('m_c_hp').value = matched || cleanLeftName;
                         }
-
-                        if (cHP && !cHP.value) {
-                            const matched = findMatchingPlayer(homePlayers, line);
-                            if (matched) cHP.value = matched;
+                        if (cleanRightName && !cleanRightName.toLowerCase().includes('captain')) {
+                            const matched = findMatchingPlayer(awayPlayers, cleanRightName);
+                            document.getElementById('m_c_ap').value = matched || cleanRightName;
                         }
-                        if (cAP && !cAP.value) {
-                            const matched = findMatchingPlayer(awayPlayers, line);
-                            if (matched) cAP.value = matched;
-                        }
+                        if (leftScore !== null) document.getElementById('m_c_hs').value = leftScore;
+                        if (rightScore !== null) document.getElementById('m_c_as').value = rightScore;
                     }
                 });
 
-                // Fallback sequential assignment for roster players if names weren't detected
+                // Populate Singles (1-6)
                 for (let i = 1; i <= 6; i++) {
                     const hpSel = document.getElementById(`m_s_hp_${i}`);
                     const apSel = document.getElementById(`m_s_ap_${i}`);
-                    if (hpSel && !hpSel.value && homePlayers[i - 1]) hpSel.value = homePlayers[i - 1].name;
-                    if (apSel && !apSel.value && awayPlayers[i - 1]) apSel.value = awayPlayers[i - 1].name;
+                    const hsIn = document.getElementById(`m_s_hs_${i}`);
+                    const asIn = document.getElementById(`m_s_as_${i}`);
+
+                    if (gameHomePlayers[i] && hpSel) hpSel.value = gameHomePlayers[i];
+                    else if (hpSel && !hpSel.value && homePlayers[i - 1]) hpSel.value = homePlayers[i - 1].name;
+
+                    if (gameAwayPlayers[i] && apSel) apSel.value = gameAwayPlayers[i];
+                    else if (apSel && !apSel.value && awayPlayers[i - 1]) apSel.value = awayPlayers[i - 1].name;
+
+                    if (gameHomeScores[i] !== undefined && hsIn) hsIn.value = gameHomeScores[i];
+                    if (gameAwayScores[i] !== undefined && asIn) asIn.value = gameAwayScores[i];
                 }
 
-                msgEl.textContent = "✅ Scan complete! Games 1-8, Captains Cup, players, and scores (0,1,2) successfully populated.";
+                // Populate Doubles (7 & 8 -> index 1 & 2)
+                for (let g = 7; g <= 8; g++) {
+                    const idx = g - 6;
+                    const hp1 = document.getElementById(`m_d_hp1_${idx}`);
+                    const hp2 = document.getElementById(`m_d_hp2_${idx}`);
+                    const ap1 = document.getElementById(`m_d_ap1_${idx}`);
+                    const ap2 = document.getElementById(`m_d_ap2_${idx}`);
+                    const hsIn = document.getElementById(`m_d_hs_${idx}`);
+                    const asIn = document.getElementById(`m_d_as_${idx}`);
+
+                    const hArr = gameHomePlayers[g] || [];
+                    const aArr = gameAwayPlayers[g] || [];
+
+                    if (hArr[0] && hp1) hp1.value = hArr[0];
+                    else if (hp1 && !hp1.value && homePlayers[(idx - 1) * 2]) hp1.value = homePlayers[(idx - 1) * 2].name;
+
+                    if (hArr[1] && hp2) hp2.value = hArr[1];
+                    else if (hp2 && !hp2.value && homePlayers[(idx - 1) * 2 + 1]) hp2.value = homePlayers[(idx - 1) * 2 + 1].name;
+
+                    if (aArr[0] && ap1) ap1.value = aArr[0];
+                    else if (ap1 && !ap1.value && awayPlayers[(idx - 1) * 2]) ap1.value = awayPlayers[(idx - 1) * 2].name;
+
+                    if (aArr[1] && ap2) ap2.value = aArr[1];
+                    else if (ap2 && !ap2.value && awayPlayers[(idx - 1) * 2 + 1]) ap2.value = awayPlayers[(idx - 1) * 2 + 1].name;
+
+                    if (gameHomeScores[g] !== undefined && hsIn) hsIn.value = gameHomeScores[g];
+                    if (gameAwayScores[g] !== undefined && asIn) asIn.value = gameAwayScores[g];
+                }
+
+                msgEl.textContent = "✅ Spatial match card scan complete! Games 1-8, Captains Cup, players, and scores successfully populated.";
                 setTimeout(() => { msgEl.textContent = ""; }, 6000);
             } catch (err) {
                 console.error("OCR Scan failed:", err);
-                msgEl.textContent = "❌ Failed to read physical match card image.";
+                msgEl.textContent = "❌ Failed to parse physical match card image.";
             }
             event.target.value = '';
         };

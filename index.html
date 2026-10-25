@@ -1394,7 +1394,7 @@
                 const homePlayers = players.filter(p => p.team === homeTeam);
                 const awayPlayers = players.filter(p => p.team === awayTeam);
 
-                // Strict team roster cross-reference matching function
+                // Strict team roster cross-reference matching function with fuzzy substring fallback
                 const crossReferencePlayer = (teamPlayerList, textStr) => {
                     const cleanText = textStr.toLowerCase().replace(/[^a-z]/g, '');
                     if (!cleanText || cleanText.length < 2) return textStr.trim();

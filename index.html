@@ -508,7 +508,7 @@
             .admin-bar-group { width: auto; }
         }
 
-        /* Professional Printable Match Scorecard Styling matching original physical layout */
+        /* Professional Printable Match Scorecard Styling with Score Boxes After Each Player's Name */
         .printable-scoresheet-table {
             width: 100%;
             border-collapse: collapse;
@@ -520,7 +520,7 @@
 
         .printable-scoresheet-table th, .printable-scoresheet-table td {
             border: 1px solid #000;
-            padding: 5px 6px;
+            padding: 6px 8px;
             vertical-align: middle;
         }
 
@@ -529,7 +529,7 @@
             color: black;
             padding: 15px;
             border-radius: 8px;
-            max-width: 800px;
+            max-width: 850px;
             margin: 0 auto;
         }
 
@@ -926,133 +926,148 @@
         <!-- SCORE SHEET TAB -->
         <div id="scoresheet" class="tab-content">
             <div class="no-print" style="margin-bottom: 1rem; display: flex; gap: 8px;">
-                <button type="button" class="btn" style="flex: 1;" onclick="window.print()">Print</button>
+                <button type="button" class="btn" style="flex: 1;" onclick="window.print()">Print Scorecard</button>
                 <button type="button" class="btn btn-accent" style="flex: 1;" onclick="downloadScoreSheet()">Download PNG</button>
             </div>
             
             <div class="printable-area card" id="printable-scoresheet-area">
-                <div style="text-align: center; border-bottom: 2px solid #000; padding-bottom: 6px; margin-bottom: 10px;">
-                    <h2 style="color: #000; font-size: 0.95rem; margin: 0; font-weight: bold; letter-spacing: 0.5px;">MONDAY NIGHT RUGELEY & DISTRICT DARTS LEAGUE</h2>
+                <div style="text-align: center; border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 12px;">
+                    <h2 style="color: #000; font-size: 1.05rem; margin: 0; font-weight: bold; letter-spacing: 0.5px;">MONDAY NIGHT RUGELEY & DISTRICT DARTS LEAGUE</h2>
                 </div>
 
-                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: bold; margin-bottom: 6px; color: #000;">
-                    <div>Match Played On __________________ At __________________</div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.82rem; font-weight: bold; margin-bottom: 8px; color: #000;">
+                    <div>Match Played On: __________________ At: __________________</div>
                 </div>
-                <div style="font-size: 0.8rem; font-weight: bold; margin-bottom: 10px; color: #000;">
-                    ______________________ Versus ______________________
+                <div style="font-size: 0.82rem; font-weight: bold; margin-bottom: 12px; color: #000;">
+                    Home Team: ______________________ vs Away Team: ______________________
                 </div>
 
                 <table class="printable-scoresheet-table">
                     <thead>
                         <tr style="background: #e2e8f0;">
-                            <th style="width: 44%; text-align: center; color: #000;">HOME TEAM</th>
-                            <th style="width: 12%; text-align: center; color: #000;"></th>
-                            <th style="width: 44%; text-align: center; color: #000;">AWAY TEAM</th>
+                            <th style="width: 43%; text-align: left; color: #000; padding-left: 8px;">HOME TEAM PLAYER(S) & SCORE BOX</th>
+                            <th style="width: 14%; text-align: center; color: #000;">GAME</th>
+                            <th style="width: 43%; text-align: left; color: #000; padding-left: 8px;">AWAY TEAM PLAYER(S) & SCORE BOX</th>
                         </tr>
                     </thead>
                     <tbody>
+                        <!-- 6 Singles Matches -->
                         <tr>
-                            <td style="height: 30px; position: relative;">
-                                <div style="position: absolute; right: 4px; top: 3px; bottom: 3px; width: 28px; border: 1px solid #000; background: #fff;"></div>
-                            </td>
-                            <td style="text-align: center; font-weight: bold; background: #f8fafc;">1</td>
-                            <td style="height: 30px; position: relative;">
-                                <div style="position: absolute; left: 4px; top: 3px; bottom: 3px; width: 28px; border: 1px solid #000; background: #fff;"></div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style="height: 30px; position: relative;">
-                                <div style="position: absolute; right: 4px; top: 3px; bottom: 3px; width: 28px; border: 1px solid #000; background: #fff;"></div>
-                            </td>
-                            <td style="text-align: center; font-weight: bold; background: #f8fafc;">2</td>
-                            <td style="height: 30px; position: relative;">
-                                <div style="position: absolute; left: 4px; top: 3px; bottom: 3px; width: 28px; border: 1px solid #000; background: #fff;"></div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style="height: 30px; position: relative;">
-                                <div style="position: absolute; right: 4px; top: 3px; bottom: 3px; width: 28px; border: 1px solid #000; background: #fff;"></div>
-                            </td>
-                            <td style="text-align: center; font-weight: bold; background: #f8fafc;">3</td>
-                            <td style="height: 30px; position: relative;">
-                                <div style="position: absolute; left: 4px; top: 3px; bottom: 3px; width: 28px; border: 1px solid #000; background: #fff;"></div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style="height: 30px; position: relative;">
-                                <div style="position: absolute; right: 4px; top: 3px; bottom: 3px; width: 28px; border: 1px solid #000; background: #fff;"></div>
-                            </td>
-                            <td style="text-align: center; font-weight: bold; background: #f8fafc;">4</td>
-                            <td style="height: 30px; position: relative;">
-                                <div style="position: absolute; left: 4px; top: 3px; bottom: 3px; width: 28px; border: 1px solid #000; background: #fff;"></div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style="height: 30px; position: relative;">
-                                <div style="position: absolute; right: 4px; top: 3px; bottom: 3px; width: 28px; border: 1px solid #000; background: #fff;"></div>
-                            </td>
-                            <td style="text-align: center; font-weight: bold; background: #f8fafc;">5</td>
-                            <td style="height: 30px; position: relative;">
-                                <div style="position: absolute; left: 4px; top: 3px; bottom: 3px; width: 28px; border: 1px solid #000; background: #fff;"></div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style="height: 30px; position: relative;">
-                                <div style="position: absolute; right: 4px; top: 3px; bottom: 3px; width: 28px; border: 1px solid #000; background: #fff;"></div>
-                            </td>
-                            <td style="text-align: center; font-weight: bold; background: #f8fafc;">6</td>
-                            <td style="height: 30px; position: relative;">
-                                <div style="position: absolute; left: 4px; top: 3px; bottom: 3px; width: 28px; border: 1px solid #000; background: #fff;"></div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style="height: 42px; position: relative; font-size: 0.75rem;">
-                                1.<br>2.
+                            <td style="height: 32px; position: relative; padding-right: 36px;">
+                                <span style="font-size: 0.8rem; color: #334155;">1.</span>
                                 <div style="position: absolute; right: 4px; top: 4px; bottom: 4px; width: 28px; border: 1px solid #000; background: #fff;"></div>
                             </td>
-                            <td style="text-align: center; font-weight: bold; background: #f8fafc;">7</td>
-                            <td style="height: 42px; position: relative; font-size: 0.75rem;">
-                                1.<br>2.
+                            <td style="text-align: center; font-weight: bold; background: #f8fafc;">Singles 1</td>
+                            <td style="height: 32px; position: relative; padding-left: 36px;">
+                                <span style="font-size: 0.8rem; color: #334155;">1.</span>
                                 <div style="position: absolute; left: 4px; top: 4px; bottom: 4px; width: 28px; border: 1px solid #000; background: #fff;"></div>
                             </td>
                         </tr>
                         <tr>
-                            <td style="height: 42px; position: relative; font-size: 0.75rem;">
-                                1.<br>2.
+                            <td style="height: 32px; position: relative; padding-right: 36px;">
+                                <span style="font-size: 0.8rem; color: #334155;">2.</span>
                                 <div style="position: absolute; right: 4px; top: 4px; bottom: 4px; width: 28px; border: 1px solid #000; background: #fff;"></div>
                             </td>
-                            <td style="text-align: center; font-weight: bold; background: #f8fafc;">8</td>
-                            <td style="height: 42px; position: relative; font-size: 0.75rem;">
-                                1.<br>2.
+                            <td style="text-align: center; font-weight: bold; background: #f8fafc;">Singles 2</td>
+                            <td style="height: 32px; position: relative; padding-left: 36px;">
+                                <span style="font-size: 0.8rem; color: #334155;">2.</span>
+                                <div style="position: absolute; left: 4px; top: 4px; bottom: 4px; width: 28px; border: 1px solid #000; background: #fff;"></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="height: 32px; position: relative; padding-right: 36px;">
+                                <span style="font-size: 0.8rem; color: #334155;">3.</span>
+                                <div style="position: absolute; right: 4px; top: 4px; bottom: 4px; width: 28px; border: 1px solid #000; background: #fff;"></div>
+                            </td>
+                            <td style="text-align: center; font-weight: bold; background: #f8fafc;">Singles 3</td>
+                            <td style="height: 32px; position: relative; padding-left: 36px;">
+                                <span style="font-size: 0.8rem; color: #334155;">3.</span>
+                                <div style="position: absolute; left: 4px; top: 4px; bottom: 4px; width: 28px; border: 1px solid #000; background: #fff;"></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="height: 32px; position: relative; padding-right: 36px;">
+                                <span style="font-size: 0.8rem; color: #334155;">4.</span>
+                                <div style="position: absolute; right: 4px; top: 4px; bottom: 4px; width: 28px; border: 1px solid #000; background: #fff;"></div>
+                            </td>
+                            <td style="text-align: center; font-weight: bold; background: #f8fafc;">Singles 4</td>
+                            <td style="height: 32px; position: relative; padding-left: 36px;">
+                                <span style="font-size: 0.8rem; color: #334155;">4.</span>
+                                <div style="position: absolute; left: 4px; top: 4px; bottom: 4px; width: 28px; border: 1px solid #000; background: #fff;"></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="height: 32px; position: relative; padding-right: 36px;">
+                                <span style="font-size: 0.8rem; color: #334155;">5.</span>
+                                <div style="position: absolute; right: 4px; top: 4px; bottom: 4px; width: 28px; border: 1px solid #000; background: #fff;"></div>
+                            </td>
+                            <td style="text-align: center; font-weight: bold; background: #f8fafc;">Singles 5</td>
+                            <td style="height: 32px; position: relative; padding-left: 36px;">
+                                <span style="font-size: 0.8rem; color: #334155;">5.</span>
+                                <div style="position: absolute; left: 4px; top: 4px; bottom: 4px; width: 28px; border: 1px solid #000; background: #fff;"></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="height: 32px; position: relative; padding-right: 36px;">
+                                <span style="font-size: 0.8rem; color: #334155;">6.</span>
+                                <div style="position: absolute; right: 4px; top: 4px; bottom: 4px; width: 28px; border: 1px solid #000; background: #fff;"></div>
+                            </td>
+                            <td style="text-align: center; font-weight: bold; background: #f8fafc;">Singles 6</td>
+                            <td style="height: 32px; position: relative; padding-left: 36px;">
+                                <span style="font-size: 0.8rem; color: #334155;">6.</span>
+                                <div style="position: absolute; left: 4px; top: 4px; bottom: 4px; width: 28px; border: 1px solid #000; background: #fff;"></div>
+                            </td>
+                        </tr>
+                        <!-- 2 Doubles Matches -->
+                        <tr>
+                            <td style="height: 48px; position: relative; padding-right: 36px; font-size: 0.75rem;">
+                                1. __________________<br>2. __________________
+                                <div style="position: absolute; right: 4px; top: 4px; bottom: 4px; width: 28px; border: 1px solid #000; background: #fff;"></div>
+                            </td>
+                            <td style="text-align: center; font-weight: bold; background: #f8fafc;">Doubles 1</td>
+                            <td style="height: 48px; position: relative; padding-left: 36px; font-size: 0.75rem;">
+                                1. __________________<br>2. __________________
+                                <div style="position: absolute; left: 4px; top: 4px; bottom: 4px; width: 28px; border: 1px solid #000; background: #fff;"></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="height: 48px; position: relative; padding-right: 36px; font-size: 0.75rem;">
+                                1. __________________<br>2. __________________
+                                <div style="position: absolute; right: 4px; top: 4px; bottom: 4px; width: 28px; border: 1px solid #000; background: #fff;"></div>
+                            </td>
+                            <td style="text-align: center; font-weight: bold; background: #f8fafc;">Doubles 2</td>
+                            <td style="height: 48px; position: relative; padding-left: 36px; font-size: 0.75rem;">
+                                1. __________________<br>2. __________________
                                 <div style="position: absolute; left: 4px; top: 4px; bottom: 4px; width: 28px; border: 1px solid #000; background: #fff;"></div>
                             </td>
                         </tr>
                         <tr style="background-color: #f1f5f9;">
-                            <td style="text-align: center; font-weight: bold; padding: 5px;">RESULT: ________</td>
-                            <td></td>
-                            <td style="text-align: center; font-weight: bold; padding: 5px;">RESULT: ________</td>
+                            <td style="text-align: center; font-weight: bold; padding: 6px;">TEAM LEG RESULT: ________</td>
+                            <td style="text-align: center; font-weight: bold;">TOTAL</td>
+                            <td style="text-align: center; font-weight: bold; padding: 6px;">TEAM LEG RESULT: ________</td>
                         </tr>
-                        <tr><td colspan="3" style="text-align: center; font-weight: bold; background: #cbd5e1; color: #000;">CAPTAINS CUP</td></tr>
+                        <!-- Captains Match -->
+                        <tr><td colspan="3" style="text-align: center; font-weight: bold; background: #cbd5e1; color: #000;">CAPTAINS MATCH (CAPTAINS CUP - EXCLUDED FROM TEAM SCORE)</td></tr>
                         <tr>
-                            <td style="height: 30px; position: relative;">
-                                Cap:
-                                <div style="position: absolute; right: 4px; top: 3px; bottom: 3px; width: 28px; border: 1px solid #000; background: #fff;"></div>
+                            <td style="height: 35px; position: relative; padding-right: 36px;">
+                                <span style="font-size: 0.8rem; font-weight: bold;">Cap:</span> __________________
+                                <div style="position: absolute; right: 4px; top: 4px; bottom: 4px; width: 28px; border: 1px solid #000; background: #fff;"></div>
                             </td>
-                            <td></td>
-                            <td style="height: 30px; position: relative;">
-                                Cap:
-                                <div style="position: absolute; left: 4px; top: 3px; bottom: 3px; width: 28px; border: 1px solid #000; background: #fff;"></div>
+                            <td style="text-align: center; font-weight: bold; background: #f8fafc;">Captains</td>
+                            <td style="height: 35px; position: relative; padding-left: 36px;">
+                                <span style="font-size: 0.8rem; font-weight: bold;">Cap:</span> __________________
+                                <div style="position: absolute; left: 4px; top: 4px; bottom: 4px; width: 28px; border: 1px solid #000; background: #fff;"></div>
                             </td>
                         </tr>
                     </tbody>
                 </table>
 
-                <div style="display: flex; justify-content: space-between; margin-top: 15px; font-size: 0.78rem; font-weight: bold; color: #000;">
-                    <div>Home Captain ______________________</div>
-                    <div>Away Captain ______________________</div>
+                <div style="display: flex; justify-content: space-between; margin-top: 18px; font-size: 0.8rem; font-weight: bold; color: #000;">
+                    <div>Home Captain Signature: ______________________</div>
+                    <div>Away Captain Signature: ______________________</div>
                 </div>
-                <div style="text-align: center; font-size: 0.72rem; margin-top: 10px; font-style: italic; color: #000;">
-                    Please return match cards to the Miners Arms by Wednesday
+                <div style="text-align: center; font-size: 0.75rem; margin-top: 12px; font-style: italic; color: #000;">
+                    Please return completed match cards to the Miners Arms by Wednesday
                 </div>
             </div>
         </div>
@@ -1066,10 +1081,10 @@
                 <button type="button" class="btn btn-danger btn-sm" onclick="closeMatchModal()">Close &times;</button>
             </div>
 
-            <!-- ENHANCED SPATIAL OCR SCANNER -->
+            <!-- ENHANCED SPATIAL & ROSTER-CROSS-REFERENCING OCR SCANNER -->
             <div style="background: #f1f5f9; border: 2px dashed #2563eb; padding: 0.85rem; border-radius: 8px; margin-bottom: 1.2rem; text-align: center;">
                 <h3 style="font-size: 0.95rem; color: #1e3a8a; margin-bottom: 0.3rem;">📸 AI Match Card Scanner</h3>
-                <p style="font-size: 0.8rem; color: #475569; margin-bottom: 0.6rem;">Upload physical match card photo. High-precision spatial scanner automatically maps home players, away players, and score boxes (0, 1, 2) for games 1-8 and Captains Cup.</p>
+                <p style="font-size: 0.8rem; color: #475569; margin-bottom: 0.6rem;">Upload physical match card photo. Scans exactly 6 singles, 2 doubles, and 1 captains match with 0, 1, 2 leg scores, automatically cross-referencing player names with team rosters.</p>
                 <input type="file" id="card-scanner-input" accept="image/*" style="display: none;" onchange="handleScanMatchCard(event)">
                 <button type="button" class="btn btn-sm btn-accent" onclick="document.getElementById('card-scanner-input').click()">Upload / Scan Photo</button>
                 <div id="scan-status-msg" style="font-size: 0.8rem; color: #d97706; margin-top: 6px; font-weight: bold;"></div>
@@ -1078,10 +1093,10 @@
             <form id="modal-match-form" onsubmit="handleSaveMatchScores(event)">
                 <input type="hidden" id="modal-match-key">
 
-                <h3 style="color: #1e3a8a; margin-top: 0.5rem; margin-bottom: 0.6rem; font-size: 1.05rem;">Singles Matches (1 v 1)</h3>
+                <h3 style="color: #1e3a8a; margin-top: 0.5rem; margin-bottom: 0.6rem; font-size: 1.05rem;">Singles Matches (6 Games - 1 v 1)</h3>
                 <div id="modal-singles-rows"></div>
 
-                <h3 style="color: #1e3a8a; margin-top: 1.2rem; margin-bottom: 0.6rem; font-size: 1.05rem;">Doubles Matches (2 v 2)</h3>
+                <h3 style="color: #1e3a8a; margin-top: 1.2rem; margin-bottom: 0.6rem; font-size: 1.05rem;">Doubles Matches (2 Games - 2 v 2)</h3>
                 <div id="modal-doubles-rows"></div>
 
                 <h3 style="color: #1e3a8a; margin-top: 1.2rem; margin-bottom: 0.6rem; font-size: 1.05rem;">Captains Match (Captains Cup - Excluded from Team Score)</h3>
@@ -1313,13 +1328,13 @@
             });
         };
 
-        /* ADVANCED SPATIAL BOUNDING-BOX OCR SCANNER FOR PHYSICAL MATCH CARDS */
+        /* ROBUST OCR SCANNER WITH TEAM ROSTER CROSS-REFERENCING (6 Singles, 2 Doubles, 1 Captains, Scores 0,1,2) */
         window.handleScanMatchCard = async function(event) {
             const file = event.target.files[0];
             if (!file) return;
 
             const msgEl = document.getElementById('scan-status-msg');
-            msgEl.textContent = "⏳ Running spatial layout OCR on physical match card...";
+            msgEl.textContent = "⏳ Scanning 6 singles, 2 doubles, captains match & cross-referencing team rosters...";
 
             try {
                 const { data: { words } } = await Tesseract.recognize(file, 'eng', {
@@ -1379,16 +1394,18 @@
                 const homePlayers = players.filter(p => p.team === homeTeam);
                 const awayPlayers = players.filter(p => p.team === awayTeam);
 
-                const findMatchingPlayer = (list, textStr) => {
-                    const clean = textStr.toLowerCase().replace(/[^a-z]/g, '');
-                    if (!clean) return '';
-                    for (let p of list) {
-                        const pClean = p.name.toLowerCase().replace(/[^a-z]/g, '');
-                        if (clean.includes(pClean) || pClean.includes(clean) || (clean.length >= 3 && pClean.startsWith(clean.substring(0, 3)))) {
-                            return p.name;
+                // Strict team roster cross-reference matching function
+                const crossReferencePlayer = (teamPlayerList, textStr) => {
+                    const cleanText = textStr.toLowerCase().replace(/[^a-z]/g, '');
+                    if (!cleanText || cleanText.length < 2) return textStr.trim();
+                    
+                    for (let p of teamPlayerList) {
+                        const cleanRoster = p.name.toLowerCase().replace(/[^a-z]/g, '');
+                        if (cleanRoster === cleanText || cleanRoster.includes(cleanText) || cleanText.includes(cleanRoster)) {
+                            return p.name; // Return exact registered player name from roster
                         }
                     }
-                    return '';
+                    return textStr.trim(); // Fallback to OCR text if no close roster match
                 };
 
                 let activeGameNum = null;
@@ -1421,7 +1438,7 @@
                         return;
                     }
 
-                    // Check if middle column contains game number 1 to 8
+                    // Detect game numbers 1 through 8
                     for (let n = 1; n <= 8; n++) {
                         if (midText === String(n) || new RegExp(`\\b${n}\\b`).test(midText)) {
                             activeGameNum = n;
@@ -1430,21 +1447,18 @@
                         }
                     }
 
-                    // Extract score digits (0, 1, 2) specifically near the outer left/right score boxes
+                    // Extract score digits (0, 1, or 2)
                     let leftScore = null;
                     let rightScore = null;
 
                     leftWords.forEach(w => {
                         const txt = w.text.trim();
-                        // Check if word is score digit 0, 1, 2 or if it's near the right edge of left column (score box)
-                        if (/^[0-2]$/.test(txt) && w.bbox.x1 > maxW * 0.28) leftScore = parseInt(txt);
-                        else if (/^[0-2]$/.test(txt) && activeGameNum !== null) leftScore = parseInt(txt);
+                        if (/^[0-2]$/.test(txt)) leftScore = parseInt(txt);
                     });
 
                     rightWords.forEach(w => {
                         const txt = w.text.trim();
-                        if (/^[0-2]$/.test(txt) && w.bbox.x0 < maxW * 0.78) rightScore = parseInt(txt);
-                        else if (/^[0-2]$/.test(txt) && activeGameNum !== null) rightScore = parseInt(txt);
+                        if (/^[0-2]$/.test(txt)) rightScore = parseInt(txt);
                     });
 
                     const cleanLeftName = leftWords.filter(w => !/^[0-2]$/.test(w.text.trim())).map(w => w.text).join(' ').trim();
@@ -1453,49 +1467,41 @@
                     if (activeGameNum !== null) {
                         if (activeGameNum >= 1 && activeGameNum <= 6) {
                             if (cleanLeftName) {
-                                const matched = findMatchingPlayer(homePlayers, cleanLeftName);
-                                if (matched) gameHomePlayers[activeGameNum] = matched;
-                                else if (!gameHomePlayers[activeGameNum] && cleanLeftName.length > 2) gameHomePlayers[activeGameNum] = cleanLeftName;
+                                gameHomePlayers[activeGameNum] = crossReferencePlayer(homePlayers, cleanLeftName);
                             }
                             if (cleanRightName) {
-                                const matched = findMatchingPlayer(awayPlayers, cleanRightName);
-                                if (matched) gameAwayPlayers[activeGameNum] = matched;
-                                else if (!gameAwayPlayers[activeGameNum] && cleanRightName.length > 2) gameAwayPlayers[activeGameNum] = cleanRightName;
+                                gameAwayPlayers[activeGameNum] = crossReferencePlayer(awayPlayers, cleanRightName);
                             }
                             if (leftScore !== null) gameHomeScores[activeGameNum] = leftScore;
                             if (rightScore !== null) gameAwayScores[activeGameNum] = rightScore;
                         } else if (activeGameNum === 7 || activeGameNum === 8) {
-                            // Doubles (games 7 & 8) have 2 players listed vertically
+                            // Doubles (games 7 & 8)
                             if (cleanLeftName) {
-                                const matched = findMatchingPlayer(homePlayers, cleanLeftName);
-                                const nameVal = matched || cleanLeftName;
-                                if (!gameHomePlayers[activeGameNum]) gameHomePlayers[activeGameNum] = [nameVal];
-                                else if (!gameHomePlayers[activeGameNum].includes(nameVal)) gameHomePlayers[activeGameNum].push(nameVal);
+                                const matched = crossReferencePlayer(homePlayers, cleanLeftName);
+                                if (!gameHomePlayers[activeGameNum]) gameHomePlayers[activeGameNum] = [matched];
+                                else if (!gameHomePlayers[activeGameNum].includes(matched)) gameHomePlayers[activeGameNum].push(matched);
                             }
                             if (cleanRightName) {
-                                const matched = findMatchingPlayer(awayPlayers, cleanRightName);
-                                const nameVal = matched || cleanRightName;
-                                if (!gameAwayPlayers[activeGameNum]) gameAwayPlayers[activeGameNum] = [nameVal];
-                                else if (!gameAwayPlayers[activeGameNum].includes(nameVal)) gameAwayPlayers[activeGameNum].push(nameVal);
+                                const matched = crossReferencePlayer(awayPlayers, cleanRightName);
+                                if (!gameAwayPlayers[activeGameNum]) gameAwayPlayers[activeGameNum] = [matched];
+                                else if (!gameAwayPlayers[activeGameNum].includes(matched)) gameAwayPlayers[activeGameNum].push(matched);
                             }
                             if (leftScore !== null) gameHomeScores[activeGameNum] = leftScore;
                             if (rightScore !== null) gameAwayScores[activeGameNum] = rightScore;
                         }
                     } else if (isCaptainsCupSection) {
                         if (cleanLeftName && !cleanLeftName.toLowerCase().includes('captain')) {
-                            const matched = findMatchingPlayer(homePlayers, cleanLeftName);
-                            document.getElementById('m_c_hp').value = matched || cleanLeftName;
+                            document.getElementById('m_c_hp').value = crossReferencePlayer(homePlayers, cleanLeftName);
                         }
                         if (cleanRightName && !cleanRightName.toLowerCase().includes('captain')) {
-                            const matched = findMatchingPlayer(awayPlayers, cleanRightName);
-                            document.getElementById('m_c_ap').value = matched || cleanRightName;
+                            document.getElementById('m_c_ap').value = crossReferencePlayer(awayPlayers, cleanRightName);
                         }
                         if (leftScore !== null) document.getElementById('m_c_hs').value = leftScore;
                         if (rightScore !== null) document.getElementById('m_c_as').value = rightScore;
                     }
                 });
 
-                // Populate Singles (1-6)
+                // Populate Singles (1-6) in modal form
                 for (let i = 1; i <= 6; i++) {
                     const hpSel = document.getElementById(`m_s_hp_${i}`);
                     const apSel = document.getElementById(`m_s_ap_${i}`);
@@ -1512,7 +1518,7 @@
                     if (gameAwayScores[i] !== undefined && asIn) asIn.value = gameAwayScores[i];
                 }
 
-                // Populate Doubles (7 & 8 -> index 1 & 2)
+                // Populate Doubles (7 & 8 -> index 1 & 2) in modal form
                 for (let g = 7; g <= 8; g++) {
                     const idx = g - 6;
                     const hp1 = document.getElementById(`m_d_hp1_${idx}`);
@@ -1541,11 +1547,11 @@
                     if (gameAwayScores[g] !== undefined && asIn) asIn.value = gameAwayScores[g];
                 }
 
-                msgEl.textContent = "✅ Spatial match card scan complete! Games 1-8, Captains Cup, players, and scores successfully populated.";
+                msgEl.textContent = "✅ Scan complete! Scanned 6 singles, 2 doubles, captains match, 0-2 scores, and cross-referenced team rosters successfully.";
                 setTimeout(() => { msgEl.textContent = ""; }, 6000);
             } catch (err) {
                 console.error("OCR Scan failed:", err);
-                msgEl.textContent = "❌ Failed to parse physical match card image.";
+                msgEl.textContent = "❌ Failed to parse match card image.";
             }
             event.target.value = '';
         };
@@ -1846,7 +1852,7 @@
                 if (el) el.innerHTML = allOpts;
             });
 
-            // Single Row Format for Singles Legs 1 through 6
+            // Single Row Format for 6 Singles Matches
             let singlesHTML = '';
             for (let i = 1; i <= 6; i++) {
                 singlesHTML += `
@@ -1870,7 +1876,7 @@
             }
             document.getElementById('modal-singles-rows').innerHTML = singlesHTML;
 
-            // Single Row Format for Doubles Matches 1 and 2 (Games 7 & 8)
+            // Single Row Format for 2 Doubles Matches
             let doublesHTML = '';
             for (let i = 1; i <= 2; i++) {
                 doublesHTML += `
@@ -2519,4 +2525,4 @@
         });
     </script>
 </body>
-    </html>
+</html>

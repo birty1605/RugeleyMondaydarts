@@ -975,7 +975,7 @@
             <!-- AI CARD SCANNER BUTTON -->
             <div style="background: #f1f5f9; border: 2px dashed #2563eb; padding: 0.85rem; border-radius: 8px; margin-bottom: 1.2rem; text-align: center;">
                 <h3 style="font-size: 0.95rem; color: #1e3a8a; margin-bottom: 0.3rem;">📸 AI Match Card Scanner</h3>
-                <p style="font-size: 0.8rem; color: #475569; margin-bottom: 0.6rem;">Upload score card photo to scan scores automatically.</p>
+                <p style="font-size: 0.8rem; color: #475569; margin-bottom: 0.6rem;">Upload scorecard photo to auto-fill player names and leg scores.</p>
                 <input type="file" id="card-scanner-input" accept="image/*" style="display: none;" onchange="handleScanMatchCard(event)">
                 <button type="button" class="btn btn-sm btn-accent" onclick="document.getElementById('card-scanner-input').click()">Upload / Scan Photo</button>
                 <div id="scan-status-msg" style="font-size: 0.8rem; color: #d97706; margin-top: 6px; font-weight: bold;"></div>
@@ -1219,12 +1219,13 @@
             });
         };
 
+        /* UPGRADED AUTOMATIC RESULTS & PLAYER SCANNER */
         window.handleScanMatchCard = async function(event) {
             const file = event.target.files[0];
             if (!file) return;
 
             const msgEl = document.getElementById('scan-status-msg');
-            msgEl.textContent = "⏳ Scanning photo... Please wait.";
+            msgEl.textContent = "⏳ Scanning photo & analyzing scorecard... Please wait.";
 
             try {
                 const { data: { text } } = await Tesseract.recognize(file, 'eng', {
@@ -1235,18 +1236,80 @@
                     }
                 });
 
-                const numbers = text.match(/\b\d\b/g)?.map(Number) || [];
-                
-                let numIdx = 0;
-                for (let i = 1; i <= 6; i++) {
-                    const hsInput = document.getElementById(`m_s_hs_${i}`);
-                    const asInput = document.getElementById(`m_s_as_${i}`);
-                    if (hsInput && numbers[numIdx] !== undefined) hsInput.value = numbers[numIdx++];
-                    if (asInput && numbers[numIdx] !== undefined) asInput.value = numbers[numIdx++];
+                const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+
+                const matchKey = document.getElementById('modal-match-key').value;
+                let homeTeam = '', awayTeam = '';
+                if (generatedFixtures) {
+                    for (let r = 0; r < generatedFixtures.length; r++) {
+                        const roundMatches = generatedFixtures[r];
+                        for (let m = 0; m < roundMatches.length; m++) {
+                            if (`w${r + 1}_m${m}` === matchKey) {
+                                homeTeam = roundMatches[m].home;
+                                awayTeam = roundMatches[m].away;
+                                break;
+                            }
+                        }
+                    }
                 }
 
-                msgEl.textContent = "✅ Scan complete! Check scores.";
-                setTimeout(() => { msgEl.textContent = ""; }, 5000);
+                const homePlayers = players.filter(p => p.team === homeTeam);
+                const awayPlayers = players.filter(p => p.team === awayTeam);
+
+                let matchedSinglesCount = 0;
+
+                // Process OCR lines to extract leg scores and identify player names
+                lines.forEach(line => {
+                    const nums = line.match(/\d+/g)?.map(Number) || [];
+                    const legNums = nums.filter(n => n >= 0 && n <= 5);
+
+                    if (legNums.length >= 2 && matchedSinglesCount < 6) {
+                        matchedSinglesCount++;
+                        const hsInput = document.getElementById(`m_s_hs_${matchedSinglesCount}`);
+                        const asInput = document.getElementById(`m_s_as_${matchedSinglesCount}`);
+                        if (hsInput) hsInput.value = legNums[0];
+                        if (asInput) asInput.value = legNums[1];
+                    }
+
+                    homePlayers.forEach(hp => {
+                        if (line.toLowerCase().includes(hp.name.toLowerCase())) {
+                            for (let i = 1; i <= 6; i++) {
+                                const sel = document.getElementById(`m_s_hp_${i}`);
+                                if (sel && !sel.value) {
+                                    sel.value = hp.name;
+                                    break;
+                                }
+                            }
+                        }
+                    });
+
+                    awayPlayers.forEach(ap => {
+                        if (line.toLowerCase().includes(ap.name.toLowerCase())) {
+                            for (let i = 1; i <= 6; i++) {
+                                const sel = document.getElementById(`m_s_ap_${i}`);
+                                if (sel && !sel.value) {
+                                    sel.value = ap.name;
+                                    break;
+                                }
+                            }
+                        }
+                    });
+                });
+
+                // Fallback: Auto-assign roster players sequentially to remaining unassigned slots
+                for (let i = 1; i <= 6; i++) {
+                    const hpSel = document.getElementById(`m_s_hp_${i}`);
+                    const apSel = document.getElementById(`m_s_ap_${i}`);
+                    if (hpSel && !hpSel.value && homePlayers[i - 1]) {
+                        hpSel.value = homePlayers[i - 1].name;
+                    }
+                    if (apSel && !apSel.value && awayPlayers[i - 1]) {
+                        apSel.value = awayPlayers[i - 1].name;
+                    }
+                }
+
+                msgEl.textContent = "✅ Scan complete! Player names and scores populated.";
+                setTimeout(() => { msgEl.textContent = ""; }, 6000);
             } catch (err) {
                 console.error("OCR Scan failed:", err);
                 msgEl.textContent = "❌ Failed to read image.";

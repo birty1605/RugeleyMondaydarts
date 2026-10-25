@@ -508,17 +508,20 @@
             .admin-bar-group { width: auto; }
         }
 
-        .scoresheet-table {
-            border: 2px solid #000;
-            margin-top: 1rem;
+        /* Professional Printable Match Scorecard Styling matching original physical layout */
+        .printable-scoresheet-table {
             width: 100%;
             border-collapse: collapse;
+            border: 2px solid #000;
+            background: #ffffff;
+            color: #000;
+            font-size: 0.82rem;
         }
 
-        .scoresheet-table th, .scoresheet-table td {
+        .printable-scoresheet-table th, .printable-scoresheet-table td {
             border: 1px solid #000;
-            color: #000;
-            padding: 6px;
+            padding: 5px 6px;
+            vertical-align: middle;
         }
 
         .printable-area {
@@ -526,6 +529,8 @@
             color: black;
             padding: 15px;
             border-radius: 8px;
+            max-width: 800px;
+            margin: 0 auto;
         }
 
         .event-card-item {
@@ -926,127 +931,127 @@
             </div>
             
             <div class="printable-area card" id="printable-scoresheet-area">
-                <div style="text-align: center; border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 12px;">
-                    <h2 style="color: #000; font-size: 1.05rem; margin: 0; font-weight: bold;">MONDAY NIGHT RUGELEY & DISTRICT DARTS LEAGUE</h2>
+                <div style="text-align: center; border-bottom: 2px solid #000; padding-bottom: 6px; margin-bottom: 10px;">
+                    <h2 style="color: #000; font-size: 0.95rem; margin: 0; font-weight: bold; letter-spacing: 0.5px;">MONDAY NIGHT RUGELEY & DISTRICT DARTS LEAGUE</h2>
                 </div>
 
-                <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: bold; margin-bottom: 8px; color: #000;">
+                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: bold; margin-bottom: 6px; color: #000;">
                     <div>Match Played On __________________ At __________________</div>
                 </div>
-                <div style="font-size: 0.85rem; font-weight: bold; margin-bottom: 12px; color: #000;">
+                <div style="font-size: 0.8rem; font-weight: bold; margin-bottom: 10px; color: #000;">
                     ______________________ Versus ______________________
                 </div>
 
-                <table class="scoresheet-table">
+                <table class="printable-scoresheet-table">
                     <thead>
                         <tr style="background: #e2e8f0;">
-                            <th style="width: 42%; text-align: center; color: #000; border: 1px solid #000;">HOME TEAM</th>
-                            <th style="width: 8%; text-align: center; color: #000; border: 1px solid #000;"></th>
-                            <th style="width: 42%; text-align: center; color: #000; border: 1px solid #000;">AWAY TEAM</th>
+                            <th style="width: 44%; text-align: center; color: #000;">HOME TEAM</th>
+                            <th style="width: 12%; text-align: center; color: #000;"></th>
+                            <th style="width: 44%; text-align: center; color: #000;">AWAY TEAM</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td style="border: 1px solid #000; height: 35px; position: relative;">
-                                <div style="position: absolute; right: 4px; top: 2px; bottom: 2px; width: 30px; border: 1px solid #000;"></div>
+                            <td style="height: 30px; position: relative;">
+                                <div style="position: absolute; right: 4px; top: 3px; bottom: 3px; width: 28px; border: 1px solid #000; background: #fff;"></div>
                             </td>
-                            <td style="border: 1px solid #000; text-align: center; font-weight: bold;">1</td>
-                            <td style="border: 1px solid #000; height: 35px; position: relative;">
-                                <div style="position: absolute; left: 4px; top: 2px; bottom: 2px; width: 30px; border: 1px solid #000;"></div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style="border: 1px solid #000; height: 35px; position: relative;">
-                                <div style="position: absolute; right: 4px; top: 2px; bottom: 2px; width: 30px; border: 1px solid #000;"></div>
-                            </td>
-                            <td style="border: 1px solid #000; text-align: center; font-weight: bold;">2</td>
-                            <td style="border: 1px solid #000; height: 35px; position: relative;">
-                                <div style="position: absolute; left: 4px; top: 2px; bottom: 2px; width: 30px; border: 1px solid #000;"></div>
+                            <td style="text-align: center; font-weight: bold; background: #f8fafc;">1</td>
+                            <td style="height: 30px; position: relative;">
+                                <div style="position: absolute; left: 4px; top: 3px; bottom: 3px; width: 28px; border: 1px solid #000; background: #fff;"></div>
                             </td>
                         </tr>
                         <tr>
-                            <td style="border: 1px solid #000; height: 35px; position: relative;">
-                                <div style="position: absolute; right: 4px; top: 2px; bottom: 2px; width: 30px; border: 1px solid #000;"></div>
+                            <td style="height: 30px; position: relative;">
+                                <div style="position: absolute; right: 4px; top: 3px; bottom: 3px; width: 28px; border: 1px solid #000; background: #fff;"></div>
                             </td>
-                            <td style="border: 1px solid #000; text-align: center; font-weight: bold;">3</td>
-                            <td style="border: 1px solid #000; height: 35px; position: relative;">
-                                <div style="position: absolute; left: 4px; top: 2px; bottom: 2px; width: 30px; border: 1px solid #000;"></div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style="border: 1px solid #000; height: 35px; position: relative;">
-                                <div style="position: absolute; right: 4px; top: 2px; bottom: 2px; width: 30px; border: 1px solid #000;"></div>
-                            </td>
-                            <td style="border: 1px solid #000; text-align: center; font-weight: bold;">4</td>
-                            <td style="border: 1px solid #000; height: 35px; position: relative;">
-                                <div style="position: absolute; left: 4px; top: 2px; bottom: 2px; width: 30px; border: 1px solid #000;"></div>
+                            <td style="text-align: center; font-weight: bold; background: #f8fafc;">2</td>
+                            <td style="height: 30px; position: relative;">
+                                <div style="position: absolute; left: 4px; top: 3px; bottom: 3px; width: 28px; border: 1px solid #000; background: #fff;"></div>
                             </td>
                         </tr>
                         <tr>
-                            <td style="border: 1px solid #000; height: 35px; position: relative;">
-                                <div style="position: absolute; right: 4px; top: 2px; bottom: 2px; width: 30px; border: 1px solid #000;"></div>
+                            <td style="height: 30px; position: relative;">
+                                <div style="position: absolute; right: 4px; top: 3px; bottom: 3px; width: 28px; border: 1px solid #000; background: #fff;"></div>
                             </td>
-                            <td style="border: 1px solid #000; text-align: center; font-weight: bold;">5</td>
-                            <td style="border: 1px solid #000; height: 35px; position: relative;">
-                                <div style="position: absolute; left: 4px; top: 2px; bottom: 2px; width: 30px; border: 1px solid #000;"></div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style="border: 1px solid #000; height: 35px; position: relative;">
-                                <div style="position: absolute; right: 4px; top: 2px; bottom: 2px; width: 30px; border: 1px solid #000;"></div>
-                            </td>
-                            <td style="border: 1px solid #000; text-align: center; font-weight: bold;">6</td>
-                            <td style="border: 1px solid #000; height: 35px; position: relative;">
-                                <div style="position: absolute; left: 4px; top: 2px; bottom: 2px; width: 30px; border: 1px solid #000;"></div>
+                            <td style="text-align: center; font-weight: bold; background: #f8fafc;">3</td>
+                            <td style="height: 30px; position: relative;">
+                                <div style="position: absolute; left: 4px; top: 3px; bottom: 3px; width: 28px; border: 1px solid #000; background: #fff;"></div>
                             </td>
                         </tr>
                         <tr>
-                            <td style="border: 1px solid #000; height: 50px; position: relative; font-size: 0.8rem;">
+                            <td style="height: 30px; position: relative;">
+                                <div style="position: absolute; right: 4px; top: 3px; bottom: 3px; width: 28px; border: 1px solid #000; background: #fff;"></div>
+                            </td>
+                            <td style="text-align: center; font-weight: bold; background: #f8fafc;">4</td>
+                            <td style="height: 30px; position: relative;">
+                                <div style="position: absolute; left: 4px; top: 3px; bottom: 3px; width: 28px; border: 1px solid #000; background: #fff;"></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="height: 30px; position: relative;">
+                                <div style="position: absolute; right: 4px; top: 3px; bottom: 3px; width: 28px; border: 1px solid #000; background: #fff;"></div>
+                            </td>
+                            <td style="text-align: center; font-weight: bold; background: #f8fafc;">5</td>
+                            <td style="height: 30px; position: relative;">
+                                <div style="position: absolute; left: 4px; top: 3px; bottom: 3px; width: 28px; border: 1px solid #000; background: #fff;"></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="height: 30px; position: relative;">
+                                <div style="position: absolute; right: 4px; top: 3px; bottom: 3px; width: 28px; border: 1px solid #000; background: #fff;"></div>
+                            </td>
+                            <td style="text-align: center; font-weight: bold; background: #f8fafc;">6</td>
+                            <td style="height: 30px; position: relative;">
+                                <div style="position: absolute; left: 4px; top: 3px; bottom: 3px; width: 28px; border: 1px solid #000; background: #fff;"></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="height: 42px; position: relative; font-size: 0.75rem;">
                                 1.<br>2.
-                                <div style="position: absolute; right: 4px; top: 2px; bottom: 2px; width: 30px; border: 1px solid #000;"></div>
+                                <div style="position: absolute; right: 4px; top: 4px; bottom: 4px; width: 28px; border: 1px solid #000; background: #fff;"></div>
                             </td>
-                            <td style="border: 1px solid #000; text-align: center; font-weight: bold;">7</td>
-                            <td style="border: 1px solid #000; height: 50px; position: relative; font-size: 0.8rem;">
+                            <td style="text-align: center; font-weight: bold; background: #f8fafc;">7</td>
+                            <td style="height: 42px; position: relative; font-size: 0.75rem;">
                                 1.<br>2.
-                                <div style="position: absolute; left: 4px; top: 2px; bottom: 2px; width: 30px; border: 1px solid #000;"></div>
+                                <div style="position: absolute; left: 4px; top: 4px; bottom: 4px; width: 28px; border: 1px solid #000; background: #fff;"></div>
                             </td>
                         </tr>
                         <tr>
-                            <td style="border: 1px solid #000; height: 50px; position: relative; font-size: 0.8rem;">
+                            <td style="height: 42px; position: relative; font-size: 0.75rem;">
                                 1.<br>2.
-                                <div style="position: absolute; right: 4px; top: 2px; bottom: 2px; width: 30px; border: 1px solid #000;"></div>
+                                <div style="position: absolute; right: 4px; top: 4px; bottom: 4px; width: 28px; border: 1px solid #000; background: #fff;"></div>
                             </td>
-                            <td style="border: 1px solid #000; text-align: center; font-weight: bold;">8</td>
-                            <td style="border: 1px solid #000; height: 50px; position: relative; font-size: 0.8rem;">
+                            <td style="text-align: center; font-weight: bold; background: #f8fafc;">8</td>
+                            <td style="height: 42px; position: relative; font-size: 0.75rem;">
                                 1.<br>2.
-                                <div style="position: absolute; left: 4px; top: 2px; bottom: 2px; width: 30px; border: 1px solid #000;"></div>
+                                <div style="position: absolute; left: 4px; top: 4px; bottom: 4px; width: 28px; border: 1px solid #000; background: #fff;"></div>
                             </td>
                         </tr>
                         <tr style="background-color: #f1f5f9;">
-                            <td style="border: 1px solid #000; text-align: center; font-weight: bold; padding: 6px;">RESULT: ________</td>
-                            <td style="border: 1px solid #000;"></td>
-                            <td style="border: 1px solid #000; text-align: center; font-weight: bold; padding: 6px;">RESULT: ________</td>
+                            <td style="text-align: center; font-weight: bold; padding: 5px;">RESULT: ________</td>
+                            <td></td>
+                            <td style="text-align: center; font-weight: bold; padding: 5px;">RESULT: ________</td>
                         </tr>
-                        <tr><td colspan="3" style="text-align: center; font-weight: bold; background: #cbd5e1; color: #000; border: 1px solid #000;">CAPTAINS CUP</td></tr>
+                        <tr><td colspan="3" style="text-align: center; font-weight: bold; background: #cbd5e1; color: #000;">CAPTAINS CUP</td></tr>
                         <tr>
-                            <td style="border: 1px solid #000; height: 35px; position: relative;">
+                            <td style="height: 30px; position: relative;">
                                 Cap:
-                                <div style="position: absolute; right: 4px; top: 2px; bottom: 2px; width: 30px; border: 1px solid #000;"></div>
+                                <div style="position: absolute; right: 4px; top: 3px; bottom: 3px; width: 28px; border: 1px solid #000; background: #fff;"></div>
                             </td>
-                            <td style="border: 1px solid #000;"></td>
-                            <td style="border: 1px solid #000; height: 35px; position: relative;">
+                            <td></td>
+                            <td style="height: 30px; position: relative;">
                                 Cap:
-                                <div style="position: absolute; left: 4px; top: 2px; bottom: 2px; width: 30px; border: 1px solid #000;"></div>
+                                <div style="position: absolute; left: 4px; top: 3px; bottom: 3px; width: 28px; border: 1px solid #000; background: #fff;"></div>
                             </td>
                         </tr>
                     </tbody>
                 </table>
 
-                <div style="display: flex; justify-content: space-between; margin-top: 20px; font-size: 0.8rem; font-weight: bold; color: #000;">
+                <div style="display: flex; justify-content: space-between; margin-top: 15px; font-size: 0.78rem; font-weight: bold; color: #000;">
                     <div>Home Captain ______________________</div>
                     <div>Away Captain ______________________</div>
                 </div>
-                <div style="text-align: center; font-size: 0.75rem; margin-top: 12px; font-style: italic; color: #000;">
+                <div style="text-align: center; font-size: 0.72rem; margin-top: 10px; font-style: italic; color: #000;">
                     Please return match cards to the Miners Arms by Wednesday
                 </div>
             </div>
@@ -1061,10 +1066,10 @@
                 <button type="button" class="btn btn-danger btn-sm" onclick="closeMatchModal()">Close &times;</button>
             </div>
 
-            <!-- SPATIAL OCR SCANNER -->
+            <!-- ENHANCED SPATIAL OCR SCANNER -->
             <div style="background: #f1f5f9; border: 2px dashed #2563eb; padding: 0.85rem; border-radius: 8px; margin-bottom: 1.2rem; text-align: center;">
                 <h3 style="font-size: 0.95rem; color: #1e3a8a; margin-bottom: 0.3rem;">📸 AI Match Card Scanner</h3>
-                <p style="font-size: 0.8rem; color: #475569; margin-bottom: 0.6rem;">Upload physical match card photo. Spatial column scanner automatically maps players, doubles (7 & 8), Captains Cup, and scores (0, 1, 2).</p>
+                <p style="font-size: 0.8rem; color: #475569; margin-bottom: 0.6rem;">Upload physical match card photo. High-precision spatial scanner automatically maps home players, away players, and score boxes (0, 1, 2) for games 1-8 and Captains Cup.</p>
                 <input type="file" id="card-scanner-input" accept="image/*" style="display: none;" onchange="handleScanMatchCard(event)">
                 <button type="button" class="btn btn-sm btn-accent" onclick="document.getElementById('card-scanner-input').click()">Upload / Scan Photo</button>
                 <div id="scan-status-msg" style="font-size: 0.8rem; color: #d97706; margin-top: 6px; font-weight: bold;"></div>
@@ -1308,13 +1313,13 @@
             });
         };
 
-        /* ROBUST SPATIAL COORDINATE OCR SCANNER FOR PHYSICAL MATCH CARDS */
+        /* ADVANCED SPATIAL BOUNDING-BOX OCR SCANNER FOR PHYSICAL MATCH CARDS */
         window.handleScanMatchCard = async function(event) {
             const file = event.target.files[0];
             if (!file) return;
 
             const msgEl = document.getElementById('scan-status-msg');
-            msgEl.textContent = "⏳ Running spatial coordinate OCR on physical match card...";
+            msgEl.textContent = "⏳ Running spatial layout OCR on physical match card...";
 
             try {
                 const { data: { words } } = await Tesseract.recognize(file, 'eng', {
@@ -1331,7 +1336,6 @@
                 }
 
                 const maxW = Math.max(...words.map(w => w.bbox.x1));
-                const maxH = Math.max(...words.map(w => w.bbox.y1));
 
                 // Group words into horizontal rows (within 22px vertical distance)
                 let rows = [];
@@ -1390,7 +1394,6 @@
                 let activeGameNum = null;
                 let isCaptainsCupSection = false;
 
-                // Track accumulated players per game index
                 let gameHomePlayers = {};
                 let gameAwayPlayers = {};
                 let gameHomeScores = {};
@@ -1418,7 +1421,7 @@
                         return;
                     }
 
-                    // Check if middle column has game number 1 to 8
+                    // Check if middle column contains game number 1 to 8
                     for (let n = 1; n <= 8; n++) {
                         if (midText === String(n) || new RegExp(`\\b${n}\\b`).test(midText)) {
                             activeGameNum = n;
@@ -1427,15 +1430,21 @@
                         }
                     }
 
-                    // Extract score digits (0, 1, 2)
+                    // Extract score digits (0, 1, 2) specifically near the outer left/right score boxes
                     let leftScore = null;
                     let rightScore = null;
 
                     leftWords.forEach(w => {
-                        if (/^[0-2]$/.test(w.text.trim())) leftScore = parseInt(w.text.trim());
+                        const txt = w.text.trim();
+                        // Check if word is score digit 0, 1, 2 or if it's near the right edge of left column (score box)
+                        if (/^[0-2]$/.test(txt) && w.bbox.x1 > maxW * 0.28) leftScore = parseInt(txt);
+                        else if (/^[0-2]$/.test(txt) && activeGameNum !== null) leftScore = parseInt(txt);
                     });
+
                     rightWords.forEach(w => {
-                        if (/^[0-2]$/.test(w.text.trim())) rightScore = parseInt(w.text.trim());
+                        const txt = w.text.trim();
+                        if (/^[0-2]$/.test(txt) && w.bbox.x0 < maxW * 0.78) rightScore = parseInt(txt);
+                        else if (/^[0-2]$/.test(txt) && activeGameNum !== null) rightScore = parseInt(txt);
                     });
 
                     const cleanLeftName = leftWords.filter(w => !/^[0-2]$/.test(w.text.trim())).map(w => w.text).join(' ').trim();
@@ -2510,4 +2519,4 @@
         });
     </script>
 </body>
-</html>
+    </html>

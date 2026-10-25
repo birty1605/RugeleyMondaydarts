@@ -1081,10 +1081,10 @@
                 <button type="button" class="btn btn-danger btn-sm" onclick="closeMatchModal()">Close &times;</button>
             </div>
 
-            <!-- ENHANCED SPATIAL & ROSTER-CROSS-REFERENCING OCR SCANNER -->
+            <!-- ENHANCED PREPROCESSED OCR SCANNER -->
             <div style="background: #f1f5f9; border: 2px dashed #2563eb; padding: 0.85rem; border-radius: 8px; margin-bottom: 1.2rem; text-align: center;">
                 <h3 style="font-size: 0.95rem; color: #1e3a8a; margin-bottom: 0.3rem;">📸 AI Match Card Scanner</h3>
-                <p style="font-size: 0.8rem; color: #475569; margin-bottom: 0.6rem;">Upload physical match card photo. Scans exactly 6 singles, 2 doubles, and 1 captains match with 0, 1, 2 leg scores, automatically cross-referencing player names with team rosters.</p>
+                <p style="font-size: 0.8rem; color: #475569; margin-bottom: 0.6rem;">Upload physical match card photo. Preprocesses contrast and scans 6 singles, 2 doubles, and 1 captains match with 0, 1, 2 leg scores, cross-referencing team rosters.</p>
                 <input type="file" id="card-scanner-input" accept="image/*" style="display: none;" onchange="handleScanMatchCard(event)">
                 <button type="button" class="btn btn-sm btn-accent" onclick="document.getElementById('card-scanner-input').click()">Upload / Scan Photo</button>
                 <div id="scan-status-msg" style="font-size: 0.8rem; color: #d97706; margin-top: 6px; font-weight: bold;"></div>
@@ -1328,16 +1328,67 @@
             });
         };
 
-        /* ROBUST OCR SCANNER WITH TEAM ROSTER CROSS-REFERENCING (6 Singles, 2 Doubles, 1 Captains, Scores 0,1,2) */
+        /* PREPROCESS IMAGE FOR OCR (Grayscale & Contrast Boost to Maximize Handwriting Recognition Accuracy) */
+        async function preprocessImageForOCR(file) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        
+                        let width = img.width;
+                        let height = img.height;
+                        const maxDim = 1200;
+                        if (width > maxDim || height > maxDim) {
+                            if (width > height) {
+                                height = Math.round((height * maxDim) / width);
+                                width = maxDim;
+                            } else {
+                                width = Math.round((width * maxDim) / height);
+                                height = maxDim;
+                            }
+                        }
+                        
+                        canvas.width = width;
+                        canvas.height = height;
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        const imgData = ctx.getImageData(0, 0, width, height);
+                        const data = imgData.data;
+                        
+                        for (let i = 0; i < data.length; i += 4) {
+                            const avg = (data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114);
+                            let contrast = 1.4;
+                            let clamped = Math.min(255, Math.max(0, (avg - 128) * contrast + 128));
+                            
+                            data[i] = clamped;     // R
+                            data[i + 1] = clamped; // G
+                            data[i + 2] = clamped; // B
+                        }
+                        ctx.putImageData(imgData, 0, 0);
+                        canvas.toBlob((blob) => {
+                            resolve(blob);
+                        }, 'image/jpeg', 0.95);
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        /* HIGHLY OPTIMIZED ROBUST OCR SCANNER WITH PREPROCESSING & ROSTER CROSS-REFERENCING */
         window.handleScanMatchCard = async function(event) {
             const file = event.target.files[0];
             if (!file) return;
 
             const msgEl = document.getElementById('scan-status-msg');
-            msgEl.textContent = "⏳ Scanning 6 singles, 2 doubles, captains match & cross-referencing team rosters...";
+            msgEl.textContent = "⏳ Preprocessing image & scanning 6 singles, 2 doubles, captains match...";
 
             try {
-                const { data: { words } } = await Tesseract.recognize(file, 'eng', {
+                const processedBlob = await preprocessImageForOCR(file);
+                const { data: { words } } = await Tesseract.recognize(processedBlob, 'eng', {
                     logger: m => {
                         if (m.status === 'recognizing text') {
                             msgEl.textContent = `⏳ OCR scanning: ${Math.round(m.progress * 100)}%`;
@@ -1352,7 +1403,6 @@
 
                 const maxW = Math.max(...words.map(w => w.bbox.x1));
 
-                // Group words into horizontal rows (within 22px vertical distance)
                 let rows = [];
                 const sortedWords = [...words].sort((a, b) => a.bbox.y0 - b.bbox.y0);
                 
@@ -1394,7 +1444,6 @@
                 const homePlayers = players.filter(p => p.team === homeTeam);
                 const awayPlayers = players.filter(p => p.team === awayTeam);
 
-                // Strict team roster cross-reference matching function with fuzzy substring fallback
                 const crossReferencePlayer = (teamPlayerList, textStr) => {
                     const cleanText = textStr.toLowerCase().replace(/[^a-z]/g, '');
                     if (!cleanText || cleanText.length < 2) return textStr.trim();
@@ -1402,10 +1451,10 @@
                     for (let p of teamPlayerList) {
                         const cleanRoster = p.name.toLowerCase().replace(/[^a-z]/g, '');
                         if (cleanRoster === cleanText || cleanRoster.includes(cleanText) || cleanText.includes(cleanRoster)) {
-                            return p.name; // Return exact registered player name from roster
+                            return p.name;
                         }
                     }
-                    return textStr.trim(); // Fallback to OCR text if no close roster match
+                    return textStr.trim();
                 };
 
                 let activeGameNum = null;
@@ -1438,7 +1487,6 @@
                         return;
                     }
 
-                    // Detect game numbers 1 through 8
                     for (let n = 1; n <= 8; n++) {
                         if (midText === String(n) || new RegExp(`\\b${n}\\b`).test(midText)) {
                             activeGameNum = n;
@@ -1447,35 +1495,29 @@
                         }
                     }
 
-                    // Extract score digits (0, 1, or 2)
                     let leftScore = null;
                     let rightScore = null;
 
                     leftWords.forEach(w => {
-                        const txt = w.text.trim();
+                        let txt = w.text.trim().replace('O', '0').replace('o', '0').replace('l', '1').replace('I', '1');
                         if (/^[0-2]$/.test(txt)) leftScore = parseInt(txt);
                     });
 
                     rightWords.forEach(w => {
-                        const txt = w.text.trim();
+                        let txt = w.text.trim().replace('O', '0').replace('o', '0').replace('l', '1').replace('I', '1');
                         if (/^[0-2]$/.test(txt)) rightScore = parseInt(txt);
                     });
 
-                    const cleanLeftName = leftWords.filter(w => !/^[0-2]$/.test(w.text.trim())).map(w => w.text).join(' ').trim();
-                    const cleanRightName = rightWords.filter(w => !/^[0-2]$/.test(w.text.trim())).map(w => w.text).join(' ').trim();
+                    const cleanLeftName = leftWords.filter(w => !/^[0-2OolI]$/.test(w.text.trim())).map(w => w.text).join(' ').trim();
+                    const cleanRightName = rightWords.filter(w => !/^[0-2OolI]$/.test(w.text.trim())).map(w => w.text).join(' ').trim();
 
                     if (activeGameNum !== null) {
                         if (activeGameNum >= 1 && activeGameNum <= 6) {
-                            if (cleanLeftName) {
-                                gameHomePlayers[activeGameNum] = crossReferencePlayer(homePlayers, cleanLeftName);
-                            }
-                            if (cleanRightName) {
-                                gameAwayPlayers[activeGameNum] = crossReferencePlayer(awayPlayers, cleanRightName);
-                            }
+                            if (cleanLeftName) gameHomePlayers[activeGameNum] = crossReferencePlayer(homePlayers, cleanLeftName);
+                            if (cleanRightName) gameAwayPlayers[activeGameNum] = crossReferencePlayer(awayPlayers, cleanRightName);
                             if (leftScore !== null) gameHomeScores[activeGameNum] = leftScore;
                             if (rightScore !== null) gameAwayScores[activeGameNum] = rightScore;
                         } else if (activeGameNum === 7 || activeGameNum === 8) {
-                            // Doubles (games 7 & 8)
                             if (cleanLeftName) {
                                 const matched = crossReferencePlayer(homePlayers, cleanLeftName);
                                 if (!gameHomePlayers[activeGameNum]) gameHomePlayers[activeGameNum] = [matched];
@@ -1501,7 +1543,6 @@
                     }
                 });
 
-                // Populate Singles (1-6) in modal form
                 for (let i = 1; i <= 6; i++) {
                     const hpSel = document.getElementById(`m_s_hp_${i}`);
                     const apSel = document.getElementById(`m_s_ap_${i}`);
@@ -1518,7 +1559,6 @@
                     if (gameAwayScores[i] !== undefined && asIn) asIn.value = gameAwayScores[i];
                 }
 
-                // Populate Doubles (7 & 8 -> index 1 & 2) in modal form
                 for (let g = 7; g <= 8; g++) {
                     const idx = g - 6;
                     const hp1 = document.getElementById(`m_d_hp1_${idx}`);
@@ -1547,7 +1587,7 @@
                     if (gameAwayScores[g] !== undefined && asIn) asIn.value = gameAwayScores[g];
                 }
 
-                msgEl.textContent = "✅ Scan complete! Scanned 6 singles, 2 doubles, captains match, 0-2 scores, and cross-referenced team rosters successfully.";
+                msgEl.textContent = "✅ Scan complete! All 6 singles, 2 doubles, captains match & scores parsed successfully.";
                 setTimeout(() => { msgEl.textContent = ""; }, 6000);
             } catch (err) {
                 console.error("OCR Scan failed:", err);
@@ -1852,7 +1892,6 @@
                 if (el) el.innerHTML = allOpts;
             });
 
-            // Single Row Format for 6 Singles Matches
             let singlesHTML = '';
             for (let i = 1; i <= 6; i++) {
                 singlesHTML += `
@@ -1876,7 +1915,6 @@
             }
             document.getElementById('modal-singles-rows').innerHTML = singlesHTML;
 
-            // Single Row Format for 2 Doubles Matches
             let doublesHTML = '';
             for (let i = 1; i <= 2; i++) {
                 doublesHTML += `
@@ -1902,7 +1940,6 @@
             }
             document.getElementById('modal-doubles-rows').innerHTML = doublesHTML;
 
-            // Single Row Format for Captains Match (Captains Cup)
             let captainHTML = `
                 <div class="match-row-line" style="border: 2px solid #f59e0b;">
                     <div class="match-row-line-header" style="color:#b45309;">Captains Match / Captains Cup (Excluded from team score)</div>
@@ -2195,7 +2232,6 @@
             });
         }
 
-        /* Render Fixtures View matching Results Layout */
         function renderFixtures() {
             const container = document.getElementById('fixtures-container');
             const completedWrapper = document.getElementById('completed-results-wrapper');
@@ -2260,7 +2296,6 @@
                     summaryHTML += `</div>`;
                     completedContainer.innerHTML += summaryHTML;
                 } else {
-                    // Render Fixture Cards in identical format to Results
                     const weekDiv = document.createElement('div');
                     weekDiv.style.marginBottom = '1.5rem';
 
